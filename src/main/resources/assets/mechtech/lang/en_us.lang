@@ -1,0 +1,16 @@
+metaitem.data_stick.tooltip.blockpos=Position: X: %d, Y: %d, Z: %d, Dim: %d
+
+metaitem.wireless_receiver.name=Wireless Receiver Cover
+
+gtforegoing.universal.tooltip.item_storage_accept=Accepts:
+gtforegoing.universal.tooltip.item_storage_reject=Rejects:
+
+gtforegoing.machine.tesla_tower.name=Tesla Tower
+
+gtforegoing.multiblock.tesla_tower.range=Range: %s
+gtforegoing.multiblock.tesla_tower.voltage=Voltage: %d
+gtforegoing.multiblock.tesla_tower.receivers=Receivers: %d
+gtforegoing.multiblock.tesla_tower.fail=Emitting failed at:
+gtforegoing.multiblock.tesla_tower.scan=Scan
+gtforegoing.multiblock.tesla_tower.amps=Amps: %d/%d
+gtforegoing.multiblock.tesla_tower.loss=Loss: %d
