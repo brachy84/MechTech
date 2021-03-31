@@ -1,24 +1,22 @@
-package com.brachy84.gtforegoing.machines.multis;
+package com.brachy84.mechtech.machines.multis;
 
 import codechicken.lib.render.CCRenderState;
 import codechicken.lib.render.pipeline.IVertexOperation;
 import codechicken.lib.vec.Matrix4;
-import com.brachy84.gtforegoing.MTConfig;
-import com.brachy84.gtforegoing.capability.MTCapabilities;
-import com.brachy84.gtforegoing.capability.MTEnergyContainerList;
-import com.brachy84.gtforegoing.cover.CoverWirelessReceiver;
-import com.brachy84.gtforegoing.integration.crafttweaker.IRangeFunction;
-import com.brachy84.gtforegoing.utils.BlockPosDim;
-import com.google.common.collect.Lists;
+import com.brachy84.mechtech.MTConfig;
+import com.brachy84.mechtech.capability.MTCapabilities;
+import com.brachy84.mechtech.capability.MTEnergyContainerList;
+import com.brachy84.mechtech.cover.CoverWirelessReceiver;
+import com.brachy84.mechtech.integration.crafttweaker.IEnergyLossFunction;
+import com.brachy84.mechtech.utils.BlockPosDim;
+import com.brachy84.mechtech.utils.TorusBlock;
 import crafttweaker.annotations.ZenRegister;
-import crafttweaker.api.block.IBlock;
-import crafttweaker.api.minecraft.CraftTweakerMC;
 import gregicadditions.GAMaterials;
+import gregicadditions.GAValues;
 import gregicadditions.capabilities.GregicAdditionsCapabilities;
 import gregicadditions.capabilities.impl.QubitContainerList;
 import gregicadditions.item.GAHeatingCoil;
 import gregicadditions.item.GAMetaBlocks;
-import gregicadditions.machines.overrides.GAMetaTileEntityBatteryBuffer;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IEnergyContainer;
 import gregtech.api.cover.ICoverable;
@@ -40,7 +38,6 @@ import gregtech.api.unification.material.Materials;
 import gregtech.api.unification.material.type.Material;
 import gregtech.common.blocks.BlockWireCoil;
 import gregtech.common.blocks.MetaBlocks;
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
@@ -58,6 +55,7 @@ import net.minecraftforge.items.IItemHandlerModifiable;
 import stanhebben.zenscript.annotations.*;
 
 import javax.annotation.Nullable;
+import javax.naming.ConfigurationException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -74,49 +72,9 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
             GregicAdditionsCapabilities.INPUT_QBIT
     };
 
-    private static final List<TorusBlock> TORUS_BLOCKS = Lists.newArrayList(
-            new TorusBlock(0.01f, -100, Materials.Plastic),
-            new TorusBlock(0.92f, 5, Materials.BlackBronze),
-            new TorusBlock(1.04f, -10, Materials.Steel),
-            new TorusBlock(1.09f, 20, GAMaterials.UHVSuperconductor),
-            new TorusBlock(1.13f, 25, GAMaterials.UEVSuperconductor),
-            new TorusBlock(1.16f, 30, GAMaterials.UIVSuperconductor),
-            new TorusBlock(1.19f, 35, GAMaterials.UMVSuperconductor),
-            new TorusBlock(1.23f, 40, GAMaterials.UXVSuperconductor)
-    );
-
-    /**
-     * @param material the name of the material
-     * @param rangeMod the modifier when all blocks are this material. values below 0 will make it always 0
-     * @param conductivity how much energyLoss will be subtracted when all blocks are this material
-     */
-    @ZenMethod
-    public static void addTorusBlock(@NotNull Material material, float rangeMod, float conductivity) {
-        TORUS_BLOCKS.add(new TorusBlock(rangeMod, conductivity, material));
+    protected int getTorusBlockAmount() {
+        return 24;
     }
-
-    @ZenMethod
-    public static void addTorusBlock(@NotNull IBlock block, float rangeMod, float conductivity) {
-        TORUS_BLOCKS.add(new TorusBlock(rangeMod, conductivity, CraftTweakerMC.getBlock(block)));
-    }
-
-    @ZenMethod
-    public static void removeTorusBlock(@NotNull Material material) {
-        TorusBlock block = TorusBlock.get(material);
-        if(block != null) {
-            TORUS_BLOCKS.remove(block);
-        }
-    }
-
-    @ZenMethod
-    public static void removeTorusBlock(@NotNull IBlock iblock) {
-        TorusBlock block = TorusBlock.get(CraftTweakerMC.getBlock(iblock));
-        TORUS_BLOCKS.remove(block);
-    }
-
-    private static final int TORUS_BLOCK_AMOUNT = 124;
-
-    private final double rangeFactor = MTConfig.multis.teslaTower.rangeFactor;
 
     /**
      * The amount of coil layers
@@ -141,6 +99,11 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
     private long inputVoltage;
 
     /**
+     * The maximum voltage the tower can provide
+     */
+    private long maxVoltage;
+
+    /**
      * The amount of amps per pulse
      */
     private long amps;
@@ -150,22 +113,18 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
      */
     private long ampsUsed;
 
-    /**
-     * The maximum amount of energy send per pulse
-     */
-    private long voltagePerPulse;
+    private static final Material casingMaterial = getCasingMaterial(Materials.Titanium, MTConfig.multis.teslaTower.casingMaterial);
 
-    @ZenProperty
-    public IRangeFunction rangeFunction = (tower) -> Math.pow(tower.coilHeight, 0.6) * tower.rangeFactor;
+    private IEnergyLossFunction lossFunction = (tower, distance) -> {
+        double a = 0.62, b = 0.067;
+        double distanceDeci = distance / tower.range;
+        return 1 - (1 / (1 + Math.exp((distanceDeci - a) / b)));
+    };
 
     /**
      * How much qubits should be consumed per pulse per machine out of range
      */
     private final int qubitCost = MTConfig.multis.teslaTower.qubitCost;
-
-    private final float energyLossBase = MTConfig.multis.teslaTower.baseEnergyLossPerecentage;
-
-    private float energyLoss;
 
     private List<IItemHandlerModifiable> inputInventorys = new ArrayList<>();
     private QubitContainerList inputQubit;
@@ -183,17 +142,20 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
 
     public MetaTileEntityTeslaTower(ResourceLocation metaTileEntityId) {
         super(metaTileEntityId);
+        if(TorusBlock.getTorusBlocks().size() <= 0) {
+            TorusBlock.addTorusBlock(Materials.Plastic, 0, 0.0001f, 0.0001f, 0);
+        }
     }
 
     @Override
     protected void formStructure(PatternMatchContext context) {
         super.formStructure(context);
         coilHeight = context.getOrDefault("height", 0);
-        // there is no way CoilType doesn't exist
-        coilTier = ((GAHeatingCoil.CoilType) context.get("CoilType")).ordinal()+1;
-        range = Math.max(0, rangeFunction.run(this) * rangeModifier);
-        energyLoss = energyLossBase - energyLossModifier;
-        amps = 8 + coilTier * 8;
+        maxVoltage = GAValues.V[context.getOrDefault("maxVoltage", 0)];
+        coilTier = context.getOrDefault("CoilTier", -1) + 1;
+        range = Math.max(0, getBaseRange() * rangeModifier);
+        System.out.println("Range mod: " + rangeModifier + " | Range: " + range);
+        amps = coilTier * 2;
 
         inputQubit = new QubitContainerList(getAbilities(GregicAdditionsCapabilities.INPUT_QBIT));
         inputInventorys = getAbilities(MultiblockAbility.IMPORT_ITEMS);
@@ -204,9 +166,9 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
             dataInventory = getImportItems();
         inputEnergy = new MTEnergyContainerList(getAbilities(MultiblockAbility.INPUT_ENERGY));
         inputVoltage = inputEnergy.getMaxInputVoltage();
-        center = getPos().offset(getFrontFacing().getOpposite(), 4).offset(EnumFacing.UP, 2 + coilHeight / 2);
-        allBlocks = createCircularBox();
-        receivers = scanRange();
+        center = getPos().offset(getFrontFacing().getOpposite(), 2).offset(EnumFacing.UP, 1 + coilHeight / 2);
+        createCircularBox();
+        scanRange();
     }
 
     @Override
@@ -219,23 +181,24 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
     @Override
     protected void updateFormedValid() {
         if (!getWorld().isRemote) {
-            // send energy every 0.5 seconds (10 ticks)
-            if (getTimer() % 10 == 0) {
-                if(MTConfig.multis.teslaTower.allowInterdimensionalTransfer || MTConfig.multis.teslaTower.allowOutOfRangeTransfer)
-                    scanDataInventory();
-                ampsUsed = 0L;
-                for(BlockPosDim pos : receivers) {
-                    feedEnergy(pos, getFeedAmount());
-                    if(ampsUsed >= amps) {
-                        break;
-                    }
+           if(getTimer() % 20 == 0) {
+               scanRange();
+           }
+
+            if (MTConfig.multis.teslaTower.allowInterdimensionalTransfer || MTConfig.multis.teslaTower.allowOutOfRangeTransfer)
+                scanDataInventory();
+            ampsUsed = 0L;
+            for (BlockPosDim pos : receivers) {
+                feedEnergy(pos);
+                if (ampsUsed >= amps) {
+                    break;
                 }
             }
         }
     }
 
     protected void scanDataInventory() {
-        for(IItemHandlerModifiable itemHandler : inputInventorys) {
+        for (IItemHandlerModifiable itemHandler : inputInventorys) {
             for (int i = 0; i < itemHandler.getSlots(); i++) {
                 ItemStack stack = itemHandler.getStackInSlot(i);
                 if (!stack.isEmpty() && stack.hasTagCompound()) {
@@ -243,14 +206,14 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
                     if (tag != null) {
                         int dim = tag.getShort("dim");
                         BlockPosDim pos = new BlockPosDim(tag.getInteger("x"), tag.getInteger("y"), tag.getInteger("z"), dim);
-                        if(!receivers.contains(pos)) {
+                        if (!receivers.contains(pos)) {
                             receivers.add(pos);
                         }
                     }
                 }
             }
-            if(removeLater.size() > 0) {
-                for(BlockPosDim pos : removeLater) {
+            if (removeLater.size() > 0) {
+                for (BlockPosDim pos : removeLater) {
                     receivers.remove(pos);
                 }
                 removeLater.clear();
@@ -259,117 +222,170 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
     }
 
     @Override
+    protected void checkStructurePattern() {
+        rangeModifier = 0;
+        energyLossModifier = 0;
+        super.checkStructurePattern();
+    }
+
+    @Override
     protected BlockPattern createStructurePattern() {
+        if(MTConfig.multis.teslaTower.useLargeStructure) {
+            return FactoryBlockPattern.start(BlockPattern.RelativeDirection.RIGHT, BlockPattern.RelativeDirection.BACK, BlockPattern.RelativeDirection.UP)
+                    .aisle("#############",
+                            "#############",
+                            "#####BBB#####",
+                            "####BBBBB####",
+                            "###BBBBBBB###",
+                            "##BBBBBBBBB##",
+                            "##BBBBBBBBB##",
+                            "##BBBBBBBBB##",
+                            "###BBBBBBB###",
+                            "####BBBBB####",
+                            "#####BSB#####",
+                            "#############",
+                            "#############")
+                    .aisle("#############",
+                            "#############",
+                            "#############",
+                            "#####CCC#####",
+                            "####C###C####",
+                            "###C##P##C###",
+                            "###C#P#P#C###",
+                            "###C##P##C###",
+                            "####C###C####",
+                            "#####CCC#####",
+                            "#############",
+                            "#############",
+                            "#############")
+                    .aisle("#############",
+                            "#############",
+                            "#############",
+                            "#############",
+                            "#############",
+                            "######P######",
+                            "#####P#P#####",
+                            "######P######",
+                            "#############",
+                            "#############",
+                            "#############",
+                            "#############",
+                            "#############")
+                    .aisle("#############",
+                            "#############",
+                            "#############",
+                            "#############",
+                            "#####CCC#####",
+                            "####C#P#C####",
+                            "####CP#PC####",
+                            "####C#P#C####",
+                            "#####CCC#####",
+                            "#############",
+                            "#############",
+                            "#############",
+                            "#############")
+                    .setRepeatable(5, 32)
+                    .aisle("#############",
+                            "#############",
+                            "#############",
+                            "#############",
+                            "#############",
+                            "######P######",
+                            "#####P#P#####",
+                            "######P######",
+                            "#############",
+                            "#############",
+                            "#############",
+                            "#############",
+                            "#############")
+                    .aisle("#############",
+                            "####GGGGG####",
+                            "###G#####G###",
+                            "##G#######G##",
+                            "#G#########G#",
+                            "#G####P####G#",
+                            "#G###P#P###G#",
+                            "#G####P####G#",
+                            "#G#########G#",
+                            "##G#######G##",
+                            "###G#####G###",
+                            "####GGGGG####",
+                            "#############")
+                    .aisle("####GGGGG####",
+                            "###G#####G###",
+                            "##G#GGGGG#G##",
+                            "#G#G##G##G#G#",
+                            "G#G###G###G#G",
+                            "G#G##PGP##G#G",
+                            "G#GGGG#GGGG#G",
+                            "G#G##PGP##G#G",
+                            "G#G###G###G#G",
+                            "#G#G##G##G#G#",
+                            "##G#GGGGG#G##",
+                            "###G#####G###",
+                            "####GGGGG####")
+                    .aisle("#############",
+                            "####GGGGG####",
+                            "###G#####G###",
+                            "##G#######G##",
+                            "#G#########G#",
+                            "#G####P####G#",
+                            "#G###P#P###G#",
+                            "#G####P####G#",
+                            "#G#########G#",
+                            "##G#######G##",
+                            "###G#####G###",
+                            "####GGGGG####",
+                            "#############")
+                    .where('B', statePredicate(getCasingState()).or(abilityPartPredicate(getAllowedAbilities())))
+                    .where('P', blockPredicate(MetaBlocks.COMPRESSED.get(Materials.Plastic)))
+                    .where('C', coilPredicate())
+                    .where('G', torusPredicate())
+                    .where('S', selfPredicate())
+                    .where('#', (tile) -> true)
+                    .build();
+        }
         return FactoryBlockPattern.start(BlockPattern.RelativeDirection.RIGHT, BlockPattern.RelativeDirection.BACK, BlockPattern.RelativeDirection.UP)
-                .aisle("#############",
-                        "#############",
-                        "#####BBB#####",
-                        "####BBBBB####",
-                        "###BBBBBBB###",
-                        "##BBBBBBBBB##",
-                        "##BBBBBBBBB##",
-                        "##BBBBBBBBB##",
-                        "###BBBBBBB###",
-                        "####BBBBB####",
-                        "#####BSB#####",
-                        "#############",
-                        "#############")
-                .aisle("#############",
-                        "#############",
-                        "#############",
-                        "#####CCC#####",
-                        "####C###C####",
-                        "###C##P##C###",
-                        "###C#P#P#C###",
-                        "###C##P##C###",
-                        "####C###C####",
-                        "#####CCC#####",
-                        "#############",
-                        "#############",
-                        "#############")
-                .aisle("#############",
-                        "#############",
-                        "#############",
-                        "#############",
-                        "#############",
-                        "######P######",
-                        "#####P#P#####",
-                        "######P######",
-                        "#############",
-                        "#############",
-                        "#############",
-                        "#############",
-                        "#############")
-                .aisle("#############",
-                        "#############",
-                        "#############",
-                        "#############",
-                        "#####CCC#####",
-                        "####C#P#C####",
-                        "####CP#PC####",
-                        "####C#P#C####",
-                        "#####CCC#####",
-                        "#############",
-                        "#############",
-                        "#############",
-                        "#############")
-                .setRepeatable(5, 32)
-                .aisle("#############",
-                        "#############",
-                        "#############",
-                        "#############",
-                        "#############",
-                        "######P######",
-                        "#####P#P#####",
-                        "######P######",
-                        "#############",
-                        "#############",
-                        "#############",
-                        "#############",
-                        "#############")
-                .aisle("#############",
-                        "####GGGGG####",
-                        "###G#####G###",
-                        "##G#######G##",
-                        "#G#########G#",
-                        "#G####P####G#",
-                        "#G###P#P###G#",
-                        "#G####P####G#",
-                        "#G#########G#",
-                        "##G#######G##",
-                        "###G#####G###",
-                        "####GGGGG####",
-                        "#############")
-                .aisle("####GGGGG####",
-                        "###G#####G###",
-                        "##G#GGGGG#G##",
-                        "#G#G##G##G#G#",
-                        "G#G###G###G#G",
-                        "G#G##PGP##G#G",
-                        "G#GGGG#GGGG#G",
-                        "G#G##PGP##G#G",
-                        "G#G###G###G#G",
-                        "#G#G##G##G#G#",
-                        "##G#GGGGG#G##",
-                        "###G#####G###",
-                        "####GGGGG####")
-                .aisle("#############",
-                        "####GGGGG####",
-                        "###G#####G###",
-                        "##G#######G##",
-                        "#G#########G#",
-                        "#G####P####G#",
-                        "#G###P#P###G#",
-                        "#G####P####G#",
-                        "#G#########G#",
-                        "##G#######G##",
-                        "###G#####G###",
-                        "####GGGGG####",
-                        "#############")
+                .aisle("#######",
+                        "###B###",
+                        "##BBB##",
+                        "#BBBBB#",
+                        "##BBB##",
+                        "###S###",
+                        "#######")
+                .aisle("#######",
+                        "#######",
+                        "#######",
+                        "###P###",
+                        "#######",
+                        "#######",
+                        "#######")
+                .aisle("#######",
+                        "#######",
+                        "###C###",
+                        "##CPC##",
+                        "###C###",
+                        "#######",
+                        "#######")
+                .setRepeatable(3, 18)
+                .aisle("#######",
+                        "#######",
+                        "#######",
+                        "###P###",
+                        "#######",
+                        "#######",
+                        "#######")
+                .aisle("###T###",
+                        "#TTTTT#",
+                        "#T#T#T#",
+                        "TTTPTTT",
+                        "#T#T#T#",
+                        "#TTTTT#",
+                        "###T###")
                 .where('B', statePredicate(getCasingState()).or(abilityPartPredicate(ALLOWED_ABILITIES)))
                 .where('P', blockPredicate(MetaBlocks.COMPRESSED.get(Materials.Plastic)))
                 .where('C', coilPredicate())
-                .where('G', torusPredicate())
+                .where('T', torusPredicate())
                 .where('S', selfPredicate())
                 .where('#', (tile) -> true)
                 .build();
@@ -377,34 +393,27 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
 
     public Predicate<BlockWorldState> torusPredicate() {
         return (blockWorldState -> {
-            Block block = blockWorldState.getBlockState().getBlock();
+            IBlockState block = blockWorldState.getBlockState();
             TorusBlock torusBlock = TorusBlock.get(block);
-            if(torusBlock != null) {
-                energyLossModifier += torusBlock.getConductivity();
-                rangeModifier += torusBlock.getRangeModifier();
+            if (torusBlock != null) {
+                energyLossModifier += torusBlock.getConductivity() / getTorusBlockAmount();
+                rangeModifier += torusBlock.getRangeModifier() / getTorusBlockAmount();
+                blockWorldState.getMatchContext().set("maxVoltage", Math.min(torusBlock.getMaxVoltageTier(), blockWorldState.getMatchContext().getOrPut("maxVoltage", torusBlock.getMaxVoltageTier())));
                 return true;
             }
             return false;
         });
     }
 
-    /*public Predicate<BlockWorldState> torusPredicateCopy() {
-        Block[] blocks = new Block[ALLOWED_TORUS_MATERIALS.length];
-        for(int i = 0; i < ALLOWED_TORUS_MATERIALS.length; i++) {
-            blocks[i] = MetaBlocks.COMPRESSED.get(ALLOWED_TORUS_MATERIALS[i]);
-        }
-        return blockPredicate(blocks);
-    }*/
-
     public Predicate<BlockWorldState> coilPredicate() {
         return (blockWorldState) -> {
             IBlockState blockState = blockWorldState.getBlockState();
             int coilTier, currentCoilTier;
-            if(blockState.getBlock() instanceof BlockWireCoil) {
+            if (blockState.getBlock() instanceof BlockWireCoil) {
                 BlockWireCoil coil = (BlockWireCoil) blockState.getBlock();
                 coilTier = coil.getState(blockState).ordinal();
                 currentCoilTier = blockWorldState.getMatchContext().getOrPut("CoilTier", coilTier);
-            } else if(blockState.getBlock() instanceof GAHeatingCoil) {
+            } else if (blockState.getBlock() instanceof GAHeatingCoil) {
                 GAHeatingCoil coil = (GAHeatingCoil) blockState.getBlock();
                 coilTier = coil.getState(blockState).ordinal() + 9;
                 currentCoilTier = blockWorldState.getMatchContext().getOrPut("CoilTier", coilTier);
@@ -426,7 +435,7 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
 
     @Override
     public ICubeRenderer getBaseTexture(IMultiblockPart iMultiblockPart) {
-        return GAMetaBlocks.METAL_CASING.get(GAMaterials.TungstenTitaniumCarbide);
+        return GAMetaBlocks.METAL_CASING.get(casingMaterial);
     }
 
     @Override
@@ -454,13 +463,13 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
         if (isStructureFormed()) {
             DecimalFormat df = new DecimalFormat("#.##");
             df.setRoundingMode(RoundingMode.HALF_UP);
-            textList.add(new TextComponentTranslation("gtforegoing.multiblock.tesla_tower.range", df.format(range)));
-            textList.add(new TextComponentTranslation("gtforegoing.multiblock.tesla_tower.voltage", inputVoltage));
-            textList.add(new TextComponentTranslation("gtforegoing.multiblock.tesla_tower.receivers", receivers.size()));
-            textList.add(new TextComponentTranslation("gtforegoing.multiblock.tesla_tower.amps", amps, ampsUsed));
-            textList.add(new TextComponentTranslation("gtforegoing.multiblock.tesla_tower.loss", energyLoss));
+            textList.add(new TextComponentTranslation("mechtech.multiblock.tesla_tower.range", df.format(range)));
+            textList.add(new TextComponentTranslation("mechtech.multiblock.tesla_tower.voltage", inputVoltage));
+            textList.add(new TextComponentTranslation("mechtech.multiblock.tesla_tower.receivers", receivers.size()));
+            textList.add(new TextComponentTranslation("mechtech.multiblock.tesla_tower.amps", amps, ampsUsed));
+            //textList.add(new TextComponentTranslation("gtforegoing.multiblock.tesla_tower.loss", energyLoss));
             if (failedPositions.size() > 0) {
-                textList.add(new TextComponentTranslation("gtforegoing.multiblock.tesla_tower.fail"));
+                textList.add(new TextComponentTranslation("mechtech.multiblock.tesla_tower.fail"));
                 for (Map.Entry<String, Integer> pos : failedPositions.entrySet()) {
                     textList.add(new TextComponentString(" - " + pos.getKey() + " E:" + pos.getValue()));
                 }
@@ -469,7 +478,15 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
     }
 
     protected IBlockState getCasingState() {
-        return GAMetaBlocks.getMetalCasingBlockState(GAMaterials.TungstenTitaniumCarbide);
+        return GAMetaBlocks.getMetalCasingBlockState(casingMaterial);
+    }
+
+    protected static Material getCasingMaterial(Material defaultMaterial, String materialString) {
+        Material mat = Material.MATERIAL_REGISTRY.getObject(materialString);
+        if (mat != null && mat.hasFlag(GAMaterials.GENERATE_METAL_CASING)) {
+            return mat;
+        }
+        return defaultMaterial;
     }
 
     public long getMaxFeedAmount() {
@@ -478,28 +495,27 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
 
     public long getFeedAmount() {
         long stored = inputEnergy.getEnergyStored();
-        return Math.min(stored, inputVoltage);
+        return Math.min(stored, Math.min(inputVoltage, maxVoltage));
     }
 
     /**
      * feeds the machine at pos
      *
-     * @param pos    the position to fill
-     * @param amount the amount of energy
+     * @param pos the position to fill
      * @return the amount of energy fed
      */
-    public long feedEnergy(BlockPosDim pos, long amount) {
+    public long feedEnergy(BlockPosDim pos) {
         boolean consumeQubit = false;
         World world = getWorld();
 
-        if(!isInRange(pos)) {
-            if(!MTConfig.multis.teslaTower.allowOutOfRangeTransfer) {
+        if (!isInRange(pos)) {
+            if (!canTransmittOutOfRange()) {
                 return 0L;
             }
             consumeQubit = true;
         }
-        if(!isInDim(pos.getDim())) {
-            if(!MTConfig.multis.teslaTower.allowInterdimensionalTransfer) {
+        if (!isInDim(pos.getDim())) {
+            if (!canTransmittInterdimensional()) {
                 return 0L;
             }
             consumeQubit = true;
@@ -510,43 +526,47 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
         TileEntity tile = world.getTileEntity(pos);
         IEnergyContainer container = null;
         String sPos = pos.toString();
-        if(world.getBlockState(pos) == Blocks.AIR.getDefaultState()) {
+        if (world.getBlockState(pos) == Blocks.AIR.getDefaultState()) {
             // block is broken
             removeLater.add(pos);
             failedPositions.remove(sPos);
             return 0;
         }
-        if (tile instanceof MetaTileEntityHolder) {
-            MetaTileEntity tileEntity = ((MetaTileEntityHolder) tile).getMetaTileEntity();
-            if (canInsertInto(tileEntity) && hasCover(tileEntity)) {
-                container = ((MetaTileEntityHolder) tile).getMetaTileEntity().getCapability(GregtechCapabilities.CAPABILITY_ENERGY_CONTAINER, null);
-            } else {
-                removeLater.add(pos);
-                failedPositions.remove(sPos);
-                return 0;
-            }
+
+        if (canInsertEnergy(tile)) {
+            container = tile.getCapability(GregtechCapabilities.CAPABILITY_ENERGY_CONTAINER, null);
+        } else {
+            removeLater.add(pos);
+            failedPositions.remove(sPos);
+            return 0;
         }
 
-        if (container != null && container.inputsEnergy(EnumFacing.NORTH)) {
-            long ampsToConsume = container.getInputAmperage() * (container.getInputVoltage() / inputVoltage);
+        if (container != null && container.inputsEnergy(EnumFacing.NORTH) && inputEnergy.getEnergyStored() > 0) {
+            /*long ampsToConsume = container.getInputAmperage() * (container.getInputVoltage() / inputVoltage);
             if(ampsToConsume < 1 || ampsUsed + ampsToConsume > amps) {
                 return 0L;
-            }
-            if(consumeQubit) {
-                if(inputQubit == null) {
+            }*/
+            if (consumeQubit) {
+                if (inputQubit == null) {
                     failed(sPos, 1);
                     return 0;
                 }
-                if(inputQubit.getQubitStored() >= qubitCost && inputQubit.changeQubit(-qubitCost) < qubitCost) {
+                if (inputQubit.getQubitStored() >= getQubitCost() && inputQubit.changeQubit(-getQubitCost()) < getQubitCost()) {
                     failed(sPos, 2);
                     return 0;
                 }
             }
-            float lossFactor = 1 - Math.max(0, energyLoss) / 100f;
-            charged = container.addEnergy((long) (amount * lossFactor));
+            ampsUsed += consumeQubit ? amps : (int) container.getInputAmperage();
+            //float lossFactor = 1 - Math.max(0, energyLoss) / 100f;
+            double energyLoss = lossFunction.run(this, pos.getDistance(getPos())) * energyLossModifier;
+            if (energyLoss <= 0) return 0L;
+            long energyToEmitt = inputEnergy.getInputVoltage() * container.getInputAmperage();
+            if (inputEnergy.getEnergyStored() > energyToEmitt * (1 + energyLoss)) {
+                energyToEmitt = (long) (inputEnergy.getEnergyStored() * (1 - energyLoss));
+            }
+            charged = container.addEnergy(energyToEmitt);
+            inputEnergy.removeEnergy((long) (charged * (1 + energyLoss)));
 
-            ampsUsed += ampsToConsume;
-            inputEnergy.removeEnergy((long) (charged * (1 + (1 - lossFactor))));
             success(sPos);
         } else {
             failed(sPos, 3);
@@ -554,12 +574,23 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
         return charged;
     }
 
+    public boolean canInsertEnergy(TileEntity tile) {
+        if (tile instanceof MetaTileEntityHolder) {
+            MetaTileEntity mte = ((MetaTileEntityHolder) tile).getMetaTileEntity();
+            if (hasCover(mte) && mte.getCapability(GregtechCapabilities.CAPABILITY_ENERGY_CONTAINER, null) != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * error
      * 1: no qubt input
      * 2: not enough qubit
      * 3: container is null or cannot input energy
-     * @param pos position in string form
+     *
+     * @param pos   position in string form
      * @param error an error code for easier debuging
      */
     protected void failed(String pos, int error) {
@@ -586,9 +617,6 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
         return dim == getWorld().provider.getDimension();
     }
 
-    public boolean canInsertInto(MetaTileEntity mte) {
-        return mte instanceof GAMetaTileEntityBatteryBuffer;
-    }
 
     /**
      * @return if the tile has a receiver cover
@@ -605,7 +633,7 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
     /**
      * @return a list of positions that are in range
      */
-    public List<BlockPos> createCircularBox() {
+    public void createCircularBox() {
         int intRange = (int) range;
         List<BlockPos> posList = new ArrayList<>();
         Iterable<BlockPos> poss = BlockPos.getAllInBox(center.getX() - intRange, center.getY() - intRange, center.getZ() - intRange, center.getX() + intRange, center.getY() + intRange, center.getZ() + intRange);
@@ -614,14 +642,15 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
             if (isInRange(blockPos))
                 posList.add(blockPos);
         }));
-        return posList;
+        allBlocks = posList;
     }
 
     /**
      * scans the list created in {@link #createCircularBox()}
+     *
      * @return all MetaTileEntities that have wireless cover
      */
-    public List<BlockPosDim> scanRange() {
+    public void scanRange() {
         failedPositions.clear();
         List<BlockPosDim> blocks = new ArrayList<>();
         for (BlockPos pos : allBlocks) {
@@ -634,17 +663,19 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
                 }
             }
         }
-        return blocks;
+       receivers = blocks;
     }
 
     protected void handleButtonClick(Widget.ClickData clickData) {
-        receivers = scanRange();
+        scanRange();
     }
 
     @Override
     protected ModularUI createUI(EntityPlayer entityPlayer) {
         ModularUI.Builder builder = this.createUITemplate(entityPlayer);
-        builder.widget(new ClickButtonWidget(125, 103, 40, 18, I18n.format("gtforegoing.multiblock.tesla_tower.scan"), this::handleButtonClick));
+        // scans automatically every second making this redundant
+        // I will keep this here just in case
+        //builder.widget(new ClickButtonWidget(125, 103, 40, 18, I18n.format("mechtech.multiblock.tesla_tower.scan"), this::handleButtonClick));
         return builder.build(this.getHolder(), entityPlayer);
     }
 
@@ -666,6 +697,10 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
 
     public List<BlockPosDim> getReceivers() {
         return receivers;
+    }
+
+    protected MultiblockAbility<?>[] getAllowedAbilities() {
+        return ALLOWED_ABILITIES;
     }
 
     @ZenGetter("coilHeight")

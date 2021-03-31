@@ -2,15 +2,21 @@ metaitem.data_stick.tooltip.blockpos=Position: X: %d, Y: %d, Z: %d, Dim: %d
 
 metaitem.wireless_receiver.name=Wireless Receiver Cover
 
-gtforegoing.universal.tooltip.item_storage_accept=Accepts:
-gtforegoing.universal.tooltip.item_storage_reject=Rejects:
+mechtech.universal.tooltip.item_storage_accept=Accepts:
+mechtech.universal.tooltip.item_storage_reject=Rejects:
 
-gtforegoing.machine.tesla_tower.name=Tesla Tower
+mechtech.machine.tesla_tower.name=Tesla Tower
 
-gtforegoing.multiblock.tesla_tower.range=Range: %s
-gtforegoing.multiblock.tesla_tower.voltage=Voltage: %d
-gtforegoing.multiblock.tesla_tower.receivers=Receivers: %d
-gtforegoing.multiblock.tesla_tower.fail=Emitting failed at:
-gtforegoing.multiblock.tesla_tower.scan=Scan
-gtforegoing.multiblock.tesla_tower.amps=Amps: %d/%d
-gtforegoing.multiblock.tesla_tower.loss=Loss: %d
+mechtech.multiblock.tesla_tower.range=Range: %s
+mechtech.multiblock.tesla_tower.voltage=Voltage: %d
+mechtech.multiblock.tesla_tower.receivers=Receivers: %d
+mechtech.multiblock.tesla_tower.fail=Emitting failed at:
+mechtech.multiblock.tesla_tower.scan=Scan
+mechtech.multiblock.tesla_tower.amps=Amps: %d/%d
+mechtech.multiblock.tesla_tower.loss=Loss: %d
+
+mechtech.jei_category.torus_block=Tesla Tower Torus Blocks
+
+mechtech.recipe.torus_block.loss=Energy loss modifier: %d
+mechtech.recipe.torus_block.range=Range modifier: %d
+mechtech.recipe.torus_block.voltage=Max Voltage: (%s) %d
