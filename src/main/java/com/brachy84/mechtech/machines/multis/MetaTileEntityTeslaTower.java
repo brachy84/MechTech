@@ -688,69 +688,40 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
         return inputVoltage;
     }
 
-    public static class TorusBlock {
+    @ZenGetter("maxVoltage")
+    public long getMaxVoltage() {
+        return maxVoltage;
+    }
 
-        private Block block;
+    @ZenGetter("baseRange")
+    public int getBaseRange() {
+        return MTConfig.multis.teslaTower.baseRange;
+    }
 
-        /**
-         * How much range should be added (ore subtracted) if all blocks would be this material
-         * min is 0
-         * 1 would do nothing (100%)
-         */
-        private final float rangeModifier;
+    @ZenGetter("lossFunction")
+    public IEnergyLossFunction getLossFunction() {
+        return lossFunction;
+    }
 
-        /**
-         * By how much the energy loss will be decreased if all blocks would be this material
-         */
-        private final float conductivity;
+    @ZenSetter("lossFunction")
+    public void setLossFunction(IEnergyLossFunction lossFunction) {
+        this.lossFunction = lossFunction;
+    }
 
-        public TorusBlock(float rangeModifier, float conductivity, Block block) {
-            //if(rangeModifier < 0) {
-            //    throw new IllegalArgumentException("RangeModifier must be greater than 0");
-            //}
-            this.rangeModifier = rangeModifier;
-            this.conductivity = conductivity;
-            this.block = block;
-        }
+    @ZenGetter("ampsPerTier")
+    public int getAmpsPerTier() {
+        return MTConfig.multis.teslaTower.ampsPerCoilTier;
+    }
 
-        public TorusBlock(float rangeModifier, float conductivity, IBlockState block) {
-            this(rangeModifier, conductivity, block.getBlock());
-        }
+    public boolean canTransmittInterdimensional() {
+        return MTConfig.multis.teslaTower.allowInterdimensionalTransfer;
+    }
 
-        public TorusBlock(float rangeModifier, float conductivity, Material material) {
-            this(rangeModifier, conductivity, MetaBlocks.COMPRESSED.get(material));
-        }
+    public boolean canTransmittOutOfRange() {
+        return MTConfig.multis.teslaTower.allowOutOfRangeTransfer;
+    }
 
-        public float getConductivity() {
-            return conductivity / TORUS_BLOCK_AMOUNT;
-        }
-
-        public float getRangeModifier() {
-            return rangeModifier / TORUS_BLOCK_AMOUNT;
-        }
-
-        public static boolean exists(Block block) {
-            for(TorusBlock block1 : TORUS_BLOCKS) {
-                if(block.equals(block1.block)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        @Nullable
-        public static TorusBlock get(Block block) {
-            for(TorusBlock block1 : TORUS_BLOCKS) {
-                if(block.equals(block1.block)) {
-                    return block1;
-                }
-            }
-            return null;
-        }
-
-        @Nullable
-        public static TorusBlock get(Material material) {
-            return get(MetaBlocks.COMPRESSED.get(material));
-        }
+    public int getQubitCost() {
+        return MTConfig.multis.teslaTower.qubitCost;
     }
 }
