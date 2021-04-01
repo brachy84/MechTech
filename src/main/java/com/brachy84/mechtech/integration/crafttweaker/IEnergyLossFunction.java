@@ -5,7 +5,7 @@ import crafttweaker.annotations.ZenRegister;
 import stanhebben.zenscript.annotations.ZenClass;
 
 @FunctionalInterface
-@ZenClass("mods.mechtech.EnergyLossFunction")
+@ZenClass("mods.mechtech.IEnergyLossFunction")
 @ZenRegister
 public interface IEnergyLossFunction {
 
