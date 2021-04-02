@@ -4,6 +4,9 @@ import com.brachy84.mechtech.MTConfig;
 import com.brachy84.mechtech.MechTech;
 import com.brachy84.mechtech.machines.multiblockpart.LimitedItemBusTile;
 import com.brachy84.mechtech.machines.multis.MetaTileEntityTeslaTower;
+import com.brachy84.mechtech.machines.multis.MetaTileEntityTokamak;
+import gregicadditions.Gregicality;
+import gregicadditions.machines.GATileEntities;
 import gregtech.api.GTValues;
 import gregtech.api.GregTechAPI;
 import net.minecraft.util.ResourceLocation;
@@ -28,6 +31,10 @@ public class MTTileEntities {
             }
         }
         id = 6011;
+        if(MTConfig.multis.tokamak.enableTokamak) {
+            GATileEntities.ADVANCED_FUSION_REACTOR = GregTechAPI.registerMetaTileEntity(id, new MetaTileEntityTokamak(new ResourceLocation(Gregicality.MODID, "advanced_fusion_reactor")));
+        }
+        id = 6012;
     }
 
     private static ResourceLocation loc(String path) {
