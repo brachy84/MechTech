@@ -11,7 +11,7 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
 
-version = "0.0.1"
+version = "0.0.3"
 group = "com.brachy84.mechtech" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "mechtech"
 
@@ -53,7 +53,7 @@ dependencies {
     //deobfCompile "codechicken-lib-1-8:CodeChickenLib-1.12.2:3.2.3.358:universal"
     deobfCompile "codechicken:CodeChickenLib:1.12.2-3.2.3.358:universal"
     deobfCompile "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.20.554"
-    deobfCompile "mezz.jei:jei_1.12.2:+"
+    deobfCompile "mezz.jei:jei_1.12.2:4.16.1.302"
     compile files("libs/Gregicality-1.12.2-0.21.5.1.jar")
 }
 
