@@ -3,10 +3,8 @@ package com.brachy84.mechtech.jei.multis;
 import com.brachy84.mechtech.MTConfig;
 import com.brachy84.mechtech.machines.MTTileEntities;
 import com.brachy84.mechtech.utils.TorusBlock;
-import gregicadditions.GAMaterials;
 import gregicadditions.item.GAHeatingCoil;
 import gregicadditions.item.GAMetaBlocks;
-import gregicadditions.jei.GAMultiblockShapeInfo;
 import gregtech.api.metatileentity.multiblock.MultiblockControllerBase;
 import gregtech.api.unification.material.Materials;
 import gregtech.common.blocks.BlockCompressed;
@@ -31,7 +29,7 @@ public class TeslaTowerInfo extends MultiblockInfoPage {
     @Override
     public List<MultiblockShapeInfo> getMatchingShapes() {
         List<MultiblockShapeInfo> shape = new ArrayList<>();
-        GAMultiblockShapeInfo.Builder builder = GAMultiblockShapeInfo.builder();
+        MultiblockShapeInfo.Builder builder = MultiblockShapeInfo.builder();
         BlockCompressed plastic = MetaBlocks.COMPRESSED.get(Materials.Plastic);
         if(MTConfig.multis.teslaTower.useLargeStructure) {
             builder.aisle( "#############", "#############", "#############", "#############", "#############", "#############", "#############", "#############", "#############", "#############", "####GGGGG####", "#############")

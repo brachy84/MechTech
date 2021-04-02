@@ -7,6 +7,7 @@ import com.brachy84.mechtech.MTConfig;
 import com.brachy84.mechtech.capability.MTCapabilities;
 import com.brachy84.mechtech.capability.MTEnergyContainerList;
 import com.brachy84.mechtech.cover.CoverWirelessReceiver;
+import com.brachy84.mechtech.integration.crafttweaker.CTMath;
 import com.brachy84.mechtech.integration.crafttweaker.IEnergyLossFunction;
 import com.brachy84.mechtech.utils.BlockPosDim;
 import com.brachy84.mechtech.utils.TorusBlock;
@@ -55,7 +56,6 @@ import net.minecraftforge.items.IItemHandlerModifiable;
 import stanhebben.zenscript.annotations.*;
 
 import javax.annotation.Nullable;
-import javax.naming.ConfigurationException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -73,7 +73,7 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
     };
 
     protected int getTorusBlockAmount() {
-        return 24;
+        return MTConfig.multis.teslaTower.useLargeStructure ? 124 : 24;
     }
 
     /**
@@ -115,7 +115,8 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
 
     private static final Material casingMaterial = getCasingMaterial(Materials.Titanium, MTConfig.multis.teslaTower.casingMaterial);
 
-    private IEnergyLossFunction lossFunction = (tower, distance) -> {
+    @ZenProperty
+    public static IEnergyLossFunction lossFunction = (tower, distance) -> {
         double a = 0.62, b = 0.067;
         double distanceDeci = distance / tower.range;
         return 1 - (1 / (1 + Math.exp((distanceDeci - a) / b)));
@@ -139,10 +140,11 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
     private List<BlockPos> allBlocks = new ArrayList<>();
     private List<BlockPosDim> receivers = new ArrayList<>();
     private List<BlockPosDim> removeLater = new ArrayList<>();
+    private boolean shouldCreateBox = true;
 
     public MetaTileEntityTeslaTower(ResourceLocation metaTileEntityId) {
         super(metaTileEntityId);
-        if(TorusBlock.getTorusBlocks().size() <= 0) {
+        if (TorusBlock.getTorusBlocks().size() <= 0) {
             TorusBlock.addTorusBlock(Materials.Plastic, 0, 0.0001f, 0.0001f, 0);
         }
     }
@@ -153,8 +155,7 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
         coilHeight = context.getOrDefault("height", 0);
         maxVoltage = GAValues.V[context.getOrDefault("maxVoltage", 0)];
         coilTier = context.getOrDefault("CoilTier", -1) + 1;
-        range = Math.max(0, getBaseRange() * rangeModifier);
-        System.out.println("Range mod: " + rangeModifier + " | Range: " + range);
+        range = Math.max(1, getBaseRange() * rangeModifier);
         amps = coilTier * 2;
 
         inputQubit = new QubitContainerList(getAbilities(GregicAdditionsCapabilities.INPUT_QBIT));
@@ -167,8 +168,6 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
         inputEnergy = new MTEnergyContainerList(getAbilities(MultiblockAbility.INPUT_ENERGY));
         inputVoltage = inputEnergy.getMaxInputVoltage();
         center = getPos().offset(getFrontFacing().getOpposite(), 2).offset(EnumFacing.UP, 1 + coilHeight / 2);
-        createCircularBox();
-        scanRange();
     }
 
     @Override
@@ -176,14 +175,12 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
         super.invalidateStructure();
         rangeModifier = 0;
         energyLossModifier = 0;
+        shouldCreateBox = true;
     }
 
     @Override
     protected void updateFormedValid() {
         if (!getWorld().isRemote) {
-           if(getTimer() % 20 == 0) {
-               scanRange();
-           }
 
             if (MTConfig.multis.teslaTower.allowInterdimensionalTransfer || MTConfig.multis.teslaTower.allowOutOfRangeTransfer)
                 scanDataInventory();
@@ -230,7 +227,7 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
 
     @Override
     protected BlockPattern createStructurePattern() {
-        if(MTConfig.multis.teslaTower.useLargeStructure) {
+        if (MTConfig.multis.teslaTower.useLargeStructure) {
             return FactoryBlockPattern.start(BlockPattern.RelativeDirection.RIGHT, BlockPattern.RelativeDirection.BACK, BlockPattern.RelativeDirection.UP)
                     .aisle("#############",
                             "#############",
@@ -489,15 +486,6 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
         return defaultMaterial;
     }
 
-    public long getMaxFeedAmount() {
-        return inputVoltage * 4 * coilTier;
-    }
-
-    public long getFeedAmount() {
-        long stored = inputEnergy.getEnergyStored();
-        return Math.min(stored, Math.min(inputVoltage, maxVoltage));
-    }
-
     /**
      * feeds the machine at pos
      *
@@ -542,10 +530,14 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
         }
 
         if (container != null && container.inputsEnergy(EnumFacing.NORTH) && inputEnergy.getEnergyStored() > 0) {
-            /*long ampsToConsume = container.getInputAmperage() * (container.getInputVoltage() / inputVoltage);
-            if(ampsToConsume < 1 || ampsUsed + ampsToConsume > amps) {
+            if(container.getInputVoltage() > Math.min(inputVoltage, maxVoltage)) {
+                failed(sPos, 4);
                 return 0L;
-            }*/
+            }
+            if(container.getEnergyStored() == container.getEnergyCapacity()) {
+                success(sPos);
+                return 0L;
+            }
             if (consumeQubit) {
                 if (inputQubit == null) {
                     failed(sPos, 1);
@@ -559,12 +551,14 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
             ampsUsed += consumeQubit ? amps : (int) container.getInputAmperage();
             //float lossFactor = 1 - Math.max(0, energyLoss) / 100f;
             double energyLoss = lossFunction.run(this, pos.getDistance(getPos())) * energyLossModifier;
+            System.out.println("Energy loss: " + energyLoss);
             if (energyLoss <= 0) return 0L;
             long energyToEmitt = inputEnergy.getInputVoltage() * container.getInputAmperage();
-            if (inputEnergy.getEnergyStored() > energyToEmitt * (1 + energyLoss)) {
+            if (inputEnergy.getEnergyStored() < energyToEmitt * (1 + energyLoss)) {
                 energyToEmitt = (long) (inputEnergy.getEnergyStored() * (1 - energyLoss));
             }
             charged = container.addEnergy(energyToEmitt);
+            System.out.println("Emitt: " + energyToEmitt + " | Charged: " + charged);
             inputEnergy.removeEnergy((long) (charged * (1 + energyLoss)));
 
             success(sPos);
@@ -634,15 +628,22 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
      * @return a list of positions that are in range
      */
     public void createCircularBox() {
-        int intRange = (int) range;
-        List<BlockPos> posList = new ArrayList<>();
-        Iterable<BlockPos> poss = BlockPos.getAllInBox(center.getX() - intRange, center.getY() - intRange, center.getZ() - intRange, center.getX() + intRange, center.getY() + intRange, center.getZ() + intRange);
+        allBlocks.clear();
+        int intRange = CTMath.clamp((int) range, 1, 256);
+        //List<BlockPos> poss = WorldUtils.getBlockBox(center, intRange);
+        BlockPos posNeg = new BlockPos(center.getX() - intRange, center.getY() - intRange, center.getZ() - intRange);
+        BlockPos posPos = new BlockPos(center.getX() + intRange, center.getY() + intRange, center.getZ() + intRange);
+        Iterable<BlockPos> poss = BlockPos.getAllInBox(posNeg, posPos);
 
-        poss.forEach((blockPos -> {
-            if (isInRange(blockPos))
-                posList.add(blockPos);
-        }));
-        allBlocks = posList;
+        int amount = 0;
+        int max = (int) Math.pow(range, 3);
+        for (BlockPos pos : poss) {
+            amount++;
+            if (amount > max) return;
+            if (isInRange(pos)) {
+                allBlocks.add(pos);
+            }
+        }
     }
 
     /**
@@ -652,21 +653,20 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
      */
     public void scanRange() {
         failedPositions.clear();
-        List<BlockPosDim> blocks = new ArrayList<>();
+        receivers.clear();
         for (BlockPos pos : allBlocks) {
             TileEntity tile = getWorld().getTileEntity(pos);
-            if (tile instanceof MetaTileEntityHolder) {
-                if (((MetaTileEntityHolder) tile).getMetaTileEntity() != null) {
-                    if (hasCover(((MetaTileEntityHolder) tile).getMetaTileEntity())) {
-                        blocks.add(new BlockPosDim(pos, getWorld().provider.getDimension()));
-                    }
-                }
+            if(canInsertEnergy(tile)) {
+                receivers.add(new BlockPosDim(pos, getWorld().provider.getDimension()));
             }
         }
-       receivers = blocks;
     }
 
     protected void handleButtonClick(Widget.ClickData clickData) {
+        if(shouldCreateBox) {
+            createCircularBox();
+            shouldCreateBox = false;
+        }
         scanRange();
     }
 
@@ -675,7 +675,7 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
         ModularUI.Builder builder = this.createUITemplate(entityPlayer);
         // scans automatically every second making this redundant
         // I will keep this here just in case
-        //builder.widget(new ClickButtonWidget(125, 103, 40, 18, I18n.format("mechtech.multiblock.tesla_tower.scan"), this::handleButtonClick));
+        builder.widget(new ClickButtonWidget(125, 103, 40, 18, I18n.format("mechtech.multiblock.tesla_tower.scan"), this::handleButtonClick));
         return builder.build(this.getHolder(), entityPlayer);
     }
 
@@ -731,16 +731,6 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
     @ZenGetter("baseRange")
     public int getBaseRange() {
         return MTConfig.multis.teslaTower.baseRange;
-    }
-
-    @ZenGetter("lossFunction")
-    public IEnergyLossFunction getLossFunction() {
-        return lossFunction;
-    }
-
-    @ZenSetter("lossFunction")
-    public void setLossFunction(IEnergyLossFunction lossFunction) {
-        this.lossFunction = lossFunction;
     }
 
     @ZenGetter("ampsPerTier")

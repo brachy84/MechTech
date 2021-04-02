@@ -50,10 +50,9 @@ public class MTConfig {
     }
 
     public static class Tokamak {
-        @Config.Comment("If this is true, Gregicalitys Advanced Fusion Reactor will be replaced with a much larger one")
+        @Config.Comment({"If this is true, Gregicalitys Advanced Fusion Reactor will be replaced with a much larger one"})
         @Config.Name("Override Advanced Fusion Rector")
         @Config.RequiresMcRestart
         public boolean enableTokamak = true;
-
     }
 }
