@@ -1,6 +1,7 @@
 package com.brachy84.mechtech.utils;
 
 import com.google.common.collect.Lists;
+import crafttweaker.annotations.ZenRegister;
 import crafttweaker.api.minecraft.CraftTweakerMC;
 import gregicadditions.GAMaterials;
 import gregicadditions.GAValues;
@@ -9,12 +10,15 @@ import gregtech.common.blocks.MetaBlocks;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import stanhebben.zenscript.annotations.NotNull;
+import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenMethod;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 
+@ZenClass("mods.mechtech.TorusBlock")
+@ZenRegister
 public class TorusBlock {
 
     private static final List<TorusBlock> TORUS_BLOCKS = Lists.newArrayList(
