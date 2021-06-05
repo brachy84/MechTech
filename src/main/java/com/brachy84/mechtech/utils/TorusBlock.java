@@ -22,11 +22,11 @@ import java.util.List;
 public class TorusBlock {
 
     private static final List<TorusBlock> TORUS_BLOCKS = Lists.newArrayList(
-            new TorusBlock(0.75f, 0.65f, GAValues.LV, GAMaterials.HVSuperconductor, 5),
-            new TorusBlock(1.0f, 0.6f, GAValues.MV, GAMaterials.EVSuperconductor, 4),
-            new TorusBlock(2.0f, 0.65f, GAValues.HV, GAMaterials.IVSuperconductor, 3),
-            new TorusBlock(2.6f, 0.7f, GAValues.EV, GAMaterials.LuVSuperconductor, 2),
-            new TorusBlock(3.2f, 0.75f, GAValues.IV, GAMaterials.ZPMSuperconductor, 0),
+            new TorusBlock(0.75f, 0.65f, GAValues.LV, GAMaterials.HVSuperconductor, 9),
+            new TorusBlock(1.0f, 0.6f, GAValues.MV, GAMaterials.EVSuperconductor, 8),
+            new TorusBlock(2.0f, 0.65f, GAValues.HV, GAMaterials.IVSuperconductor, 7),
+            new TorusBlock(2.6f, 0.7f, GAValues.EV, GAMaterials.LuVSuperconductor, 6),
+            new TorusBlock(3.2f, 0.75f, GAValues.IV, GAMaterials.ZPMSuperconductor, 4),
             new TorusBlock(4.0f, 0.8f, GAValues.LuV, GAMaterials.UVSuperconductor, 8),
             new TorusBlock(4.8f, 0.85f, GAValues.ZPM, GAMaterials.UHVSuperconductor, 3),
             new TorusBlock(5.4f, 0.89f, GAValues.UV, GAMaterials.UEVSuperconductor, 1),
