@@ -1,15 +1,17 @@
 buildscript {
     repositories {
-        jcenter()
-        maven { url = "https://files.minecraftforge.net/maven" }
+        //jcenter()
+        mavenCentral()
+        //maven { url = "https://files.minecraftforge.net/maven" }
+        maven { url = "https://jitpack.io" }
+        maven { url = "https://plugins.gradle.org/m2/" }
+        maven { url = "http://maven.minecraftforge.net/" }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath("com.github.GregTechCE:ForgeGradle:FG_2.3-SNAPSHOT")
     }
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
-//Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
-
 
 version = "0.0.3"
 group = "com.brachy84.mechtech" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
@@ -23,20 +25,11 @@ compileJava {
 minecraft {
     version = "1.12.2-14.23.5.2847"
     runDir = "run"
-    
-    // the mappings can be changed at any time, and must be in the following format.
-    // snapshot_YYYYMMDD   snapshot are built nightly.
-    // stable_#            stables are built at the discretion of the MCP team.
-    // Use non-default mappings at your own risk. they may not always work.
-    // simply re-run your setup task after changing the mappings to update your workspace.
     mappings = "stable_39"
-    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 }
 
+
 repositories {
-    maven {
-        url = "https://dl.bintray.com/gregtech/dev/"
-    }
     maven {
         url = "http://chickenbones.net/maven/"
     }
@@ -46,15 +39,24 @@ repositories {
     maven {
         url = "http://dvs1.progwml6.com/files/maven/"
     }
+    maven {
+        name = "tterrag maven"
+        setUrl("http://maven.tterrag.com/")
+    }
+    maven {
+        url "https://minecraft.curseforge.com/api/maven"
+    }
 }
 
 dependencies {
-    compile "gregtech:gregtech:1.12.2-1.13.0.681"
-    //deobfCompile "codechicken-lib-1-8:CodeChickenLib-1.12.2:3.2.3.358:universal"
-    deobfCompile "codechicken:CodeChickenLib:1.12.2-3.2.3.358:universal"
+    deobfCompile "gregtechce:gregtech:1.12.2:1.15.0.721"
+    deobfCompile "codechicken-lib-1-8:CodeChickenLib-1.12.2:3.2.3.358:universal"
     deobfCompile "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.20.554"
     deobfCompile "mezz.jei:jei_1.12.2:4.16.1.302"
-    compile files("libs/Gregicality-1.12.2-0.21.5.1.jar")
+
+    compile files(
+            "libs/Gregicality-1.12.2-0.22.5.jar",
+    )
 }
 
 processResources {
@@ -76,6 +78,21 @@ processResources {
     }
 }
 
+def run(command) {
+    def process = command.execute()
+    def outputStream = new StringBuffer();
+    def errorStream = new StringBuffer();
+    process.waitForProcessOutput(outputStream, errorStream)
+
+    errorStream.toString().with {
+        if (it) {
+            throw new GradleException("Error executing ${command}:\n> ${it}")
+        }
+    }
+
+    return outputStream.toString().trim()
+}
+
 runClient {
-    jvmArgs "-Xms4G", "-Xmx4G"
+
 }
