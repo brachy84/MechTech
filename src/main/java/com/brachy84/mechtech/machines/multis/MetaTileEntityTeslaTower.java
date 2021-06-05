@@ -55,7 +55,6 @@ import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import stanhebben.zenscript.annotations.*;
 
-import javax.annotation.Nullable;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -448,7 +447,7 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
     }
 
     @Override
-    public void addInformation(ItemStack stack, @Nullable World player, List<String> tooltip, boolean advanced) {
+    public void addInformation(ItemStack stack, World player, List<String> tooltip, boolean advanced) {
         super.addInformation(stack, player, tooltip, advanced);
     }
 

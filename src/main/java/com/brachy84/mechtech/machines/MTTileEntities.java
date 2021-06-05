@@ -24,7 +24,7 @@ public class MTTileEntities {
             //LIMITED_ITEM_BUS[i] = new LimitedItemBusTile(MechTech.loc("limited_item_bus.import." + GTValues.VN[i].toLowerCase()), i, true, LimitedItemHandlerContainer.DATA_ITEMS);
             //LIMITED_ITEM_BUS[i] = GregTechAPI.registerMetaTileEntity(id+i, LIMITED_ITEM_BUS[i]);
         }
-        id += 10;
+        id = 6010;
         if(Loader.isModLoaded("gtadditions")) {
             if(MTConfig.multis.teslaTower.enabled) {
                 TESLA_TOWER = GregTechAPI.registerMetaTileEntity(id, new MetaTileEntityTeslaTower(loc("tesla_tower")));
