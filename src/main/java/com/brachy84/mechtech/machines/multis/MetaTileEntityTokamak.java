@@ -2,18 +2,17 @@ package com.brachy84.mechtech.machines.multis;
 
 import gregicadditions.item.GAMetaBlocks;
 import gregicadditions.item.fusion.GAFusionCasing;
-import gregicadditions.machines.multi.advance.TileEntityAdvFusionReactor;
+import gregicadditions.machines.multi.advance.MetaTileEntityAdvFusionReactor;
 import gregicadditions.machines.multi.multiblockpart.GAMetaTileEntityEnergyHatch;
 import gregtech.api.metatileentity.MetaTileEntity;
 import gregtech.api.metatileentity.MetaTileEntityHolder;
 import gregtech.api.metatileentity.multiblock.MultiblockAbility;
 import gregtech.api.multiblock.BlockPattern;
 import gregtech.api.multiblock.FactoryBlockPattern;
-import gregtech.api.recipes.RecipeMap;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.ResourceLocation;
 
-public class MetaTileEntityTokamak extends TileEntityAdvFusionReactor {
+public class MetaTileEntityTokamak extends MetaTileEntityAdvFusionReactor {
 
     private static final MultiblockAbility<?>[] ALLOWED_ABILITIES = {
             MultiblockAbility.IMPORT_FLUIDS,
