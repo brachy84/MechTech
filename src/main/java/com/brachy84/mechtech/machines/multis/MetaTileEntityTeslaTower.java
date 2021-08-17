@@ -19,6 +19,7 @@ import gregicadditions.capabilities.impl.QubitContainerList;
 import gregicadditions.item.GAHeatingCoil;
 import gregicadditions.item.GAMetaBlocks;
 import gregtech.api.capability.GregtechCapabilities;
+import gregtech.api.capability.GregtechTileCapabilities;
 import gregtech.api.capability.IEnergyContainer;
 import gregtech.api.cover.ICoverable;
 import gregtech.api.gui.ModularUI;
@@ -37,12 +38,12 @@ import gregtech.api.render.ICubeRenderer;
 import gregtech.api.render.Textures;
 import gregtech.api.unification.material.Materials;
 import gregtech.api.unification.material.type.Material;
+import gregtech.api.util.GTLog;
 import gregtech.common.blocks.BlockWireCoil;
 import gregtech.common.blocks.MetaBlocks;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -53,7 +54,9 @@ import net.minecraft.util.text.*;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.items.IItemHandlerModifiable;
-import stanhebben.zenscript.annotations.*;
+import stanhebben.zenscript.annotations.ZenClass;
+import stanhebben.zenscript.annotations.ZenGetter;
+import stanhebben.zenscript.annotations.ZenProperty;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -71,9 +74,7 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
             GregicAdditionsCapabilities.INPUT_QBIT
     };
 
-    protected int getTorusBlockAmount() {
-        return MTConfig.multis.teslaTower.useLargeStructure ? 124 : 24;
-    }
+    private final int torusBlockAmount = 124;
 
     /**
      * The amount of coil layers
@@ -136,8 +137,8 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
 
     private Map<String, Integer> failedPositions = new HashMap<>();
 
-    private List<BlockPos> allBlocks = new ArrayList<>();
-    private List<BlockPosDim> receivers = new ArrayList<>();
+    //private List<BlockPos> allBlocks = new ArrayList<>();
+    private Set<BlockPosDim> receivers = new HashSet<>();
     private List<BlockPosDim> removeLater = new ArrayList<>();
     private boolean shouldCreateBox = true;
 
@@ -166,7 +167,7 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
             dataInventory = getImportItems();
         inputEnergy = new MTEnergyContainerList(getAbilities(MultiblockAbility.INPUT_ENERGY));
         inputVoltage = inputEnergy.getMaxInputVoltage();
-        center = getPos().offset(getFrontFacing().getOpposite(), 2).offset(EnumFacing.UP, 1 + coilHeight / 2);
+        center = getPos().offset(getFrontFacing().getOpposite(), 4).offset(EnumFacing.UP, 1 + coilHeight / 2);
     }
 
     @Override
@@ -180,11 +181,18 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
     @Override
     protected void updateFormedValid() {
         if (!getWorld().isRemote) {
-
-            if (MTConfig.multis.teslaTower.allowInterdimensionalTransfer || MTConfig.multis.teslaTower.allowOutOfRangeTransfer)
-                scanDataInventory();
+            if (getHolder().getOffsetTimer() % 100 == 0) {
+                receivers.clear();
+                scanRange();
+            }
+            if (getHolder().getOffsetTimer() % 20 == 0) {
+                if (MTConfig.multis.teslaTower.allowInterdimensionalTransfer || MTConfig.multis.teslaTower.allowOutOfRangeTransfer)
+                    scanDataInventory();
+            }
             ampsUsed = 0L;
             for (BlockPosDim pos : receivers) {
+                if (inputEnergy.getEnergyStored() <= 0)
+                    break;
                 feedEnergy(pos);
                 if (ampsUsed >= amps) {
                     break;
@@ -226,165 +234,120 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
 
     @Override
     protected BlockPattern createStructurePattern() {
-        if (MTConfig.multis.teslaTower.useLargeStructure) {
-            return FactoryBlockPattern.start(BlockPattern.RelativeDirection.RIGHT, BlockPattern.RelativeDirection.BACK, BlockPattern.RelativeDirection.UP)
-                    .aisle("#############",
-                            "#############",
-                            "#####BBB#####",
-                            "####BBBBB####",
-                            "###BBBBBBB###",
-                            "##BBBBBBBBB##",
-                            "##BBBBBBBBB##",
-                            "##BBBBBBBBB##",
-                            "###BBBBBBB###",
-                            "####BBBBB####",
-                            "#####BSB#####",
-                            "#############",
-                            "#############")
-                    .aisle("#############",
-                            "#############",
-                            "#############",
-                            "#####CCC#####",
-                            "####C###C####",
-                            "###C##P##C###",
-                            "###C#P#P#C###",
-                            "###C##P##C###",
-                            "####C###C####",
-                            "#####CCC#####",
-                            "#############",
-                            "#############",
-                            "#############")
-                    .aisle("#############",
-                            "#############",
-                            "#############",
-                            "#############",
-                            "#############",
-                            "######P######",
-                            "#####P#P#####",
-                            "######P######",
-                            "#############",
-                            "#############",
-                            "#############",
-                            "#############",
-                            "#############")
-                    .aisle("#############",
-                            "#############",
-                            "#############",
-                            "#############",
-                            "#####CCC#####",
-                            "####C#P#C####",
-                            "####CP#PC####",
-                            "####C#P#C####",
-                            "#####CCC#####",
-                            "#############",
-                            "#############",
-                            "#############",
-                            "#############")
-                    .setRepeatable(5, 32)
-                    .aisle("#############",
-                            "#############",
-                            "#############",
-                            "#############",
-                            "#############",
-                            "######P######",
-                            "#####P#P#####",
-                            "######P######",
-                            "#############",
-                            "#############",
-                            "#############",
-                            "#############",
-                            "#############")
-                    .aisle("#############",
-                            "####GGGGG####",
-                            "###G#####G###",
-                            "##G#######G##",
-                            "#G#########G#",
-                            "#G####P####G#",
-                            "#G###P#P###G#",
-                            "#G####P####G#",
-                            "#G#########G#",
-                            "##G#######G##",
-                            "###G#####G###",
-                            "####GGGGG####",
-                            "#############")
-                    .aisle("####GGGGG####",
-                            "###G#####G###",
-                            "##G#GGGGG#G##",
-                            "#G#G##G##G#G#",
-                            "G#G###G###G#G",
-                            "G#G##PGP##G#G",
-                            "G#GGGG#GGGG#G",
-                            "G#G##PGP##G#G",
-                            "G#G###G###G#G",
-                            "#G#G##G##G#G#",
-                            "##G#GGGGG#G##",
-                            "###G#####G###",
-                            "####GGGGG####")
-                    .aisle("#############",
-                            "####GGGGG####",
-                            "###G#####G###",
-                            "##G#######G##",
-                            "#G#########G#",
-                            "#G####P####G#",
-                            "#G###P#P###G#",
-                            "#G####P####G#",
-                            "#G#########G#",
-                            "##G#######G##",
-                            "###G#####G###",
-                            "####GGGGG####",
-                            "#############")
-                    .where('B', statePredicate(getCasingState()).or(abilityPartPredicate(getAllowedAbilities())))
-                    .where('P', blockPredicate(MetaBlocks.COMPRESSED.get(Materials.Plastic)))
-                    .where('C', coilPredicate())
-                    .where('G', torusPredicate())
-                    .where('S', selfPredicate())
-                    .where('#', (tile) -> true)
-                    .build();
-        }
         return FactoryBlockPattern.start(BlockPattern.RelativeDirection.RIGHT, BlockPattern.RelativeDirection.BACK, BlockPattern.RelativeDirection.UP)
-                .aisle("#######",
-                        "###B###",
-                        "##BBB##",
-                        "#BBBBB#",
-                        "##BBB##",
-                        "###S###",
-                        "#######")
-                .aisle("#######",
-                        "#######",
-                        "#######",
-                        "###P###",
-                        "#######",
-                        "#######",
-                        "#######")
-                .aisle("#######",
-                        "#######",
-                        "###C###",
-                        "##CPC##",
-                        "###C###",
-                        "#######",
-                        "#######")
-                .setRepeatable(3, 18)
-                .aisle("#######",
-                        "#######",
-                        "#######",
-                        "###P###",
-                        "#######",
-                        "#######",
-                        "#######")
-                .aisle("###T###",
-                        "#TTTTT#",
-                        "#T#T#T#",
-                        "TTTPTTT",
-                        "#T#T#T#",
-                        "#TTTTT#",
-                        "###T###")
-                .where('B', statePredicate(getCasingState()).or(abilityPartPredicate(ALLOWED_ABILITIES)))
+                .aisle("#############",
+                        "#############",
+                        "#####BBB#####",
+                        "####BBBBB####",
+                        "###BBBBBBB###",
+                        "##BBBBBBBBB##",
+                        "##BBBBBBBBB##",
+                        "##BBBBBBBBB##",
+                        "###BBBBBBB###",
+                        "####BBBBB####",
+                        "#####BSB#####",
+                        "#############",
+                        "#############")
+                .aisle("#############",
+                        "#############",
+                        "#############",
+                        "#####CCC#####",
+                        "####C###C####",
+                        "###C##P##C###",
+                        "###C#P#P#C###",
+                        "###C##P##C###",
+                        "####C###C####",
+                        "#####CCC#####",
+                        "#############",
+                        "#############",
+                        "#############")
+                .aisle("#############",
+                        "#############",
+                        "#############",
+                        "#############",
+                        "#############",
+                        "######P######",
+                        "#####P#P#####",
+                        "######P######",
+                        "#############",
+                        "#############",
+                        "#############",
+                        "#############",
+                        "#############")
+                .aisle("#############",
+                        "#############",
+                        "#############",
+                        "#############",
+                        "#####CCC#####",
+                        "####C#P#C####",
+                        "####CP#PC####",
+                        "####C#P#C####",
+                        "#####CCC#####",
+                        "#############",
+                        "#############",
+                        "#############",
+                        "#############")
+                .setRepeatable(5, 32)
+                .aisle("#############",
+                        "#############",
+                        "#############",
+                        "#############",
+                        "#############",
+                        "######P######",
+                        "#####P#P#####",
+                        "######P######",
+                        "#############",
+                        "#############",
+                        "#############",
+                        "#############",
+                        "#############")
+                .aisle("#############",
+                        "####GGGGG####",
+                        "###G#####G###",
+                        "##G#######G##",
+                        "#G#########G#",
+                        "#G####P####G#",
+                        "#G###P#P###G#",
+                        "#G####P####G#",
+                        "#G#########G#",
+                        "##G#######G##",
+                        "###G#####G###",
+                        "####GGGGG####",
+                        "#############")
+                .aisle("####GGGGG####",
+                        "###G#####G###",
+                        "##G#GGGGG#G##",
+                        "#G#G##G##G#G#",
+                        "G#G###G###G#G",
+                        "G#G##PGP##G#G",
+                        "G#GGGG#GGGG#G",
+                        "G#G##PGP##G#G",
+                        "G#G###G###G#G",
+                        "#G#G##G##G#G#",
+                        "##G#GGGGG#G##",
+                        "###G#####G###",
+                        "####GGGGG####")
+                .aisle("#############",
+                        "####GGGGG####",
+                        "###G#####G###",
+                        "##G#######G##",
+                        "#G#########G#",
+                        "#G####P####G#",
+                        "#G###P#P###G#",
+                        "#G####P####G#",
+                        "#G#########G#",
+                        "##G#######G##",
+                        "###G#####G###",
+                        "####GGGGG####",
+                        "#############")
+                .where('B', statePredicate(getCasingState()).or(abilityPartPredicate(getAllowedAbilities())))
                 .where('P', blockPredicate(MetaBlocks.COMPRESSED.get(Materials.Plastic)))
                 .where('C', coilPredicate())
-                .where('T', torusPredicate())
+                .where('G', torusPredicate())
                 .where('S', selfPredicate())
                 .where('#', (tile) -> true)
                 .build();
+
     }
 
     public Predicate<BlockWorldState> torusPredicate() {
@@ -392,8 +355,8 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
             IBlockState block = blockWorldState.getBlockState();
             TorusBlock torusBlock = TorusBlock.get(block);
             if (torusBlock != null) {
-                energyLossModifier += torusBlock.getConductivity() / getTorusBlockAmount();
-                rangeModifier += torusBlock.getRangeModifier() / getTorusBlockAmount();
+                energyLossModifier += torusBlock.getConductivity() / torusBlockAmount;
+                rangeModifier += torusBlock.getRangeModifier() / torusBlockAmount;
                 blockWorldState.getMatchContext().set("maxVoltage", Math.min(torusBlock.getMaxVoltageTier(), blockWorldState.getMatchContext().getOrPut("maxVoltage", torusBlock.getMaxVoltageTier())));
                 return true;
             }
@@ -454,8 +417,6 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
     @Override
     protected void addDisplayText(List<ITextComponent> textList) {
         super.addDisplayText(textList);
-        Style red = new Style().setColor(TextFormatting.RED);
-
         if (isStructureFormed()) {
             DecimalFormat df = new DecimalFormat("#.##");
             df.setRoundingMode(RoundingMode.HALF_UP);
@@ -491,90 +452,90 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
      * @param pos the position to fill
      * @return the amount of energy fed
      */
-    public long feedEnergy(BlockPosDim pos) {
+    public void feedEnergy(BlockPosDim pos) {
         boolean consumeQubit = false;
         World world = getWorld();
 
         if (!isInRange(pos)) {
             if (!canTransmittOutOfRange()) {
-                return 0L;
+                return;
             }
             consumeQubit = true;
         }
         if (!isInDim(pos.getDim())) {
             if (!canTransmittInterdimensional()) {
-                return 0L;
+                return;
             }
             consumeQubit = true;
             world = DimensionManager.getWorld(pos.getDim());
         }
 
-        long charged = 0L;
         TileEntity tile = world.getTileEntity(pos);
-        IEnergyContainer container = null;
         String sPos = pos.toString();
-        if (world.getBlockState(pos) == Blocks.AIR.getDefaultState()) {
-            // block is broken
+        if (tile == null) {
             removeLater.add(pos);
             failedPositions.remove(sPos);
-            return 0;
+            return;
         }
-
-        if (canInsertEnergy(tile)) {
-            container = tile.getCapability(GregtechCapabilities.CAPABILITY_ENERGY_CONTAINER, null);
-        } else {
+        EnumFacing facing = getCover(tile);
+        if (facing == null) {
             removeLater.add(pos);
             failedPositions.remove(sPos);
-            return 0;
+            return;
+        }
+        IEnergyContainer container = getEnergyContainer(tile, facing);
+        if (container == null) {
+            removeLater.add(pos);
+            failedPositions.remove(sPos);
+            return;
         }
 
-        if (container != null && container.inputsEnergy(EnumFacing.NORTH) && inputEnergy.getEnergyStored() > 0) {
-            if(container.getInputVoltage() > Math.min(inputVoltage, maxVoltage)) {
+        if (container.inputsEnergy(facing)) {
+            if (container.getInputVoltage() > Math.min(inputVoltage, maxVoltage)) {
                 failed(sPos, 4);
-                return 0L;
+                return;
             }
-            if(container.getEnergyStored() == container.getEnergyCapacity()) {
+            if (container.getEnergyStored() == container.getEnergyCapacity()) {
                 success(sPos);
-                return 0L;
+                return;
             }
             if (consumeQubit) {
                 if (inputQubit == null) {
                     failed(sPos, 1);
-                    return 0;
+                    return;
                 }
                 if (inputQubit.getQubitStored() >= getQubitCost() && inputQubit.changeQubit(-getQubitCost()) < getQubitCost()) {
                     failed(sPos, 2);
-                    return 0;
+                    return;
                 }
             }
-            ampsUsed += consumeQubit ? amps : (int) container.getInputAmperage();
-            //float lossFactor = 1 - Math.max(0, energyLoss) / 100f;
-            double energyLoss = lossFunction.run(this, pos.getDistance(getPos())) * energyLossModifier;
-            System.out.println("Energy loss: " + energyLoss);
-            if (energyLoss <= 0) return 0L;
-            long energyToEmitt = inputEnergy.getInputVoltage() * container.getInputAmperage();
-            if (inputEnergy.getEnergyStored() < energyToEmitt * (1 + energyLoss)) {
-                energyToEmitt = (long) (inputEnergy.getEnergyStored() * (1 - energyLoss));
+            long v = (long) (inputEnergy.getInputVoltage() * lossFunction.run(this, pos.getDistance(getPos())) * energyLossModifier + 0.5);
+            long amperage = amps - ampsUsed;
+            int m = 1;
+            if(v > container.getInputVoltage()) {
+                m = (int) Math.ceil(v / (container.getInputVoltage() + 0.0));
+                v /= m;
+                amperage *= m;
             }
-            charged = container.addEnergy(energyToEmitt);
-            System.out.println("Emitt: " + energyToEmitt + " | Charged: " + charged);
-            inputEnergy.removeEnergy((long) (charged * (1 + energyLoss)));
+            long a = container.acceptEnergyFromNetwork(facing, v, amperage);
+            inputEnergy.removeEnergy(v * a);
+            ampsUsed += a / m;
 
             success(sPos);
         } else {
             failed(sPos, 3);
         }
-        return charged;
     }
 
     public boolean canInsertEnergy(TileEntity tile) {
-        if (tile instanceof MetaTileEntityHolder) {
-            MetaTileEntity mte = ((MetaTileEntityHolder) tile).getMetaTileEntity();
-            if (hasCover(mte) && mte.getCapability(GregtechCapabilities.CAPABILITY_ENERGY_CONTAINER, null) != null) {
-                return true;
-            }
-        }
-        return false;
+        if (tile == null) return false;
+        EnumFacing facing = getCover(tile);
+        return facing != null && tile.hasCapability(GregtechCapabilities.CAPABILITY_ENERGY_CONTAINER, facing);
+    }
+
+    public IEnergyContainer getEnergyContainer(TileEntity tile, EnumFacing side) {
+        if (tile == null) return null;
+        return tile.getCapability(GregtechCapabilities.CAPABILITY_ENERGY_CONTAINER, side);
     }
 
     /**
@@ -614,58 +575,50 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
     /**
      * @return if the tile has a receiver cover
      */
-    public boolean hasCover(ICoverable coverable) {
+    public EnumFacing getCover(TileEntity tile) {
+        if (tile == null) return null;
+        ICoverable coverable = null;
+        for (EnumFacing face : EnumFacing.values()) {
+            coverable = tile.getCapability(GregtechTileCapabilities.CAPABILITY_COVERABLE, face);
+            if (coverable != null)
+                break;
+        }
+        if (coverable == null) return null;
         for (EnumFacing face : EnumFacing.values()) {
             if (coverable.getCoverAtSide(face) instanceof CoverWirelessReceiver) {
-                return true;
+                return face;
             }
         }
-        return false;
+        return null;
     }
 
-    /**
-     * @return a list of positions that are in range
-     */
-    public void createCircularBox() {
-        allBlocks.clear();
-        int intRange = CTMath.clamp((int) range, 1, 256);
-        //List<BlockPos> poss = WorldUtils.getBlockBox(center, intRange);
-        BlockPos posNeg = new BlockPos(center.getX() - intRange, center.getY() - intRange, center.getZ() - intRange);
-        BlockPos posPos = new BlockPos(center.getX() + intRange, center.getY() + intRange, center.getZ() + intRange);
-        Iterable<BlockPos> poss = BlockPos.getAllInBox(posNeg, posPos);
-
-        int amount = 0;
-        int max = (int) Math.pow(range, 3);
-        for (BlockPos pos : poss) {
-            amount++;
-            if (amount > max) return;
-            if (isInRange(pos)) {
-                allBlocks.add(pos);
-            }
-        }
-    }
-
-    /**
-     * scans the list created in {@link #createCircularBox()}
-     *
-     * @return all MetaTileEntities that have wireless cover
-     */
     public void scanRange() {
-        failedPositions.clear();
-        receivers.clear();
-        for (BlockPos pos : allBlocks) {
-            TileEntity tile = getWorld().getTileEntity(pos);
-            if(canInsertEnergy(tile)) {
-                receivers.add(new BlockPosDim(pos, getWorld().provider.getDimension()));
+        int intRange = CTMath.clamp((int) range, 1, 256);
+        int d = intRange * 2 + 1;
+        BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain();
+        pos.setPos(center.getX() - intRange, center.getY() - intRange, center.getZ() - intRange);
+        for (int i = 0; i < d; i++) {
+            for (int j = 0; j < d; j++) {
+                for (int k = 0; k < d; k++) {
+                    if (isInRange(pos) && canInsertEnergy(getWorld().getTileEntity(pos))) {
+                        receivers.add(new BlockPosDim(pos, getWorld().provider.getDimension()));
+                    }
+                    pos.move(EnumFacing.EAST);
+                }
+                pos.move(EnumFacing.WEST, d);
+                pos.move(EnumFacing.SOUTH);
             }
+            pos.move(EnumFacing.NORTH, d);
+            pos.move(EnumFacing.UP);
         }
+        pos.release();
     }
 
     protected void handleButtonClick(Widget.ClickData clickData) {
-        if(shouldCreateBox) {
+        /*if(shouldCreateBox) {
             createCircularBox();
             shouldCreateBox = false;
-        }
+        }*/
         scanRange();
     }
 
@@ -674,7 +627,7 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
         ModularUI.Builder builder = this.createUITemplate(entityPlayer);
         // scans automatically every second making this redundant
         // I will keep this here just in case
-        builder.widget(new ClickButtonWidget(125, 103, 40, 18, I18n.format("mechtech.multiblock.tesla_tower.scan"), this::handleButtonClick));
+        //builder.widget(new ClickButtonWidget(125, 103, 40, 18, I18n.format("mechtech.multiblock.tesla_tower.scan"), this::handleButtonClick));
         return builder.build(this.getHolder(), entityPlayer);
     }
 
@@ -694,7 +647,7 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
         return failedPositions;
     }
 
-    public List<BlockPosDim> getReceivers() {
+    public Set<BlockPosDim> getReceivers() {
         return receivers;
     }
 
@@ -747,5 +700,10 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
 
     public int getQubitCost() {
         return MTConfig.multis.teslaTower.qubitCost;
+    }
+
+    @Override
+    public long getOffsetTimer() {
+        return getHolder().getOffsetTimer();
     }
 }

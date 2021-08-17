@@ -14,6 +14,7 @@ mechtech.multiblock.tesla_tower.fail=Emitting failed at:
 mechtech.multiblock.tesla_tower.scan=Scan
 mechtech.multiblock.tesla_tower.amps=Amps: %d/%d
 mechtech.multiblock.tesla_tower.loss=Loss: %d
+mechtech.multiblock.tesla_tower.description=The Tesla Tower can transmit power wireless.
 
 mechtech.jei_category.torus_block=Tesla Tower Torus Blocks
 

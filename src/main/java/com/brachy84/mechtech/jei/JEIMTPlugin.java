@@ -7,8 +7,10 @@ import com.brachy84.mechtech.jei.multis.TokamakInfo;
 import com.brachy84.mechtech.machines.MTTileEntities;
 import com.brachy84.mechtech.utils.TorusBlock;
 import com.google.common.collect.Lists;
-import gregicadditions.jei.LargeMultiblockInfoRecipeWrapper;
 import gregicadditions.machines.GATileEntities;
+import gregicadditions.recipes.GARecipeMaps;
+import gregtech.api.GTValues;
+import gregtech.api.recipes.RecipeMap;
 import gregtech.integration.jei.multiblock.MultiblockInfoRecipeWrapper;
 import mezz.jei.api.*;
 import mezz.jei.api.recipe.IFocus;
@@ -41,11 +43,11 @@ public class JEIMTPlugin implements IModPlugin {
     @Override
     public void register(IModRegistry registry) {
         multiblockInfos = Lists.newArrayList(
-                new LargeMultiblockInfoRecipeWrapper(new TeslaTowerInfo())
+                new MultiblockInfoRecipeWrapper(new TeslaTowerInfo())
 
         );
         if(MTConfig.multis.tokamak.enableTokamak) {
-            multiblockInfos.add(new LargeMultiblockInfoRecipeWrapper(new TokamakInfo()));
+            multiblockInfos.add(new MultiblockInfoRecipeWrapper(new TokamakInfo()));
         }
         registry.addRecipes(multiblockInfos, MUTLIBLOCK_INFOS);
 
@@ -58,6 +60,8 @@ public class JEIMTPlugin implements IModPlugin {
     @Override
     public void onRuntimeAvailable(IJeiRuntime jeiRuntime) {
         IRecipeRegistry registry = jeiRuntime.getRecipeRegistry();
+        IRecipeCategory assemblyLineCategory = registry.getRecipeCategory("gregtech:assembly_line");
+
         if(MTConfig.multis.tokamak.enableTokamak) {
             IFocus<ItemStack> focus = registry.createFocus(IFocus.Mode.OUTPUT, GATileEntities.ADVANCED_FUSION_REACTOR.getStackForm());
             IRecipeCategory category = registry.getRecipeCategory(MUTLIBLOCK_INFOS);
@@ -71,5 +75,13 @@ public class JEIMTPlugin implements IModPlugin {
             //if(recipe == null) return;
             //registry.hideRecipe(recipe, MUTLIBLOCK_INFOS);
         }
+
+        registry.getRecipeWrappers(assemblyLineCategory).forEach(recipeWrapper -> {
+            registry.hideRecipe((IRecipeWrapper) recipeWrapper, getRecipeMapJeiCategory(GARecipeMaps.ASSEMBLY_LINE_RECIPES));
+        });
+    }
+
+    public String getRecipeMapJeiCategory(RecipeMap<?> recipeMap) {
+        return GTValues.MODID + ":" + recipeMap.unlocalizedName;
     }
 }

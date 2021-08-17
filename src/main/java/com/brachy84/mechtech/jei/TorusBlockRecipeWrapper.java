@@ -1,6 +1,5 @@
 package com.brachy84.mechtech.jei;
 
-import com.brachy84.mechtech.machines.multis.MetaTileEntityTeslaTower;
 import com.brachy84.mechtech.utils.TorusBlock;
 import gregicadditions.GAValues;
 import mezz.jei.api.ingredients.IIngredients;
