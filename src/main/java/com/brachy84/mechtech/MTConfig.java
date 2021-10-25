@@ -18,8 +18,8 @@ public class MTConfig {
         @Config.RequiresMcRestart
         public boolean enabled = true;
 
-        @Config.Comment("If this is false, the structure will be replaced with a smaller one")
-        public boolean useLargeStructure = true;
+        //@Config.Comment("If this is false, the structure will be replaced with a smaller one")
+        //public boolean useLargeStructure = true;
 
         @Config.Name("Tesla Tower base range")
         @Config.RangeInt(min = 0)
@@ -46,7 +46,7 @@ public class MTConfig {
         @Config.Comment("The casing material to use for the TeslaTower.")
         @Config.Name("Tesla Tower casing material")
         @Config.RequiresMcRestart
-        public String casingMaterial = "titanium";
+        public String casingMaterial = "tungsten_titanium_carbide";
     }
 
     public static class Tokamak {

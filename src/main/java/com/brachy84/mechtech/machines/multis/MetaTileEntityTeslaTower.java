@@ -24,7 +24,6 @@ import gregtech.api.capability.IEnergyContainer;
 import gregtech.api.cover.ICoverable;
 import gregtech.api.gui.ModularUI;
 import gregtech.api.gui.Widget;
-import gregtech.api.gui.widgets.ClickButtonWidget;
 import gregtech.api.metatileentity.MetaTileEntity;
 import gregtech.api.metatileentity.MetaTileEntityHolder;
 import gregtech.api.metatileentity.multiblock.IMultiblockPart;
@@ -38,11 +37,9 @@ import gregtech.api.render.ICubeRenderer;
 import gregtech.api.render.Textures;
 import gregtech.api.unification.material.Materials;
 import gregtech.api.unification.material.type.Material;
-import gregtech.api.util.GTLog;
 import gregtech.common.blocks.BlockWireCoil;
 import gregtech.common.blocks.MetaBlocks;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -50,7 +47,9 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.*;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.items.IItemHandlerModifiable;
@@ -113,7 +112,7 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
      */
     private long ampsUsed;
 
-    private static final Material casingMaterial = getCasingMaterial(Materials.Titanium, MTConfig.multis.teslaTower.casingMaterial);
+    private static final Material casingMaterial = getCasingMaterial(GAMaterials.TungstenTitaniumCarbide, MTConfig.multis.teslaTower.casingMaterial);
 
     @ZenProperty
     public static IEnergyLossFunction lossFunction = (tower, distance) -> {
@@ -434,7 +433,7 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
         }
     }
 
-    protected IBlockState getCasingState() {
+    public IBlockState getCasingState() {
         return GAMetaBlocks.getMetalCasingBlockState(casingMaterial);
     }
 
@@ -512,7 +511,7 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
             long v = (long) (inputEnergy.getInputVoltage() * lossFunction.run(this, pos.getDistance(getPos())) * energyLossModifier + 0.5);
             long amperage = amps - ampsUsed;
             int m = 1;
-            if(v > container.getInputVoltage()) {
+            if (v > container.getInputVoltage()) {
                 m = (int) Math.ceil(v / (container.getInputVoltage() + 0.0));
                 v /= m;
                 amperage *= m;

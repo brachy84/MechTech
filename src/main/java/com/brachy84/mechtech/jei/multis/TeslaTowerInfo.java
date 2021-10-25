@@ -45,7 +45,7 @@ public class TeslaTowerInfo extends MultiblockInfoPage {
                 .aisle("#############", "#############", "#############", "#############", "#############", "#############", "#############", "#############", "#############", "#############", "####GGGGG####", "#############")
                 .where('S', MTTileEntities.TESLA_TOWER, EnumFacing.SOUTH)
                 .where('I', MetaTileEntities.ENERGY_INPUT_HATCH[4], EnumFacing.SOUTH)
-                .where('B', GAMetaBlocks.METAL_CASING.get(Materials.Titanium).getDefaultState())
+                .where('B', MTTileEntities.TESLA_TOWER.getCasingState())
                 .where('P', plastic.getStateFromMeta(13))
                 .where('#', Blocks.AIR.getDefaultState());
         for (BlockWireCoil.CoilType coilType : BlockWireCoil.CoilType.values()) {

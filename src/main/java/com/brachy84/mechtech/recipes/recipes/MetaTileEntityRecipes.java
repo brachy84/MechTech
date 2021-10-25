@@ -1,9 +1,6 @@
 package com.brachy84.mechtech.recipes.recipes;
 
 import com.brachy84.mechtech.MTConfig;
-import gregicadditions.GAValues;
-import gregicadditions.item.GAHeatingCoil;
-import gregicadditions.item.GAMetaBlocks;
 import gregtech.common.blocks.BlockWireCoil;
 
 import static gregicadditions.GAEnums.GAOrePrefix.*;
@@ -21,10 +18,10 @@ public class MetaTileEntityRecipes {
     public static void init() {
         if(MTConfig.multis.teslaTower.enabled) {
             ASSEMBLER_RECIPES.recipeBuilder().duration(1200).EUt(2048)
-                    .input(gtMetalCasing, Titanium, 4)
-                    .inputs(WIRE_COIL.getItemVariant(BlockWireCoil.CoilType.TUNGSTENSTEEL, 8))
-                    .input("circuitExtreme", 4)
-                    .input(wireGtQuadruple, HVSuperconductor, 8)
+                    .input(gtMetalCasing, TungstenTitaniumCarbide, 4)
+                    .inputs(WIRE_COIL.getItemVariant(BlockWireCoil.CoilType.HSS_G, 16))
+                    .input("circuitSuperconductor", 4)
+                    .input(wireGtDouble, LuVSuperconductor, 32)
                     .fluidInputs(SolderingAlloy.getFluid(1296))
                     .outputs(TESLA_TOWER.getStackForm())
                     .buildAndRegister();
