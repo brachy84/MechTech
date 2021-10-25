@@ -14,11 +14,11 @@ import javax.annotation.Nullable;
 public class TorusBlockRecipeCategory implements IRecipeCategory<TorusBlockRecipeWrapper> {
 
     private final IDrawable background;
-    private final IDrawable icon;
+    private IDrawable icon;
 
     public TorusBlockRecipeCategory(IGuiHelper helper) {
         this.background = helper.createBlankDrawable(176, 50);
-        icon = helper.createDrawableIngredient(MTTileEntities.TESLA_TOWER.getStackForm());
+        //icon = helper.createDrawableIngredient(MTTileEntities.TESLA_TOWER.getStackForm());
     }
 
     @Override

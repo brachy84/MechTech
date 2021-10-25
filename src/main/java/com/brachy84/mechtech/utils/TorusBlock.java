@@ -5,7 +5,7 @@ import crafttweaker.annotations.ZenRegister;
 import crafttweaker.api.minecraft.CraftTweakerMC;
 import gregicadditions.GAMaterials;
 import gregicadditions.GAValues;
-import gregtech.api.unification.material.type.Material;
+import gregtech.api.unification.material.Material;
 import gregtech.common.blocks.MetaBlocks;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
@@ -22,7 +22,7 @@ import java.util.List;
 public class TorusBlock {
 
     private static final List<TorusBlock> TORUS_BLOCKS = Lists.newArrayList(
-            new TorusBlock(0.75f, 0.65f, GAValues.LV, GAMaterials.HVSuperconductor, 9),
+            /*new TorusBlock(0.75f, 0.65f, GAValues.LV, GAMaterials.HVSuperconductor, 9),
             new TorusBlock(1.0f, 0.6f, GAValues.MV, GAMaterials.EVSuperconductor, 8),
             new TorusBlock(2.0f, 0.65f, GAValues.HV, GAMaterials.IVSuperconductor, 7),
             new TorusBlock(2.6f, 0.7f, GAValues.EV, GAMaterials.LuVSuperconductor, 6),
@@ -32,7 +32,7 @@ public class TorusBlock {
             new TorusBlock(5.4f, 0.89f, GAValues.UV, GAMaterials.UEVSuperconductor, 1),
             new TorusBlock(6.0f, 0.92f, GAValues.UHV, GAMaterials.UIVSuperconductor, 6),
             new TorusBlock(7.0f, 0.95f, GAValues.UEV, GAMaterials.UMVSuperconductor, 4),
-            new TorusBlock(8.0f, 0.99f, GAValues.UIV, GAMaterials.UXVSuperconductor, 2)
+            new TorusBlock(8.0f, 0.99f, GAValues.UIV, GAMaterials.UXVSuperconductor, 2)*/
     );
 
     public static List<TorusBlock> getTorusBlocks() {

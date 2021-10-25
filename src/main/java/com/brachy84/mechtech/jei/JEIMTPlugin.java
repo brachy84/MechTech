@@ -35,9 +35,9 @@ public class JEIMTPlugin implements IModPlugin {
 
     @Override
     public void registerCategories(IRecipeCategoryRegistration registry) {
-        registry.addRecipeCategories(
+        /*registry.addRecipeCategories(
                 new TorusBlockRecipeCategory(registry.getJeiHelpers().getGuiHelper())
-        );
+        );*/
     }
 
     @Override
@@ -49,18 +49,17 @@ public class JEIMTPlugin implements IModPlugin {
         if(MTConfig.multis.tokamak.enableTokamak) {
             multiblockInfos.add(new MultiblockInfoRecipeWrapper(new TokamakInfo()));
         }
-        registry.addRecipes(multiblockInfos, MUTLIBLOCK_INFOS);
+        /*registry.addRecipes(multiblockInfos, MUTLIBLOCK_INFOS);
 
         registry.addRecipes(TorusBlock.getTorusBlocks()
                 .stream().map((TorusBlockRecipeWrapper::new)).collect(Collectors.toList()), TORUS_RECIPES);
 
-        registry.addRecipeCatalyst(MTTileEntities.TESLA_TOWER.getStackForm(), TORUS_RECIPES);
+        registry.addRecipeCatalyst(MTTileEntities.TESLA_TOWER.getStackForm(), TORUS_RECIPES);*/
     }
 
     @Override
     public void onRuntimeAvailable(IJeiRuntime jeiRuntime) {
         IRecipeRegistry registry = jeiRuntime.getRecipeRegistry();
-        IRecipeCategory assemblyLineCategory = registry.getRecipeCategory("gregtech:assembly_line");
 
         if(MTConfig.multis.tokamak.enableTokamak) {
             IFocus<ItemStack> focus = registry.createFocus(IFocus.Mode.OUTPUT, GATileEntities.ADVANCED_FUSION_REACTOR.getStackForm());
@@ -75,10 +74,6 @@ public class JEIMTPlugin implements IModPlugin {
             //if(recipe == null) return;
             //registry.hideRecipe(recipe, MUTLIBLOCK_INFOS);
         }
-
-        registry.getRecipeWrappers(assemblyLineCategory).forEach(recipeWrapper -> {
-            registry.hideRecipe((IRecipeWrapper) recipeWrapper, getRecipeMapJeiCategory(GARecipeMaps.ASSEMBLY_LINE_RECIPES));
-        });
     }
 
     public String getRecipeMapJeiCategory(RecipeMap<?> recipeMap) {

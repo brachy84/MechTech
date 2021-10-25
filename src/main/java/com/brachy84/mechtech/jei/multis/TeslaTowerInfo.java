@@ -22,6 +22,21 @@ import java.util.List;
 public class TeslaTowerInfo extends MultiblockInfoPage {
     @Override
     public MultiblockControllerBase getController() {
+        return null;
+    }
+
+    @Override
+    public List<MultiblockShapeInfo> getMatchingShapes() {
+        return null;
+    }
+
+    @Override
+    public String[] getDescription() {
+        return new String[0];
+    }
+    /*
+    @Override
+    public MultiblockControllerBase getController() {
         return MTTileEntities.TESLA_TOWER;
     }
 
@@ -29,7 +44,7 @@ public class TeslaTowerInfo extends MultiblockInfoPage {
     public List<MultiblockShapeInfo> getMatchingShapes() {
         List<MultiblockShapeInfo> shape = new ArrayList<>();
         MultiblockShapeInfo.Builder builder = MultiblockShapeInfo.builder();
-        BlockCompressed plastic = MetaBlocks.COMPRESSED.get(Materials.Plastic);
+        BlockCompressed plastic = MetaBlocks.COMPRESSED.get(Materials.Polyethylene);
         builder.aisle("#############", "#############", "#############", "#############", "#############", "#############", "#############", "#############", "#############", "#############", "####GGGGG####", "#############")
                 .aisle("#############", "#############", "#############", "#############", "#############", "#############", "#############", "#############", "#############", "####GGGGG####", "###G#####G###", "####GGGGG####")
                 .aisle("#####BBB#####", "#############", "#############", "#############", "#############", "#############", "#############", "#############", "#############", "###G#####G###", "##G#GGGGG#G##", "###G#####G###")
@@ -75,5 +90,5 @@ public class TeslaTowerInfo extends MultiblockInfoPage {
     @Override
     public float getDefaultZoom() {
         return 0.3f;
-    }
+    }*/
 }
