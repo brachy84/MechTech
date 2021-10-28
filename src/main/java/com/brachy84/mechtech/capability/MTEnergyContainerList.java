@@ -1,5 +1,5 @@
 package com.brachy84.mechtech.capability;
-
+/*
 import gregicadditions.capabilities.EnergyContainerListWithAmps;
 import gregtech.api.capability.IEnergyContainer;
 
@@ -17,7 +17,7 @@ public class MTEnergyContainerList extends EnergyContainerListWithAmps {
 
     /**
      * @return the voltage of the container with the highest voltage
-     */
+
     public long getMaxInputVoltage() {
         long voltage = 0L;
         for(IEnergyContainer container : containerList) {
@@ -28,7 +28,7 @@ public class MTEnergyContainerList extends EnergyContainerListWithAmps {
 
     /**
      * @return the voltage of the container with the highest voltage
-     */
+
     public long getMaxOutputVoltage() {
         long voltage = 0L;
         for(IEnergyContainer container : containerList) {
@@ -36,4 +36,4 @@ public class MTEnergyContainerList extends EnergyContainerListWithAmps {
         }
         return voltage;
     }
-}
+}*/

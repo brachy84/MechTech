@@ -1,6 +1,6 @@
 package com.brachy84.mechtech.items.behavior;
 
-import gregicadditions.machines.overrides.GATieredMetaTileEntity;
+//import gregicadditions.machines.overrides.GATieredMetaTileEntity;
 import gregtech.api.items.metaitem.stats.IItemBehaviour;
 import gregtech.api.metatileentity.MetaTileEntity;
 import gregtech.api.metatileentity.MetaTileEntityHolder;
@@ -35,8 +35,8 @@ public class DataStickBehavior implements IItemBehaviour {
         TileEntity tile = world.getTileEntity(pos);
         if(tile instanceof MetaTileEntityHolder) {
             MetaTileEntity mte = ((MetaTileEntityHolder) tile).getMetaTileEntity();
-            if(mte instanceof TieredMetaTileEntity ||
-                    mte instanceof GATieredMetaTileEntity) {
+            if(mte instanceof TieredMetaTileEntity /*||
+                    mte instanceof GATieredMetaTileEntity*/) {
                 if(!stack.isEmpty()) {
                     GTLog.logger.info("Saving Pos");
                     NBTTagCompound subTag = getOrCreateSubTag(stack);

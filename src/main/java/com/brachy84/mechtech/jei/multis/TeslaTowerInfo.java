@@ -2,8 +2,8 @@ package com.brachy84.mechtech.jei.multis;
 
 import com.brachy84.mechtech.machines.MTTileEntities;
 import com.brachy84.mechtech.utils.TorusBlock;
-import gregicadditions.item.GAHeatingCoil;
-import gregicadditions.item.GAMetaBlocks;
+//import gregicadditions.item.GAHeatingCoil;
+//import gregicadditions.item.GAMetaBlocks;
 import gregtech.api.metatileentity.multiblock.MultiblockControllerBase;
 import gregtech.api.unification.material.Materials;
 import gregtech.common.blocks.BlockCompressed;

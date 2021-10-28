@@ -21,3 +21,5 @@ mechtech.jei_category.torus_block=Tesla Tower Torus Blocks
 mechtech.recipe.torus_block.loss=Energy loss modifier: %d
 mechtech.recipe.torus_block.range=Range modifier: %d
 mechtech.recipe.torus_block.voltage=Max Voltage: (%s) %d
+
+mechtech.modules.night_vision.name=Night Vision

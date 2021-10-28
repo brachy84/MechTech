@@ -1,5 +1,5 @@
 package com.brachy84.mechtech.jei.multis;
-
+/*
 import gregicadditions.item.GAMetaBlocks;
 import gregicadditions.item.fusion.GACryostatCasing;
 import gregicadditions.item.fusion.GADivertorCasing;
@@ -81,4 +81,4 @@ public class TokamakInfo extends FusionReactor4Info {
                 .where('D', GAMetaBlocks.DIVERTOR_CASING.getState(GADivertorCasing.CasingType.DIVERTOR_5)).build());
         return shapes;
     }
-}
+}*/

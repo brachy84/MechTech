@@ -1,5 +1,5 @@
 package com.brachy84.mechtech.machines;
-
+/*
 import com.brachy84.mechtech.capability.impl.EnergyRelayItemHandler;
 import com.brachy84.mechtech.client.ClientHandler;
 import com.brachy84.mechtech.utils.BlockPosDim;
@@ -202,7 +202,7 @@ public class MetaTileEntityEnergyRelay extends GATieredMetaTileEntity {
             return super.getCapability(capability, side);
         }
     }*/
-
+    /*
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound data) {
         GTUtility.writeItems(this.itemInventory, "ItemInventory", data);
@@ -214,4 +214,4 @@ public class MetaTileEntityEnergyRelay extends GATieredMetaTileEntity {
         GTUtility.readItems((IItemHandlerModifiable) itemInventory, "ItemInventory", data);
         super.readFromNBT(data);
     }
-}
+}*/

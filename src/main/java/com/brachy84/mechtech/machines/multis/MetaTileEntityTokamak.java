@@ -1,5 +1,5 @@
 package com.brachy84.mechtech.machines.multis;
-
+/*
 import gregicadditions.item.GAMetaBlocks;
 import gregicadditions.item.fusion.GAFusionCasing;
 import gregicadditions.machines.multi.advance.MetaTileEntityAdvFusionReactor;
@@ -70,4 +70,4 @@ public class MetaTileEntityTokamak extends MetaTileEntityAdvFusionReactor {
     private IBlockState getCasingState() {
         return GAMetaBlocks.FUSION_CASING.getState(GAFusionCasing.CasingType.ADV_FUSION_CASING);
     }
-}
+}*/
