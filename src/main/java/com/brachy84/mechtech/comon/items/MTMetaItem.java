@@ -1,12 +1,11 @@
-package com.brachy84.mechtech.items;
+package com.brachy84.mechtech.comon.items;
 
-import com.brachy84.mechtech.armor.ModularArmor;
-import com.brachy84.mechtech.armor.modules.NightVision;
-import com.brachy84.mechtech.items.behavior.DataStickBehavior;
+import com.brachy84.mechtech.api.armor.ModularArmor;
+import com.brachy84.mechtech.comon.items.behavior.DataStickBehavior;
 import gregtech.api.items.metaitem.StandardMetaItem;
 import gregtech.common.items.MetaItems;
 
-import static com.brachy84.mechtech.items.MTMetaItems.*;
+import static com.brachy84.mechtech.comon.items.MTMetaItems.*;
 
 public class MTMetaItem extends StandardMetaItem {
 

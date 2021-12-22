@@ -1,5 +1,5 @@
 package com.brachy84.mechtech.integration.crafttweaker;
-
+/*
 import crafttweaker.annotations.ZenDoc;
 import crafttweaker.annotations.ZenRegister;
 import stanhebben.zenscript.annotations.ZenClass;
@@ -134,4 +134,4 @@ public class CTMath {
     public static double clamp(double v, double min, double max) {
         return Math.min(max, Math.max(v, min));
     }
-}
+}*/

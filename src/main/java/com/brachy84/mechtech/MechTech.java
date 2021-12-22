@@ -1,7 +1,8 @@
 package com.brachy84.mechtech;
 
-import com.brachy84.mechtech.cover.MTCoverBehaviors;
-import com.brachy84.mechtech.machines.MTTileEntities;
+import com.brachy84.mechtech.comon.CommonProxy;
+import com.brachy84.mechtech.comon.cover.MTCoverBehaviors;
+import com.brachy84.mechtech.comon.machines.MTTileEntities;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -23,7 +24,7 @@ public class MechTech {
         return new ResourceLocation(MODID, path);
     }
 
-    @SidedProxy(modId = MODID, clientSide = "com.brachy84.mechtech.ClientProxy", serverSide = "com.brachy84.mechtech.CommonProxy")
+    @SidedProxy(modId = MODID, clientSide = "com.brachy84.mechtech.comon.ClientProxy", serverSide = "com.brachy84.mechtech.comon.CommonProxy")
     public static CommonProxy proxy;
 
     @EventHandler

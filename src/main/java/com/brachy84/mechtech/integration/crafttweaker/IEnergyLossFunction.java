@@ -1,5 +1,5 @@
 package com.brachy84.mechtech.integration.crafttweaker;
-
+/*
 import crafttweaker.annotations.ZenRegister;
 import stanhebben.zenscript.annotations.ZenClass;
 
@@ -17,6 +17,6 @@ public interface IEnergyLossFunction {
      * @return the fraction of energy lost as decimal
      * 0.2 -> 20% energy lost
      */
-    double run(/*MetaTileEntityTeslaTower teslaTower, */double distance);
+    /*double run(/*MetaTileEntityTeslaTower teslaTower, *//*double distance);
 
-}
+}*/

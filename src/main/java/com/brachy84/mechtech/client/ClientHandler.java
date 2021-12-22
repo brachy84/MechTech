@@ -2,7 +2,7 @@ package com.brachy84.mechtech.client;
 
 import com.brachy84.mechtech.MechTech;
 import gregtech.api.gui.resources.TextureArea;
-import gregtech.api.render.SimpleOverlayRenderer;
+import gregtech.client.renderer.texture.cube.SimpleOverlayRenderer;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.relauncher.Side;
 
