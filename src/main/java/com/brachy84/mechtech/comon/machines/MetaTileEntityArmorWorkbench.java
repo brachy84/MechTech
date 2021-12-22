@@ -9,6 +9,8 @@ import com.brachy84.mechtech.client.BatterySlot;
 import com.brachy84.mechtech.client.ModuleSlot;
 import com.brachy84.mechtech.client.SlotThatActuallyNotfiesListeners;
 import com.google.common.collect.Lists;
+import gregtech.api.capability.GregtechCapabilities;
+import gregtech.api.capability.IElectricItem;
 import gregtech.api.capability.impl.ItemHandlerList;
 import gregtech.api.gui.GuiTextures;
 import gregtech.api.gui.ModularUI;
@@ -17,7 +19,6 @@ import gregtech.api.gui.widgets.SlotWidget;
 import gregtech.api.gui.widgets.WidgetGroup;
 import gregtech.api.metatileentity.MetaTileEntity;
 import gregtech.api.metatileentity.MetaTileEntityHolder;
-import gregtech.api.util.GTLog;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.Position;
 import gregtech.api.util.Size;
@@ -35,7 +36,7 @@ import java.util.List;
 
 public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
 
-    public static final int[][] slotPositions = {
+    protected static final int[][] slotPositions = {
             {8, 8},
             {30, 8},
             {8, 30},
@@ -44,7 +45,7 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
             {30, 52},
     };
 
-    public static final int[][] batterySlots = {
+    protected static final int[][] batterySlots = {
             {115, 60},
             {133, 60},
             {151, 60}
@@ -72,13 +73,13 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
                 return 1;
             }
         };
-        moduleSlotHandler = new ItemStackHandler(5) {
+        moduleSlotHandler = new ItemStackHandler(slotPositions.length) {
             @Override
             public int getSlotLimit(int slot) {
                 return 1;
             }
         };
-        batterySlotHandler = new ItemStackHandler(3) {
+        batterySlotHandler = new ItemStackHandler(batterySlots.length) {
             @Override
             public int getSlotLimit(int slot) {
                 return 1;
@@ -103,7 +104,20 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
         }
         for (int i = 0; i < batterySlots.length; i++) {
             int[] pos = batterySlots[i];
-            SlotWidget slot = new BatterySlot(batterySlotHandler, i, pos[0], pos[1]);
+            SlotWidget slot = new BatterySlot(batterySlotHandler, i, pos[0], pos[1])
+                    .setFilter(stack -> {
+                        long totalCap = 0;
+                        for (int j = 0; j < batterySlotHandler.getSlots(); j++) {
+                            ItemStack stack1 = batterySlotHandler.getStackInSlot(j);
+                            if (stack1.isEmpty()) continue;
+                            IElectricItem electricItem = stack1.getCapability(GregtechCapabilities.CAPABILITY_ELECTRIC_ITEM, null);
+                            if (electricItem == null) continue;
+                            long max = electricItem.getMaxCharge();
+                            if (Long.MAX_VALUE - totalCap > max || (totalCap += max) >= Long.MAX_VALUE)
+                                return false;
+                        }
+                        return true;
+                    });
             slot.setBackgroundTexture(GuiTextures.SLOT, GuiTextures.BATTERY_OVERLAY);
             slot.setActive(false);
             slot.setVisible(false);
@@ -111,7 +125,6 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
         }
 
         SlotWidget mainSlot = new SlotThatActuallyNotfiesListeners(this.mainSlot, 0, 79, 26).setChangeListener(() -> {
-            GTLog.logger.info("Slot changed");
             ItemStack stack = this.mainSlot.getStackInSlot(0);
             for (Widget widget : moduleSlots.widgets) {
                 widget.setActive(false);
@@ -120,7 +133,6 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
             if (!stack.isEmpty()) {
                 ModularArmor modularArmor = ModularArmor.get(stack);
                 if (modularArmor != null) {
-                    GTLog.logger.info("Inserted Modular Armor");
                     List<ItemStack> stacks = ModularArmor.getModuleStacksOf(stack);
                     if (stacks.size() > modularArmor.getModuleSlots())
                         throw new IllegalStateException("There were more module than allowed");
@@ -137,17 +149,14 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
                             if (count == modularArmor.getModuleSlots())
                                 continue;
                             count++;
-                            ((ModuleSlot) widget).setArmorModulePredicate(module -> module.canPlaceIn(modularArmor.getSlot(), stack));
+                            ((ModuleSlot) widget).setArmorModulePredicate(module -> module.canPlaceIn(modularArmor.getSlot(), stack, moduleSlotHandler));
                         }
                         widget.setActive(true);
                         widget.setVisible(true);
                     }
                     lastArmor = stack;
-                } else {
-                    GTLog.logger.error("Can't find Modular Armor");
                 }
             } else if (!lastArmor.isEmpty()) {
-                GTLog.logger.info("Removed Modular Armor");
                 List<ItemStack> stacks = new ArrayList<>();
                 for (int i = 0; i < moduleSlotHandler.getSlots(); i++) {
                     ItemStack stack1 = moduleSlotHandler.getStackInSlot(i);
