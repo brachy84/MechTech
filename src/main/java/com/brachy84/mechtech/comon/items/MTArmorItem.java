@@ -36,13 +36,14 @@ public class MTArmorItem extends ArmorMetaItem<ArmorMetaItem<?>.ArmorMetaValueIt
         ArmorMetaItem<?>.ArmorMetaValueItem item = this.getItem(itemStack);
         if (item != null) {
             List<IArmorModule> modules = ModularArmor.getModulesOf(itemStack);
+            ModularArmor modularArmor = ModularArmor.get(itemStack);
             String unlocalizedTooltip = "metaitem." + item.unlocalizedName + ".tooltip";
             if (I18n.hasKey(unlocalizedTooltip)) {
                 lines.addAll(Arrays.asList(I18n.format(unlocalizedTooltip, new Object[0]).split("/n")));
             }
 
             if(modules.size() > 0) {
-                lines.add(I18n.format("metaitem.modular_armor.installed_modules"));
+                lines.add(I18n.format("metaitem.modular_armor.installed_modules", modules.size(), modularArmor.getModuleSlots()));
                 for(IArmorModule module : modules) {
                     lines.add(" - " + module.getLocalizedName());
                 }
@@ -58,7 +59,7 @@ public class MTArmorItem extends ArmorMetaItem<ArmorMetaItem<?>.ArmorMetaValueIt
                 if(electricItem.getMaxCharge() == 0) {
                     lines.add(I18n.format("metaitem.modular_armor.no_battery"));
                 } else {
-                    lines.add(I18n.format("metaitem.generic.electric_item.tooltip", electricItem.getCharge(), electricItem.getMaxCharge(), "Unspecified Tier"));
+                    lines.add(I18n.format("metaitem.generic.electric_item.tooltip", electricItem.getCharge(), electricItem.getMaxCharge(), "Unspecified"));
                 }
             }
 

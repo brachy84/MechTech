@@ -16,6 +16,7 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ISpecialArmor;
+import net.minecraftforge.items.IItemHandler;
 
 public class NightVision implements IArmorModule {
 
@@ -41,8 +42,8 @@ public class NightVision implements IArmorModule {
     }
 
     @Override
-    public boolean canPlaceIn(EntityEquipmentSlot slot, ItemStack modularArmorPiece) {
-        return slot == EntityEquipmentSlot.HEAD;
+    public boolean canPlaceIn(EntityEquipmentSlot slot, ItemStack modularArmorPiece, IItemHandler modularSlots) {
+        return slot == EntityEquipmentSlot.HEAD && IArmorModule.moduleCount(this, modularSlots) == 0;
     }
 
     @Override

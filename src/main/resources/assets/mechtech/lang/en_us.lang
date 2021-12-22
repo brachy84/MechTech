@@ -6,6 +6,8 @@ mechtech.universal.tooltip.item_storage_accept=Accepts:
 mechtech.universal.tooltip.item_storage_reject=Rejects:
 
 mechtech.machine.tesla_tower.name=Tesla Tower
+mechtech.machine.armor_workbench.name=Armor Workbench
+mechtech.machine.armor_workbench.tooltip=Can be used to modify Modular Armor
 
 mechtech.multiblock.tesla_tower.range=Range: %s
 mechtech.multiblock.tesla_tower.voltage=Voltage: %d
@@ -23,6 +25,9 @@ mechtech.recipe.torus_block.range=Range modifier: %d
 mechtech.recipe.torus_block.voltage=Max Voltage: (%s) %d
 
 mechtech.modules.night_vision.name=Night Vision
+mechtech.modules.solar_gen.1.name=Solar Gen I
+mechtech.modules.solar_gen.2.name=Solar Gen II
+mechtech.modules.solar_gen.3.name=Solar Gen III
 
 metaitem.modular_helmet.name=Modular Helmet
 metaitem.modular_chestplate.name=Modular Chestplate
@@ -30,5 +35,5 @@ metaitem.modular_leggings.name=Modular Leggings
 metaitem.modular_boots.name=Modular Boots
 
 metaitem.modular_armor.no_battery=§4Insert Batteries!
-metaitem.modular_armor.installed_modules=§bInstalled Modules:
+metaitem.modular_armor.installed_modules=§bInstalled Modules: §7(%d/%d)
 metaitem.modular_armor.no_modules=§cNo Modules installed

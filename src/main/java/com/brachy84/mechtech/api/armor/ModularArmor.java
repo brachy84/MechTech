@@ -7,17 +7,13 @@ import com.google.common.collect.Multimap;
 import gregtech.api.GTValues;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IElectricItem;
-import gregtech.api.gui.widgets.WidgetGroup;
 import gregtech.api.items.armor.ArmorMetaItem;
 import gregtech.api.items.armor.IArmorLogic;
 import gregtech.api.items.armor.ISpecialArmorLogic;
 import gregtech.api.items.metaitem.stats.IItemBehaviour;
 import gregtech.api.util.GTControlledRegistry;
-import gregtech.api.util.GTLog;
 import gregtech.common.items.MetaItems;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.EntityPlayer;
@@ -30,11 +26,12 @@ import net.minecraft.util.*;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ISpecialArmor;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nonnull;
-import java.util.*;
-import java.util.function.BiConsumer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 public class ModularArmor implements ISpecialArmorLogic {
 
@@ -217,7 +214,6 @@ public class ModularArmor implements ISpecialArmorLogic {
             }
             nbt.setTag(BATTERIES, list);
         }
-        GTLog.logger.info("Filled {}, sim {}", original - amount, simulate);
         return original - amount;
     }
 
@@ -243,7 +239,6 @@ public class ModularArmor implements ISpecialArmorLogic {
             }
             nbt.setTag(BATTERIES, list);
         }
-        GTLog.logger.info("Drained {}, sim {}", original - amount, simulate);
         return original - amount;
     }
 
