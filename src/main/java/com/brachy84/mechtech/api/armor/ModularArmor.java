@@ -1,8 +1,10 @@
 package com.brachy84.mechtech.api.armor;
 
 import com.brachy84.mechtech.api.armor.modules.NightVision;
+import com.brachy84.mechtech.api.armor.modules.SolarGen;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import gregtech.api.GTValues;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IElectricItem;
 import gregtech.api.gui.widgets.WidgetGroup;
@@ -38,9 +40,15 @@ public class ModularArmor implements ISpecialArmorLogic {
 
     public static class Modules {
         public static final IArmorModule nightVision = new NightVision();
+        public static final IArmorModule solarGen1 = new SolarGen(() -> MetaItems.COVER_SOLAR_PANEL_LV.getStackForm(), GTValues.V[1], 1);
+        public static final IArmorModule solarGen2 = new SolarGen(() -> MetaItems.COVER_SOLAR_PANEL_MV.getStackForm(), GTValues.V[2], 2);
+        public static final IArmorModule solarGen3 = new SolarGen(() -> MetaItems.COVER_SOLAR_PANEL_HV.getStackForm(), GTValues.V[3], 3);
 
         static {
             registerModule(0, nightVision);
+            registerModule(1, solarGen1);
+            registerModule(2, solarGen2);
+            registerModule(3, solarGen3);
         }
     }
 

@@ -19,7 +19,10 @@ public class MTMetaItem extends StandardMetaItem {
         //NIGHTVISION_MODULE = addItem(100, "module.night_vision").addComponents(ModularArmor.Modules.nightVision);
         //WIRELESS_BINDER = addItem(2001, "wireless_binder");
 
-        MetaItems.NIGHTVISION_GOGGLES.addComponents(ModularArmor.Modules.nightVision).addComponents();
+        MetaItems.NIGHTVISION_GOGGLES.addComponents(ModularArmor.Modules.nightVision);
+        MetaItems.COVER_SOLAR_PANEL_LV.addComponents(ModularArmor.Modules.solarGen1);
+        MetaItems.COVER_SOLAR_PANEL_MV.addComponents(ModularArmor.Modules.solarGen2);
+        MetaItems.COVER_SOLAR_PANEL_HV.addComponents(ModularArmor.Modules.solarGen3);
         //MetaItems.TOOL_DATA_STICK.addComponents(new DataStickBehavior());
     }
 }
