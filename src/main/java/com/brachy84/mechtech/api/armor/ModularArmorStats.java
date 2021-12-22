@@ -76,7 +76,7 @@ public class ModularArmorStats implements IItemMaxStackSizeProvider, IItemCapabi
 
             @Override
             public long discharge(long amount, int tier, boolean ignoreLimit, boolean externally, boolean simulate) {
-                if(amount == 0 ||externally || tier < getTier())
+                if(amount == 0 || externally || tier < getTier())
                     return 0;
                 long drained = ModularArmor.drain(stack, amount, tier, simulate);
                 if(!simulate && drained > 0)
@@ -84,9 +84,12 @@ public class ModularArmorStats implements IItemMaxStackSizeProvider, IItemCapabi
                 return drained;
             }
 
+            /**
+             * Transfer limit is defined be contained batteries
+             */
             @Override
             public long getTransferLimit() {
-                return GTValues.V[getTier()];
+                return Long.MAX_VALUE;
             }
 
             @Override
@@ -101,8 +104,7 @@ public class ModularArmorStats implements IItemMaxStackSizeProvider, IItemCapabi
 
             @Override
             public int getTier() {
-                ModularArmor armor = ModularArmor.get(stack);
-                return armor == null ? GTValues.MAX : armor.getTier();
+                return GTValues.MV;
             }
         };
     }

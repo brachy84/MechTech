@@ -9,7 +9,9 @@ import gregtech.api.gui.widgets.WidgetGroup;
 import gregtech.api.items.armor.ArmorMetaItem;
 import gregtech.api.items.armor.IArmorLogic;
 import gregtech.api.items.armor.ISpecialArmorLogic;
+import gregtech.api.items.metaitem.stats.IItemBehaviour;
 import gregtech.api.util.GTControlledRegistry;
+import gregtech.api.util.GTLog;
 import gregtech.common.items.MetaItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -22,7 +24,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagIntArray;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.DamageSource;
+import net.minecraft.util.*;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ISpecialArmor;
 import net.minecraftforge.common.util.Constants;
@@ -60,27 +62,19 @@ public class ModularArmor implements ISpecialArmorLogic {
         return MODULE_REGISTRY.getIDForObject(module);
     }
 
+    public static final String BATTERIES = "Batteries";
+    public static final String MODULES = "Modules";
+
     private final int moduleSlots;
     private final EntityEquipmentSlot slot;
     private final int tier;
     private final long baseEnergyCapacity;
-    private BiConsumer<IItemHandler, WidgetGroup> uiBuilder = (handler, builder) -> {
-    };
 
     public ModularArmor(EntityEquipmentSlot slot, int moduleSlots, int tier, long baseEnergyCapacity) {
         this.slot = slot;
         this.moduleSlots = moduleSlots;
         this.baseEnergyCapacity = baseEnergyCapacity;
         this.tier = tier;
-    }
-
-    public ModularArmor setUiBuilder(BiConsumer<IItemHandler, WidgetGroup> builder) {
-        this.uiBuilder = Objects.requireNonNull(builder);
-        return this;
-    }
-
-    public BiConsumer<IItemHandler, WidgetGroup> getUiBuilder() {
-        return uiBuilder;
     }
 
     public int getTier() {
@@ -108,9 +102,19 @@ public class ModularArmor implements ISpecialArmorLogic {
     @Override
     public void onArmorTick(World world, EntityPlayer player, ItemStack itemStack) {
         Collection<IArmorModule> modules = getModulesOf(itemStack);
-        for (IArmorModule module : modules) {
-            module.onTick(world, player, itemStack);
+        NBTTagCompound armorNbt = itemStack.getTagCompound();
+        NBTTagCompound nbt;
+        if(armorNbt != null) {
+            nbt = armorNbt.getCompoundTag("ModuleData");
+        } else {
+            armorNbt = new NBTTagCompound();
+            nbt = new NBTTagCompound();
+            itemStack.setTagCompound(armorNbt);
         }
+        for (IArmorModule module : modules) {
+            module.onTick(world, player, itemStack, nbt);
+        }
+        armorNbt.setTag("ModuleData", nbt);
     }
 
     public void onUnequip(World world, EntityLivingBase player, ItemStack modularArmorPiece, ItemStack newStack) {
@@ -128,6 +132,21 @@ public class ModularArmor implements ISpecialArmorLogic {
     @Override
     public void addToolComponents(ArmorMetaItem.ArmorMetaValueItem mvi) {
         mvi.addComponents(new ModularArmorStats());
+        mvi.addComponents(new IItemBehaviour() {
+            @Override
+            public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand) {
+                if (player.getHeldItem(hand).getItem() instanceof ArmorMetaItem) {
+                    ItemStack armor = player.getHeldItem(hand);
+                    if (armor.getItem() instanceof ArmorMetaItem && player.inventory.armorInventory.get(slot.getIndex()).isEmpty() && !player.isSneaking()) {
+                        player.inventory.armorInventory.set(slot.getIndex(), armor.copy());
+                        player.setHeldItem(hand, ItemStack.EMPTY);
+                        player.playSound(new SoundEvent(new ResourceLocation("item.armor.equip_generic")), 1.0F, 1.0F);
+                        return ActionResult.newResult(EnumActionResult.SUCCESS, armor);
+                    }
+                }
+                return ActionResult.newResult(EnumActionResult.PASS, player.getHeldItem(hand));
+            }
+        });
     }
 
     @Override
@@ -174,20 +193,24 @@ public class ModularArmor implements ISpecialArmorLogic {
             return 0;
         }
         long original = amount;
-        if (nbt.hasKey("Batteries")) {
-            NBTTagList list = nbt.getTagList("Batteries", Constants.NBT.TAG_COMPOUND);
+        if (nbt.hasKey(BATTERIES)) {
+            NBTTagList list = nbt.getTagList(BATTERIES, Constants.NBT.TAG_COMPOUND);
             for (int i = 0; i < list.tagCount(); i++) {
                 NBTTagCompound batteryNbt = list.getCompoundTagAt(i);
                 ItemStack batteryStack = new ItemStack(batteryNbt);
                 IElectricItem electricItem = batteryStack.getCapability(GregtechCapabilities.CAPABILITY_ELECTRIC_ITEM, null);
                 if (electricItem != null) {
                     amount -= electricItem.charge(amount, tier, false, simulate);
+                    batteryNbt = batteryStack.serializeNBT();
+                    list.set(i, batteryNbt);
                     if (amount == 0)
-                        return amount;
+                        break;
                 }
             }
+            nbt.setTag(BATTERIES, list);
         }
-        return amount - original;
+        GTLog.logger.info("Filled {}, sim {}", original - amount, simulate);
+        return original - amount;
     }
 
     public static long drain(ItemStack stack, long amount, int tier, boolean simulate) {
@@ -196,20 +219,24 @@ public class ModularArmor implements ISpecialArmorLogic {
             return 0;
         }
         long original = amount;
-        if (nbt.hasKey("Batteries")) {
-            NBTTagList list = nbt.getTagList("Batteries", Constants.NBT.TAG_COMPOUND);
+        if (nbt.hasKey(BATTERIES)) {
+            NBTTagList list = nbt.getTagList(BATTERIES, Constants.NBT.TAG_COMPOUND);
             for (int i = 0; i < list.tagCount(); i++) {
                 NBTTagCompound batteryNbt = list.getCompoundTagAt(i);
                 ItemStack batteryStack = new ItemStack(batteryNbt);
                 IElectricItem electricItem = batteryStack.getCapability(GregtechCapabilities.CAPABILITY_ELECTRIC_ITEM, null);
                 if (electricItem != null) {
                     amount -= electricItem.discharge(amount, tier, false, false, simulate);
+                    batteryNbt = batteryStack.serializeNBT();
+                    list.set(i, batteryNbt);
                     if (amount == 0)
-                        return amount;
+                        break;
                 }
             }
+            nbt.setTag(BATTERIES, list);
         }
-        return amount - original;
+        GTLog.logger.info("Drained {}, sim {}", original - amount, simulate);
+        return original - amount;
     }
 
     public static long getCapacity(ItemStack stack) {
@@ -218,8 +245,8 @@ public class ModularArmor implements ISpecialArmorLogic {
             return 0;
         }
         long cap = 0;
-        if (nbt.hasKey("Batteries")) {
-            NBTTagList list = nbt.getTagList("Batteries", Constants.NBT.TAG_COMPOUND);
+        if (nbt.hasKey(BATTERIES)) {
+            NBTTagList list = nbt.getTagList(BATTERIES, Constants.NBT.TAG_COMPOUND);
             for (int i = 0; i < list.tagCount(); i++) {
                 NBTTagCompound batteryNbt = list.getCompoundTagAt(i);
                 ItemStack batteryStack = new ItemStack(batteryNbt);
@@ -238,8 +265,8 @@ public class ModularArmor implements ISpecialArmorLogic {
             return 0;
         }
         long cap = 0;
-        if (nbt.hasKey("Batteries")) {
-            NBTTagList list = nbt.getTagList("Batteries", Constants.NBT.TAG_COMPOUND);
+        if (nbt.hasKey(BATTERIES)) {
+            NBTTagList list = nbt.getTagList(BATTERIES, Constants.NBT.TAG_COMPOUND);
             for (int i = 0; i < list.tagCount(); i++) {
                 NBTTagCompound batteryNbt = list.getCompoundTagAt(i);
                 ItemStack batteryStack = new ItemStack(batteryNbt);
@@ -261,17 +288,17 @@ public class ModularArmor implements ISpecialArmorLogic {
         for (ItemStack battery : batteries) {
             list.appendTag(battery.serializeNBT());
         }
-        nbt.setTag("Batteries", list);
+        nbt.setTag(BATTERIES, list);
         stack.setTagCompound(nbt);
     }
 
     public static List<ItemStack> getBatteries(ItemStack stack) {
         if(!stack.isEmpty() && stack.hasTagCompound()) {
             NBTTagCompound nbt = stack.getTagCompound();
-            if(!nbt.hasKey("Batteries"))
+            if(!nbt.hasKey(BATTERIES))
                 return Collections.emptyList();
             List<ItemStack> batteries = new ArrayList<>();
-            NBTTagList list = nbt.getTagList("Batteries", Constants.NBT.TAG_COMPOUND);
+            NBTTagList list = nbt.getTagList(BATTERIES, Constants.NBT.TAG_COMPOUND);
             for(int i = 0; i < list.tagCount(); i++) {
                 batteries.add(new ItemStack(list.getCompoundTagAt(i)));
             }
@@ -286,7 +313,7 @@ public class ModularArmor implements ISpecialArmorLogic {
             NBTTagCompound nbt = stack.getTagCompound();
             if(nbt == null)
                 return Collections.emptyList();
-            int[] moduleList = nbt.getIntArray("Modules");
+            int[] moduleList = nbt.getIntArray(MODULES);
             List<ItemStack> modules = new ArrayList<>();
             for (int moduleId : moduleList) {
                 IArmorModule module = getModule(moduleId);
@@ -306,7 +333,7 @@ public class ModularArmor implements ISpecialArmorLogic {
             NBTTagCompound nbt = stack.getTagCompound();
             if(nbt == null)
                 return Collections.emptyList();
-            int[] moduleList = nbt.getIntArray("Modules");
+            int[] moduleList = nbt.getIntArray(MODULES);
             List<IArmorModule> modules = new ArrayList<>();
             for (int moduleId : moduleList) {
                 IArmorModule module = getModule(moduleId);
@@ -324,22 +351,17 @@ public class ModularArmor implements ISpecialArmorLogic {
         ModularArmor armor = get(stack);
         if (armor != null) {
             List<Integer> moduleIds = new ArrayList<>();
-            //List<ItemStack> batteries = new ArrayList<>();
             for (ItemStack stack1 : modules) {
                 if(stack1.isEmpty())
                     continue;
                 moduleIds.add(getModuleId(IArmorModule.getOf(stack1)));
-                /*if(stack1.hasCapability(GregtechCapabilities.CAPABILITY_ELECTRIC_ITEM, null)) {
-                    batteries.add(stack1);
-                }*/
             }
             NBTTagCompound nbt = stack.getTagCompound();
             if (nbt == null) {
                 nbt = new NBTTagCompound();
             }
-            nbt.setTag("Modules", new NBTTagIntArray(moduleIds));
+            nbt.setTag(MODULES, new NBTTagIntArray(moduleIds));
             stack.setTagCompound(nbt);
-            //setBatteries(stack, batteries);
         }
     }
 }

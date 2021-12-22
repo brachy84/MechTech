@@ -16,9 +16,10 @@ public class MTMetaItem extends StandardMetaItem {
     @Override
     public void registerSubItems() {
         WIRELESS_RECEIVER = addItem(0, "wireless_receiver");
-        NIGHTVISION_MODULE = addItem(100, "module.night_vision").addComponents(ModularArmor.Modules.nightVision);
+        //NIGHTVISION_MODULE = addItem(100, "module.night_vision").addComponents(ModularArmor.Modules.nightVision);
         //WIRELESS_BINDER = addItem(2001, "wireless_binder");
 
-        MetaItems.TOOL_DATA_STICK.addComponents(new DataStickBehavior());
+        MetaItems.NIGHTVISION_GOGGLES.addComponents(ModularArmor.Modules.nightVision).addComponents();
+        //MetaItems.TOOL_DATA_STICK.addComponents(new DataStickBehavior());
     }
 }

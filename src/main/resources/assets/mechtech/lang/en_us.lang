@@ -23,3 +23,12 @@ mechtech.recipe.torus_block.range=Range modifier: %d
 mechtech.recipe.torus_block.voltage=Max Voltage: (%s) %d
 
 mechtech.modules.night_vision.name=Night Vision
+
+metaitem.modular_helmet.name=Modular Helmet
+metaitem.modular_chestplate.name=Modular Chestplate
+metaitem.modular_leggings.name=Modular Leggings
+metaitem.modular_boots.name=Modular Boots
+
+metaitem.modular_armor.no_battery=§4Insert Batteries!
+metaitem.modular_armor.installed_modules=§bInstalled Modules:
+metaitem.modular_armor.no_modules=§cNo Modules installed
