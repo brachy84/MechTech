@@ -23,6 +23,7 @@ import java.util.List;
 
 public interface IArmorModule extends IItemComponent {
 
+    @Nullable
     static IArmorModule getOf(ItemStack stack) {
         if (stack.getItem() instanceof MetaItem) {
             return getOf(((MetaItem<?>) stack.getItem()).getItem(stack));
@@ -30,6 +31,7 @@ public interface IArmorModule extends IItemComponent {
         return null;
     }
 
+    @Nullable
     static IArmorModule getOf(MetaItem<?>.MetaValueItem mvi) {
         for (IItemComponent component : mvi.getAllStats()) {
             if (component instanceof IArmorModule)
@@ -38,12 +40,20 @@ public interface IArmorModule extends IItemComponent {
         return null;
     }
 
+    /**
+     * Returns how many modules of the module are in the handler.
+     * Can be used in {@link #canPlaceIn(EntityEquipmentSlot, ItemStack, IItemHandler)} to set a maximum.
+     *
+     * @param module  to check for
+     * @param handler to check in
+     * @return module count
+     */
     static int moduleCount(IArmorModule module, IItemHandler handler) {
         int count = 0;
         ItemStack moduleItem = module.getAsItemStack();
         for (int i = 0; i < handler.getSlots(); i++) {
             ItemStack stack = handler.getStackInSlot(i);
-            if (!stack.isEmpty() && moduleItem.getItem() == stack.getItem() && ItemStack.areItemStackTagsEqual(moduleItem, stack))
+            if (!stack.isEmpty() && moduleItem.getItem() == stack.getItem() && moduleItem.getMetadata() == stack.getMetadata() && ItemStack.areItemStackTagsEqual(moduleItem, stack))
                 count += stack.getCount();
         }
         return count;
