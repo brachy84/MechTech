@@ -24,6 +24,7 @@ import gregtech.api.util.Position;
 import gregtech.api.util.Size;
 import gregtech.client.renderer.texture.Textures;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
@@ -31,6 +32,7 @@ import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemStackHandler;
 import org.apache.commons.lang3.ArrayUtils;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -124,6 +126,12 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
             moduleSlots.addWidget(slot);
         }
 
+        ArmorInventoryWrapper armorInventory = new ArmorInventoryWrapper(entityPlayer);
+        builder.slot(armorInventory, 0, 4, -18, GuiTextures.SLOT);
+        builder.slot(armorInventory, 1, 22, -18, GuiTextures.SLOT);
+        builder.slot(armorInventory, 2, 40, -18, GuiTextures.SLOT);
+        builder.slot(armorInventory, 3, 58, -18, GuiTextures.SLOT);
+
         SlotWidget mainSlot = new SlotThatActuallyNotfiesListeners(this.mainSlot, 0, 79, 26).setChangeListener(() -> {
             ItemStack stack = this.mainSlot.getStackInSlot(0);
             for (Widget widget : moduleSlots.widgets) {
@@ -135,7 +143,7 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
                 if (modularArmor != null) {
                     List<ItemStack> stacks = ModularArmor.getModuleStacksOf(stack);
                     if (stacks.size() > modularArmor.getModuleSlots())
-                        throw new IllegalStateException("There were more module than allowed");
+                        throw new IllegalStateException("There were more modules than allowed");
                     for (int i = 0; i < stacks.size(); i++) {
                         moduleSlotHandler.setStackInSlot(i, stacks.get(i));
                     }
@@ -202,5 +210,63 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
     public void readFromNBT(NBTTagCompound data) {
         super.readFromNBT(data);
         lastArmor = new ItemStack(data.getCompoundTag("LastArmor"));
+    }
+
+    private static class ArmorInventoryWrapper implements IItemHandlerModifiable {
+
+        private final EntityPlayer player;
+
+        public ArmorInventoryWrapper(EntityPlayer player) {
+            this.player = player;
+        }
+
+        @Override
+        public int getSlots() {
+            return 4;
+        }
+
+        @Nonnull
+        @Override
+        public ItemStack getStackInSlot(int slot) {
+            return player.inventory.armorInventory.get(slot);
+        }
+
+        @Nonnull
+        @Override
+        public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+            ItemStack currentStack = getStackInSlot(slot);
+            EntityEquipmentSlot equipmentSlot = stack.getItem().getEquipmentSlot(stack);
+            if (stack.isEmpty() || !currentStack.isEmpty() || equipmentSlot == null || equipmentSlot.getIndex() != slot)
+                return stack;
+            ItemStack copy = stack.copy();
+            copy.setCount(1);
+            if (!simulate)
+                setStackInSlot(slot, copy);
+            if (stack.getCount() == 1)
+                return ItemStack.EMPTY;
+            stack.shrink(1);
+            return stack;
+        }
+
+        @Nonnull
+        @Override
+        public ItemStack extractItem(int slot, int amount, boolean simulate) {
+            ItemStack currentStack = getStackInSlot(slot);
+            if (amount <= 0 || currentStack.isEmpty())
+                return ItemStack.EMPTY;
+            if(!simulate)
+                setStackInSlot(slot, ItemStack.EMPTY);
+            return currentStack;
+        }
+
+        @Override
+        public int getSlotLimit(int slot) {
+            return 1;
+        }
+
+        @Override
+        public void setStackInSlot(int slot, @Nonnull ItemStack stack) {
+            player.inventory.armorInventory.set(slot, stack);
+        }
     }
 }
