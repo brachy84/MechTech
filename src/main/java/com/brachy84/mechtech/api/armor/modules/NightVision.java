@@ -1,7 +1,6 @@
 package com.brachy84.mechtech.api.armor.modules;
 
 import com.brachy84.mechtech.api.armor.IArmorModule;
-import com.brachy84.mechtech.comon.items.MTMetaItems;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IElectricItem;
 import gregtech.common.items.MetaItems;
@@ -13,19 +12,17 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ISpecialArmor;
 import net.minecraftforge.items.IItemHandler;
 
 public class NightVision implements IArmorModule {
 
     @Override
     public void onTick(World world, EntityPlayer player, ItemStack modularArmorPiece, NBTTagCompound moduleData) {
-        if(!world.isRemote) {
+        if (!world.isRemote) {
             IElectricItem item = modularArmorPiece.getCapability(GregtechCapabilities.CAPABILITY_ELECTRIC_ITEM, null);
-            if(item != null && item.canUse(4) && item.discharge(4, Integer.MAX_VALUE, false, false, false) == 4) {
-                if(moduleData.getBoolean("NiVi"))
+            if (item != null && item.canUse(4) && item.discharge(4, Integer.MAX_VALUE, false, false, false) == 4) {
+                if (moduleData.getBoolean("NiVi"))
                     return;
                 player.addPotionEffect(new PotionEffect(MobEffects.NIGHT_VISION, 999999999, 0, true, false));
             } else {
@@ -36,7 +33,7 @@ public class NightVision implements IArmorModule {
 
     @Override
     public void onUnequip(World world, EntityLivingBase player, ItemStack modularArmorPiece, ItemStack newStack) {
-        if(!world.isRemote) {
+        if (!world.isRemote) {
             player.removePotionEffect(MobEffects.NIGHT_VISION);
         }
     }
@@ -44,11 +41,6 @@ public class NightVision implements IArmorModule {
     @Override
     public boolean canPlaceIn(EntityEquipmentSlot slot, ItemStack modularArmorPiece, IItemHandler modularSlots) {
         return slot == EntityEquipmentSlot.HEAD && IArmorModule.moduleCount(this, modularSlots) == 0;
-    }
-
-    @Override
-    public void modifyArmorProperties(ISpecialArmor.ArmorProperties properties, EntityLivingBase entity, ItemStack modularArmorPiece, DamageSource source, double damage, EntityEquipmentSlot slot) {
-
     }
 
     @Override

@@ -8,7 +8,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumActionResult;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ISpecialArmor;
 import net.minecraftforge.fml.relauncher.Side;
@@ -47,20 +49,73 @@ public interface IArmorModule extends IItemComponent {
         return count;
     }
 
+    /**
+     * Called each tick when the armor piece with this module is worn
+     *
+     * @param world             current world
+     * @param player            wearing player
+     * @param modularArmorPiece armor piece
+     * @param armorData         nbt data of armor piece
+     */
     void onTick(World world, EntityPlayer player, ItemStack modularArmorPiece, NBTTagCompound armorData);
 
+    /**
+     * Called when the worn modular armor piece is taken of
+     *
+     * @param world             current world
+     * @param player            wearing player
+     * @param modularArmorPiece armor piece
+     * @param newStack          the replacing item
+     */
     default void onUnequip(World world, EntityLivingBase player, ItemStack modularArmorPiece, ItemStack newStack) {
     }
 
+    /**
+     * Used to determin if the module can be placed inside that armor piece
+     *
+     * @param slot              slot of the armor piece
+     * @param modularArmorPiece armor piece
+     * @param modularSlots      item handler of the modular slots of the {@link com.brachy84.mechtech.comon.machines.MetaTileEntityArmorWorkbench}
+     * @return if the armor accepts this module
+     */
     boolean canPlaceIn(EntityEquipmentSlot slot, ItemStack modularArmorPiece, IItemHandler modularSlots);
 
-    void modifyArmorProperties(ISpecialArmor.ArmorProperties properties, EntityLivingBase entity, ItemStack modularArmorPiece, DamageSource source, double damage, EntityEquipmentSlot slot);
+    /**
+     * Modifies armor values when damaged
+     *
+     * @param properties        properties passed from the armor piece (can be already modified from other modules)
+     * @param entity            wearing entity
+     * @param modularArmorPiece armor piece
+     * @param source            damage source
+     * @param damage            damage amount
+     * @param slot              slot of the armor piece
+     * @return modified properties with a action result
+     * SUCCESS and FAIL: the properties returned are final and will not be modified by other modules
+     * PASS: the properties may be modified further by other modules (default)
+     */
+    default ActionResult<ISpecialArmor.ArmorProperties> modifyArmorProperties(ISpecialArmor.ArmorProperties properties, EntityLivingBase entity, ItemStack modularArmorPiece, DamageSource source, double damage, EntityEquipmentSlot slot) {
+        return ActionResult.newResult(EnumActionResult.PASS, properties);
+    }
 
+    /**
+     * Tooltip that will be added to the armor piece item (NOT THE MODULE)
+     * @param itemStack armor piece
+     * @param worldIn current world
+     * @param lines tooltip
+     * @param tooltipFlag flag
+     */
     default void addTooltip(@Nonnull ItemStack itemStack, @Nullable World worldIn, @Nonnull List<String> lines, @Nonnull ITooltipFlag tooltipFlag) {
     }
 
+    /**
+     * ItemStack representation of this module. This item will be put into the {@link com.brachy84.mechtech.comon.machines.MetaTileEntityArmorWorkbench}
+     * @return ItemStack representation
+     */
     ItemStack getAsItemStack();
 
+    /**
+     * @return the name of this module. Will only show in the armor piece tooltip
+     */
     @SideOnly(Side.CLIENT)
     String getLocalizedName();
 }

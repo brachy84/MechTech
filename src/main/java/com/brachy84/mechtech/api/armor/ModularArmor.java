@@ -72,22 +72,10 @@ public class ModularArmor implements ISpecialArmorLogic {
 
     private final int moduleSlots;
     private final EntityEquipmentSlot slot;
-    private final int tier;
-    private final long baseEnergyCapacity;
 
-    public ModularArmor(EntityEquipmentSlot slot, int moduleSlots, int tier, long baseEnergyCapacity) {
+    public ModularArmor(EntityEquipmentSlot slot, int moduleSlots) {
         this.slot = slot;
         this.moduleSlots = moduleSlots;
-        this.baseEnergyCapacity = baseEnergyCapacity;
-        this.tier = tier;
-    }
-
-    public int getTier() {
-        return tier;
-    }
-
-    public long getBaseEnergyCapacity() {
-        return baseEnergyCapacity;
     }
 
     public int getModuleSlots() {
@@ -99,7 +87,10 @@ public class ModularArmor implements ISpecialArmorLogic {
         Collection<IArmorModule> modules = getModulesOf(itemStack);
         ISpecialArmor.ArmorProperties properties = new ISpecialArmor.ArmorProperties(0, 0, Integer.MAX_VALUE);
         for (IArmorModule module : modules) {
-            module.modifyArmorProperties(properties, entityLivingBase, itemStack, damageSource, v, entityEquipmentSlot);
+            ActionResult<ISpecialArmor.ArmorProperties> result = module.modifyArmorProperties(properties, entityLivingBase, itemStack, damageSource, v, entityEquipmentSlot);
+            properties = result.getResult();
+            if(result.getType() != EnumActionResult.PASS)
+                break;
         }
         return properties;
     }
