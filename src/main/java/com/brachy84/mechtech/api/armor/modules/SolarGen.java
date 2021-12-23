@@ -50,7 +50,7 @@ public class SolarGen implements IArmorModule {
     }
 
     @Override
-    public ItemStack getAsItemStack() {
+    public ItemStack getAsItemStack(NBTTagCompound nbt) {
         return item.get();
     }
 

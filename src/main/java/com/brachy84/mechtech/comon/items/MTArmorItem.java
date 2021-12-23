@@ -16,6 +16,7 @@ import net.minecraft.world.World;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import static com.brachy84.mechtech.comon.items.MTMetaItems.*;
@@ -34,28 +35,28 @@ public class MTArmorItem extends ArmorMetaItem<ArmorMetaItem<?>.ArmorMetaValueIt
     public void addInformation(@Nonnull ItemStack itemStack, @Nullable World worldIn, @Nonnull List<String> lines, @Nonnull ITooltipFlag tooltipFlag) {
         ArmorMetaItem<?>.ArmorMetaValueItem item = this.getItem(itemStack);
         if (item != null) {
-            List<IArmorModule> modules = ModularArmor.getModulesOf(itemStack);
+            Collection<IArmorModule> modules = ModularArmor.getModulesOf(itemStack);
             ModularArmor modularArmor = ModularArmor.get(itemStack);
             String unlocalizedTooltip = "metaitem." + item.unlocalizedName + ".tooltip";
             if (I18n.hasKey(unlocalizedTooltip)) {
                 lines.addAll(Arrays.asList(I18n.format(unlocalizedTooltip, new Object[0]).split("/n")));
             }
 
-            if(modules.size() > 0) {
+            if (modules.size() > 0) {
                 lines.add(I18n.format("metaitem.modular_armor.installed_modules", modules.size(), modularArmor.getModuleSlots()));
-                for(IArmorModule module : modules) {
+                for (IArmorModule module : modules) {
                     lines.add(" - " + module.getLocalizedName());
                 }
-                for(IArmorModule module : modules) {
+                for (IArmorModule module : modules) {
                     module.addTooltip(itemStack, worldIn, lines, tooltipFlag);
                 }
             } else {
                 lines.add(I18n.format("metaitem.modular_armor.no_modules"));
             }
 
-            IElectricItem electricItem = itemStack.getCapability(GregtechCapabilities.CAPABILITY_ELECTRIC_ITEM, (EnumFacing)null);
+            IElectricItem electricItem = itemStack.getCapability(GregtechCapabilities.CAPABILITY_ELECTRIC_ITEM, (EnumFacing) null);
             if (electricItem != null) {
-                if(electricItem.getMaxCharge() == 0) {
+                if (electricItem.getMaxCharge() == 0) {
                     lines.add(I18n.format("metaitem.modular_armor.no_battery"));
                 } else {
                     lines.add(I18n.format("metaitem.generic.electric_item.tooltip", electricItem.getCharge(), electricItem.getMaxCharge(), "Unspecified"));

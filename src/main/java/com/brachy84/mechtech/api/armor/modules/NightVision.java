@@ -44,7 +44,7 @@ public class NightVision implements IArmorModule {
     }
 
     @Override
-    public ItemStack getAsItemStack() {
+    public ItemStack getAsItemStack(NBTTagCompound nbt) {
         return MetaItems.NIGHTVISION_GOGGLES.getStackForm();
     }
 

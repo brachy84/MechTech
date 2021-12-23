@@ -24,10 +24,15 @@ mechtech.recipe.torus_block.loss=Energy loss modifier: %d
 mechtech.recipe.torus_block.range=Range modifier: %d
 mechtech.recipe.torus_block.voltage=Max Voltage: (%s) %d
 
+mechtech.modules.armor_plating.name=%s Armor Plating
 mechtech.modules.night_vision.name=Night Vision
 mechtech.modules.solar_gen.1.name=Solar Gen I
 mechtech.modules.solar_gen.2.name=Solar Gen II
 mechtech.modules.solar_gen.3.name=Solar Gen III
+
+mechtech.modules.armor_plating.tooltip.1=Durability: %d/%d
+mechtech.modules.armor_plating.tooltip.2=Armor: %d
+mechtech.modules.armor_plating.tooltip.3=Toughness: %d
 
 metaitem.modular_helmet.name=Modular Helmet
 metaitem.modular_chestplate.name=Modular Chestplate

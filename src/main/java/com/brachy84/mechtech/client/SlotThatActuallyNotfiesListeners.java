@@ -32,7 +32,6 @@ public class SlotThatActuallyNotfiesListeners extends SlotWidget {
             }
             if(!ItemStack.areItemStackTagsEqual(oldStack, getHandle().getStack()) && getHandle().getStack().isEmpty()) {
                 changeListener.run();
-                writeClientAction(-99, buf -> {});
             }
             return true;
         } else {

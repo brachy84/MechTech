@@ -15,20 +15,19 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagIntArray;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.*;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ISpecialArmor;
 import net.minecraftforge.common.util.Constants;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class ModularArmor implements ISpecialArmorLogic {
+
+    private static final UUID[] ARMOR_MODIFIERS = new UUID[]{UUID.fromString("845DB27C-C624-495F-8C9F-6020A9A58B6B"), UUID.fromString("D8499B04-0E66-4726-AB29-64469D734E0D"), UUID.fromString("9F3D476D-C118-4544-8365-64846904B48E"), UUID.fromString("2AD3F246-FEE1-4E67-B886-69FD380BB150")};
 
     public static ModularArmor get(ItemStack stack) {
         if (stack.getItem() instanceof ArmorMetaItem) {
@@ -59,6 +58,7 @@ public class ModularArmor implements ISpecialArmorLogic {
     public ISpecialArmor.ArmorProperties getProperties(EntityLivingBase entityLivingBase, @Nonnull ItemStack itemStack, DamageSource damageSource, double v, EntityEquipmentSlot entityEquipmentSlot) {
         Collection<IArmorModule> modules = getModulesOf(itemStack);
         ISpecialArmor.ArmorProperties properties = new ISpecialArmor.ArmorProperties(0, 0, Integer.MAX_VALUE);
+        properties.Slot = entityEquipmentSlot.getIndex();
         for (IArmorModule module : modules) {
             ActionResult<ISpecialArmor.ArmorProperties> result = module.modifyArmorProperties(properties, entityLivingBase, itemStack, damageSource, v, entityEquipmentSlot);
             properties = result.getResult();
@@ -94,8 +94,13 @@ public class ModularArmor implements ISpecialArmorLogic {
     }
 
     @Override
-    public int getArmorDisplay(EntityPlayer entityPlayer, @Nonnull ItemStack itemStack, int i) {
-        return 0;
+    public int getArmorDisplay(EntityPlayer player, @Nonnull ItemStack armorPiece, int i) {
+        List<IArmorModule> modules = ModularArmor.getModulesOf(armorPiece);
+        int armor = 0;
+        for (IArmorModule module : modules) {
+            armor += module.getArmorDisplay(player, armorPiece, i);
+        }
+        return armor;
     }
 
     @Override
@@ -128,13 +133,51 @@ public class ModularArmor implements ISpecialArmorLogic {
     }
 
     @Override
-    public void damageArmor(EntityLivingBase entityLivingBase, ItemStack itemStack, DamageSource damageSource, int i, EntityEquipmentSlot entityEquipmentSlot) {
+    public boolean handleUnblockableDamage(EntityLivingBase entity, @Nonnull ItemStack armor, DamageSource source, double damage, EntityEquipmentSlot equipmentSlot) {
+        return true;
+    }
 
+    // I hate how this is done, but it seems to be the best solution
+    @Override
+    public void damageArmor(EntityLivingBase entityLivingBase, ItemStack stack, DamageSource damageSource, int damage, EntityEquipmentSlot entityEquipmentSlot) {
+        NBTTagCompound nbt = stack.getTagCompound();
+        if (nbt == null || !nbt.hasKey(MODULES))
+            return;
+        List<Pair<IArmorModule, NBTTagCompound>> modules = new ArrayList<>();
+        NBTTagList modulesNbt = nbt.getTagList(MODULES, Constants.NBT.TAG_COMPOUND);
+        for (int i = 0; i < modulesNbt.tagCount(); i++) {
+            NBTTagCompound moduleNbt = modulesNbt.getCompoundTagAt(i);
+            IArmorModule module = Modules.getModule(moduleNbt.getInteger("ID"));
+            if (module.isDamageable() && !moduleNbt.getBoolean("Destroyed")) {
+                modules.add(Pair.of(module, moduleNbt));
+            }
+        }
+        while (modules.size() > 0 && damage > 0) {
+            Iterator<Pair<IArmorModule, NBTTagCompound>> iterator = modules.iterator();
+            int c = damage / modules.size();
+            int m = damage % modules.size();
+            while (iterator.hasNext()) {
+                Pair<IArmorModule, NBTTagCompound> entry = iterator.next();
+                int dmg = c;
+                if (m > 0) {
+                    dmg++;
+                    m--;
+                } else if (dmg == 0) {
+                    break;
+                }
+                int damaged = entry.getKey().damage(entityLivingBase, stack, entry.getValue(), damageSource, dmg, entityEquipmentSlot);
+                damage -= damaged;
+                if (damaged != dmg || entry.getValue().getBoolean("Destroyed")) {
+                    iterator.remove();
+                }
+            }
+        }
     }
 
     @Override
-    public Multimap<String, AttributeModifier> getAttributeModifiers(EntityEquipmentSlot entityEquipmentSlot, ItemStack itemStack) {
-        return ImmutableMultimap.of();
+    public Multimap<String, AttributeModifier> getAttributeModifiers(EntityEquipmentSlot equipmentSlot, ItemStack itemStack) {
+        ImmutableMultimap.Builder<String, AttributeModifier> builder = new ImmutableMultimap.Builder<>();
+        return builder.build();
     }
 
     @Override
@@ -267,14 +310,17 @@ public class ModularArmor implements ISpecialArmorLogic {
         ModularArmor armor = get(stack);
         if (armor != null) {
             NBTTagCompound nbt = stack.getTagCompound();
-            if (nbt == null)
+            if (nbt == null || !nbt.hasKey(MODULES))
                 return Collections.emptyList();
-            int[] moduleList = nbt.getIntArray(MODULES);
             List<ItemStack> modules = new ArrayList<>();
-            for (int moduleId : moduleList) {
-                IArmorModule module = Modules.getModule(moduleId);
-                if (module != null) {
-                    modules.add(module.getAsItemStack());
+            NBTTagList modulesNbt = nbt.getTagList(MODULES, Constants.NBT.TAG_COMPOUND);
+            for (int i = 0; i < modulesNbt.tagCount(); i++) {
+                NBTTagCompound moduleNbt = modulesNbt.getCompoundTagAt(i);
+                IArmorModule module = Modules.getModule(moduleNbt.getInteger("ID"));
+                if (moduleNbt.getBoolean("Destroyed")) {
+                    modules.add(module.getDestroyedStack());
+                } else {
+                    modules.add(module.getAsItemStack(moduleNbt));
                 }
             }
             return modules;
@@ -287,15 +333,15 @@ public class ModularArmor implements ISpecialArmorLogic {
         ModularArmor armor = get(stack);
         if (armor != null) {
             NBTTagCompound nbt = stack.getTagCompound();
-            if (nbt == null)
+            if (nbt == null || !nbt.hasKey(MODULES))
                 return Collections.emptyList();
-            int[] moduleList = nbt.getIntArray(MODULES);
+            NBTTagList modulesNbt = nbt.getTagList(MODULES, Constants.NBT.TAG_COMPOUND);
             List<IArmorModule> modules = new ArrayList<>();
-            for (int moduleId : moduleList) {
-                IArmorModule module = Modules.getModule(moduleId);
-                if (module != null) {
+            for (int i = 0; i < modulesNbt.tagCount(); i++) {
+                NBTTagCompound moduleNbt = modulesNbt.getCompoundTagAt(i);
+                IArmorModule module = Modules.getModule(moduleNbt.getInteger("ID"));
+                if (!moduleNbt.getBoolean("Destroyed"))
                     modules.add(module);
-                }
             }
             return modules;
         }
@@ -306,18 +352,51 @@ public class ModularArmor implements ISpecialArmorLogic {
     public static void writeModulesTo(Collection<ItemStack> modules, ItemStack stack) {
         ModularArmor armor = get(stack);
         if (armor != null) {
-            List<Integer> moduleIds = new ArrayList<>();
+            NBTTagList modulesNbt = new NBTTagList();
             for (ItemStack stack1 : modules) {
-                if (stack1.isEmpty())
-                    continue;
-                moduleIds.add(Modules.getModuleId(IArmorModule.getOf(stack1)));
+                NBTTagCompound moduleNbt = new NBTTagCompound();
+                IArmorModule module = IArmorModule.getOf(stack1);
+                moduleNbt.setInteger("ID", Modules.getModuleId(module));
+                module.writeExtraData(moduleNbt, stack1);
+                modulesNbt.appendTag(moduleNbt);
             }
             NBTTagCompound nbt = stack.getTagCompound();
             if (nbt == null) {
                 nbt = new NBTTagCompound();
+                stack.setTagCompound(nbt);
             }
-            nbt.setTag(MODULES, new NBTTagIntArray(moduleIds));
-            stack.setTagCompound(nbt);
+            nbt.setTag(MODULES, modulesNbt);
+        }
+    }
+
+    public static void removeModules(ItemStack stack, Collection<Integer> indexes) {
+        ModularArmor armor = get(stack);
+        if (armor != null) {
+            NBTTagCompound nbt = stack.getTagCompound();
+            if (nbt == null || !nbt.hasKey(MODULES))
+                return;
+            NBTTagList modulesNbt = nbt.getTagList(MODULES, Constants.NBT.TAG_COMPOUND);
+            NBTTagList newList = new NBTTagList();
+            for (int i = 0; i < modulesNbt.tagCount(); i++) {
+                if (!indexes.contains(i))
+                    newList.appendTag(modulesNbt.get(i));
+            }
+            nbt.setTag(MODULES, newList);
+        }
+    }
+
+    public static double armorDamageSpread(EntityEquipmentSlot slot) {
+        switch (slot) {
+            case HEAD:
+                return 0.20;
+            case CHEST:
+                return 0.375;
+            case LEGS:
+                return 0.275;
+            case FEET:
+                return 0.15;
+            default:
+                return 0;
         }
     }
 }

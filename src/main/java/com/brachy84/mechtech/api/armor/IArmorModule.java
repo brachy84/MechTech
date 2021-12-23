@@ -50,7 +50,7 @@ public interface IArmorModule extends IItemComponent {
      */
     static int moduleCount(IArmorModule module, IItemHandler handler) {
         int count = 0;
-        ItemStack moduleItem = module.getAsItemStack();
+        ItemStack moduleItem = module.getAsItemStack(new NBTTagCompound());
         for (int i = 0; i < handler.getSlots(); i++) {
             ItemStack stack = handler.getStackInSlot(i);
             if (!stack.isEmpty() && moduleItem.getItem() == stack.getItem() && moduleItem.getMetadata() == stack.getMetadata() && ItemStack.areItemStackTagsEqual(moduleItem, stack))
@@ -67,7 +67,8 @@ public interface IArmorModule extends IItemComponent {
      * @param modularArmorPiece armor piece
      * @param armorData         nbt data of armor piece
      */
-    void onTick(World world, EntityPlayer player, ItemStack modularArmorPiece, NBTTagCompound armorData);
+    default void onTick(World world, EntityPlayer player, ItemStack modularArmorPiece, NBTTagCompound armorData) {
+    }
 
     /**
      * Called when the worn modular armor piece is taken of
@@ -107,6 +108,33 @@ public interface IArmorModule extends IItemComponent {
         return ActionResult.newResult(EnumActionResult.PASS, properties);
     }
 
+    default int getArmorDisplay(EntityPlayer player, ItemStack armorPiece, int slot) {
+        return 0;
+    }
+
+    /**
+     * @return if this module can be damaged
+     */
+    default boolean isDamageable() {
+        return false;
+    }
+
+    /**
+     * Called when the armor is damaged
+     *
+     * @param entityLivingBase    wearing entity
+     * @param modularArmorPiece   armor piece
+     * @param damageSource        damage source
+     * @param i                   amount
+     * @param entityEquipmentSlot current slot
+     * @return the damage applied to this module
+     * SUCCESS: Modules max damage is reached -> destroy module
+     * PASS: Nothing happens
+     */
+    default int damage(EntityLivingBase entityLivingBase, ItemStack modularArmorPiece, NBTTagCompound moduleData, DamageSource damageSource, int i, EntityEquipmentSlot entityEquipmentSlot) {
+        return 0;
+    }
+
     /**
      * Tooltip that will be added to the armor piece item (NOT THE MODULE)
      *
@@ -119,11 +147,25 @@ public interface IArmorModule extends IItemComponent {
     }
 
     /**
+     * Called when the module is saved to the armor piece
+     *
+     * @param nbt        data
+     * @param moduleItem this module as item
+     */
+    default void writeExtraData(NBTTagCompound nbt, ItemStack moduleItem) {
+    }
+
+    /**
      * ItemStack representation of this module. This item will be put into the {@link com.brachy84.mechtech.comon.machines.MetaTileEntityArmorWorkbench}
      *
+     * @param nbt contains extra data that was written in {@link #writeExtraData(NBTTagCompound, ItemStack)}
      * @return ItemStack representation
      */
-    ItemStack getAsItemStack();
+    ItemStack getAsItemStack(NBTTagCompound nbt);
+
+    default ItemStack getDestroyedStack() {
+        return ItemStack.EMPTY;
+    }
 
     /**
      * @return the name of this module. Will only show in the armor piece tooltip
