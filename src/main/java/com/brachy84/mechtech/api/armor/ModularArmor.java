@@ -1,18 +1,13 @@
 package com.brachy84.mechtech.api.armor;
 
-import com.brachy84.mechtech.api.armor.modules.NightVision;
-import com.brachy84.mechtech.api.armor.modules.SolarGen;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import gregtech.api.GTValues;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IElectricItem;
 import gregtech.api.items.armor.ArmorMetaItem;
 import gregtech.api.items.armor.IArmorLogic;
 import gregtech.api.items.armor.ISpecialArmorLogic;
 import gregtech.api.items.metaitem.stats.IItemBehaviour;
-import gregtech.api.util.GTControlledRegistry;
-import gregtech.common.items.MetaItems;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -35,41 +30,19 @@ import java.util.List;
 
 public class ModularArmor implements ISpecialArmorLogic {
 
-    public static class Modules {
-        public static final IArmorModule nightVision = new NightVision();
-        public static final IArmorModule solarGen1 = new SolarGen(() -> MetaItems.COVER_SOLAR_PANEL_LV.getStackForm(), GTValues.V[1], 1);
-        public static final IArmorModule solarGen2 = new SolarGen(() -> MetaItems.COVER_SOLAR_PANEL_MV.getStackForm(), GTValues.V[2], 2);
-        public static final IArmorModule solarGen3 = new SolarGen(() -> MetaItems.COVER_SOLAR_PANEL_HV.getStackForm(), GTValues.V[3], 3);
-
-        static {
-            registerModule(0, nightVision);
-            registerModule(1, solarGen1);
-            registerModule(2, solarGen2);
-            registerModule(3, solarGen3);
+    public static ModularArmor get(ItemStack stack) {
+        if (stack.getItem() instanceof ArmorMetaItem) {
+            ArmorMetaItem.ArmorMetaValueItem metaValueItem = ((ArmorMetaItem<?>) stack.getItem()).getItem(stack);
+            IArmorLogic logic = metaValueItem.getArmorLogic();
+            if (logic instanceof ModularArmor) {
+                return (ModularArmor) logic;
+            }
         }
-    }
-
-    private static final GTControlledRegistry<Class<? extends IArmorModule>, IArmorModule> MODULE_REGISTRY = new GTControlledRegistry<>(256);
-
-    public static void registerModule(int id, IArmorModule module) {
-        MODULE_REGISTRY.register(id, module.getClass(), module);
-    }
-
-    public static IArmorModule getModule(int id) {
-        return MODULE_REGISTRY.getObjectById(id);
-    }
-
-    public static IArmorModule getModule(Class<? extends IArmorModule> clazz) {
-        return MODULE_REGISTRY.getObject(clazz);
-    }
-
-    public static int getModuleId(IArmorModule module) {
-        return MODULE_REGISTRY.getIDForObject(module);
+        return null;
     }
 
     public static final String BATTERIES = "Batteries";
     public static final String MODULES = "Modules";
-
     private final int moduleSlots;
     private final EntityEquipmentSlot slot;
 
@@ -89,7 +62,7 @@ public class ModularArmor implements ISpecialArmorLogic {
         for (IArmorModule module : modules) {
             ActionResult<ISpecialArmor.ArmorProperties> result = module.modifyArmorProperties(properties, entityLivingBase, itemStack, damageSource, v, entityEquipmentSlot);
             properties = result.getResult();
-            if(result.getType() != EnumActionResult.PASS)
+            if (result.getType() != EnumActionResult.PASS)
                 break;
         }
         return properties;
@@ -100,7 +73,7 @@ public class ModularArmor implements ISpecialArmorLogic {
         Collection<IArmorModule> modules = getModulesOf(itemStack);
         NBTTagCompound armorNbt = itemStack.getTagCompound();
         NBTTagCompound nbt;
-        if(armorNbt != null) {
+        if (armorNbt != null) {
             nbt = armorNbt.getCompoundTag("ModuleData");
         } else {
             armorNbt = new NBTTagCompound();
@@ -170,17 +143,6 @@ public class ModularArmor implements ISpecialArmorLogic {
         return slot != EntityEquipmentSlot.LEGS ?
                 String.format("gregtech:textures/armor/%s_1.png", armorTexture) :
                 String.format("gregtech:textures/armor/%s_2.png", armorTexture);
-    }
-
-    public static ModularArmor get(ItemStack stack) {
-        if (stack.getItem() instanceof ArmorMetaItem) {
-            ArmorMetaItem.ArmorMetaValueItem metaValueItem = ((ArmorMetaItem<?>) stack.getItem()).getItem(stack);
-            IArmorLogic logic = metaValueItem.getArmorLogic();
-            if (logic instanceof ModularArmor) {
-                return (ModularArmor) logic;
-            }
-        }
-        return null;
     }
 
     public static long fill(ItemStack stack, long amount, int tier, boolean simulate) {
@@ -287,13 +249,13 @@ public class ModularArmor implements ISpecialArmorLogic {
     }
 
     public static List<ItemStack> getBatteries(ItemStack stack) {
-        if(!stack.isEmpty() && stack.hasTagCompound()) {
+        if (!stack.isEmpty() && stack.hasTagCompound()) {
             NBTTagCompound nbt = stack.getTagCompound();
-            if(!nbt.hasKey(BATTERIES))
+            if (!nbt.hasKey(BATTERIES))
                 return Collections.emptyList();
             List<ItemStack> batteries = new ArrayList<>();
             NBTTagList list = nbt.getTagList(BATTERIES, Constants.NBT.TAG_COMPOUND);
-            for(int i = 0; i < list.tagCount(); i++) {
+            for (int i = 0; i < list.tagCount(); i++) {
                 batteries.add(new ItemStack(list.getCompoundTagAt(i)));
             }
             return batteries;
@@ -305,12 +267,12 @@ public class ModularArmor implements ISpecialArmorLogic {
         ModularArmor armor = get(stack);
         if (armor != null) {
             NBTTagCompound nbt = stack.getTagCompound();
-            if(nbt == null)
+            if (nbt == null)
                 return Collections.emptyList();
             int[] moduleList = nbt.getIntArray(MODULES);
             List<ItemStack> modules = new ArrayList<>();
             for (int moduleId : moduleList) {
-                IArmorModule module = getModule(moduleId);
+                IArmorModule module = Modules.getModule(moduleId);
                 if (module != null) {
                     modules.add(module.getAsItemStack());
                 }
@@ -325,12 +287,12 @@ public class ModularArmor implements ISpecialArmorLogic {
         ModularArmor armor = get(stack);
         if (armor != null) {
             NBTTagCompound nbt = stack.getTagCompound();
-            if(nbt == null)
+            if (nbt == null)
                 return Collections.emptyList();
             int[] moduleList = nbt.getIntArray(MODULES);
             List<IArmorModule> modules = new ArrayList<>();
             for (int moduleId : moduleList) {
-                IArmorModule module = getModule(moduleId);
+                IArmorModule module = Modules.getModule(moduleId);
                 if (module != null) {
                     modules.add(module);
                 }
@@ -346,9 +308,9 @@ public class ModularArmor implements ISpecialArmorLogic {
         if (armor != null) {
             List<Integer> moduleIds = new ArrayList<>();
             for (ItemStack stack1 : modules) {
-                if(stack1.isEmpty())
+                if (stack1.isEmpty())
                     continue;
-                moduleIds.add(getModuleId(IArmorModule.getOf(stack1)));
+                moduleIds.add(Modules.getModuleId(IArmorModule.getOf(stack1)));
             }
             NBTTagCompound nbt = stack.getTagCompound();
             if (nbt == null) {

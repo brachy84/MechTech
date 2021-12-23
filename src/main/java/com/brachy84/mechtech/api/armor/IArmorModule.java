@@ -99,9 +99,10 @@ public interface IArmorModule extends IItemComponent {
 
     /**
      * Tooltip that will be added to the armor piece item (NOT THE MODULE)
-     * @param itemStack armor piece
-     * @param worldIn current world
-     * @param lines tooltip
+     *
+     * @param itemStack   armor piece
+     * @param worldIn     current world
+     * @param lines       tooltip
      * @param tooltipFlag flag
      */
     default void addTooltip(@Nonnull ItemStack itemStack, @Nullable World worldIn, @Nonnull List<String> lines, @Nonnull ITooltipFlag tooltipFlag) {
@@ -109,6 +110,7 @@ public interface IArmorModule extends IItemComponent {
 
     /**
      * ItemStack representation of this module. This item will be put into the {@link com.brachy84.mechtech.comon.machines.MetaTileEntityArmorWorkbench}
+     *
      * @return ItemStack representation
      */
     ItemStack getAsItemStack();
