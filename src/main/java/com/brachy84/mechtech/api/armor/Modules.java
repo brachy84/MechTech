@@ -35,7 +35,7 @@ public class Modules {
         registerModule(2, solarGen2);
         registerModule(3, solarGen3);
 
-        double MAX_ABSORB = 1 / 14.0; // if the all armor pieces have a module with this absorbtion, the entity will get ~0 damage
+        double MAX_ABSORB = 0.25807; // if the all armor pieces have a module with this absorbtion, the entity will get ~0 damage
 
         registerMaterialArmorModule(1000, Materials.Aluminium, 0.3, 0.0, MAX_ABSORB / 6, 256);
         registerMaterialArmorModule(1001, Materials.Polyethylene, 0.02, 0, MAX_ABSORB / 12, 6);

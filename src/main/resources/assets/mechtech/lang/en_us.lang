@@ -42,3 +42,5 @@ metaitem.modular_boots.name=Modular Boots
 metaitem.modular_armor.no_battery=§4Insert Batteries!
 metaitem.modular_armor.installed_modules=§bInstalled Modules: §7(%d/%d)
 metaitem.modular_armor.no_modules=§cNo Modules installed
+
+mechtech.modular_armor.usable= - Can be used as a module in the Modular Armor

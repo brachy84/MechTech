@@ -32,6 +32,10 @@ public class ProtectionModule implements IArmorModule {
         this.durability = durability;
     }
 
+    public Material getMaterial() {
+        return material;
+    }
+
     public void setStack(ItemStack stack) {
         this.stack = stack;
     }

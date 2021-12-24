@@ -29,10 +29,10 @@ public class MTMetaItem extends StandardMetaItem {
         WIRELESS_RECEIVER = addItem(0, "wireless_receiver");
         //WIRELESS_BINDER = addItem(2001, "wireless_binder");
 
-        MetaItems.NIGHTVISION_GOGGLES.addComponents(Modules.nightVision);
-        MetaItems.COVER_SOLAR_PANEL_LV.addComponents(Modules.solarGen1);
-        MetaItems.COVER_SOLAR_PANEL_MV.addComponents(Modules.solarGen2);
-        MetaItems.COVER_SOLAR_PANEL_HV.addComponents(Modules.solarGen3);
+        MetaItems.NIGHTVISION_GOGGLES.addComponents(Modules.nightVision, canBeUsedinMATooltip());
+        MetaItems.COVER_SOLAR_PANEL_LV.addComponents(Modules.solarGen1, canBeUsedinMATooltip());
+        MetaItems.COVER_SOLAR_PANEL_MV.addComponents(Modules.solarGen2, canBeUsedinMATooltip());
+        MetaItems.COVER_SOLAR_PANEL_HV.addComponents(Modules.solarGen3, canBeUsedinMATooltip());
         for (Map.Entry<Integer, Material> entry : Modules.getArmorModules().entrySet()) {
             ProtectionModule module = (ProtectionModule) Modules.getModule(entry.getKey());
             MetaItem<?>.MetaValueItem metaValueItem = addItem(entry.getKey(), "armor_plating_" + entry.getValue().toString())
@@ -69,12 +69,22 @@ public class MTMetaItem extends StandardMetaItem {
                         public int getRGBDurabilityForDisplay(ItemStack itemStack) {
                             return MathHelper.hsvToRGB((1.0f - (float) getDurabilityForDisplay(itemStack)) / 3.0f, 1.0f, 1.0f);
                         }
-                    });
+                    })
+                    .addComponents(canBeUsedinMATooltip());
             MATERIAL_ARMOR_PLATINGS.put(entry.getValue(), metaValueItem);
 
             module.setStack(metaValueItem.getStackForm());
         }
         //MetaItems.TOOL_DATA_STICK.addComponents(new DataStickBehavior());
+    }
+
+    private IItemBehaviour canBeUsedinMATooltip() {
+        return new IItemBehaviour() {
+            @Override
+            public void addInformation(ItemStack itemStack, List<String> lines) {
+                lines.add(I18n.format("mechtech.modular_armor.usable"));
+            }
+        };
     }
 
     @Override
