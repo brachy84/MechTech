@@ -42,13 +42,15 @@ mechtech.modules.shock_absorber.name=Shock Absorber
 mechtech.modules.armor_plating.tooltip.1=Durability: %d/%d
 mechtech.modules.armor_plating.tooltip.2=Armor: %d
 mechtech.modules.armor_plating.tooltip.3=Toughness: %d
-mechtech.modules.shock_absorber.tooltip=Absorbs 90% fall damage and 80% knock back (does not stack)
 
 metaitem.modular_helmet.name=Modular Helmet
 metaitem.modular_chestplate.name=Modular Chestplate
 metaitem.modular_leggings.name=Modular Leggings
 metaitem.modular_boots.name=Modular Boots
+metaitem.modular_armor.tooltip.unsneak=§aHold Shift
+metaitem.modular_armor.tooltip.sneak=Modular Armor does nothing on it's own and never breaks. It can be modified with various modules inside the Armor Workbench. Some modules require energy. Those also needs batteries.
 metaitem.shock_absorber.name=Shock Absorber
+metaitem.shock_absorber.tooltip=Absorbs 90%% fall damage and reduces knock back (does not stack)
 
 metaitem.modular_armor.no_battery=§4Insert Batteries!
 metaitem.modular_armor.installed_modules=§bInstalled Modules: §7(%d/%d)

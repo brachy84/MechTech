@@ -28,7 +28,7 @@ public class MTMetaItem extends StandardMetaItem {
     public void registerSubItems() {
         WIRELESS_RECEIVER = addItem(0, "wireless_receiver");
         SHOCK_ABSORBER = addItem(1, "shock_absorber")
-                .addComponents(Modules.SHOCK_ABSORBER, canBeUsedinMATooltip(I18n.format("metaitem.shock_absorber.tooltip")));
+                .addComponents(Modules.SHOCK_ABSORBER, canBeUsedinMATooltip());
         //WIRELESS_BINDER = addItem(2001, "wireless_binder");
 
         MetaItems.NIGHTVISION_GOGGLES.addComponents(Modules.nightVision, canBeUsedinMATooltip());

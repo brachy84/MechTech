@@ -5,6 +5,7 @@ import com.brachy84.mechtech.api.armor.ModularArmor;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IElectricItem;
 import gregtech.api.items.armor.ArmorMetaItem;
+import gregtech.api.items.metaitem.MetaItem;
 import gregtech.api.items.metaitem.stats.IItemBehaviour;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
@@ -12,6 +13,7 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
+import org.lwjgl.input.Keyboard;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -35,6 +37,11 @@ public class MTArmorItem extends ArmorMetaItem<ArmorMetaItem<?>.ArmorMetaValueIt
     public void addInformation(@Nonnull ItemStack itemStack, @Nullable World worldIn, @Nonnull List<String> lines, @Nonnull ITooltipFlag tooltipFlag) {
         ArmorMetaItem<?>.ArmorMetaValueItem item = this.getItem(itemStack);
         if (item != null) {
+            if (Keyboard.isKeyDown(42) || Keyboard.isKeyDown(54)) {
+                lines.add(I18n.format("metaitem.modular_armor.tooltip.sneak"));
+            } else {
+                lines.add(I18n.format("metaitem.modular_armor.tooltip.unsneak"));
+            }
             Collection<IArmorModule> modules = ModularArmor.getModulesOf(itemStack);
             ModularArmor modularArmor = ModularArmor.get(itemStack);
             String unlocalizedTooltip = "metaitem." + item.unlocalizedName + ".tooltip";
@@ -67,5 +74,15 @@ public class MTArmorItem extends ArmorMetaItem<ArmorMetaItem<?>.ArmorMetaValueIt
                 behaviour.addInformation(itemStack, lines);
             }
         }
+    }
+
+    @Override
+    public boolean showDurabilityBar(@Nonnull ItemStack stack) {
+        MetaItem<?>.MetaValueItem metaValueItem = getItem(stack);
+        if (metaValueItem != null && metaValueItem.getDurabilityManager() != null) {
+            return metaValueItem.getDurabilityManager().showsDurabilityBar(stack);
+        }
+        IElectricItem electricItem = stack.getCapability(GregtechCapabilities.CAPABILITY_ELECTRIC_ITEM, null);
+        return ModularArmor.getBatteries(stack).size() > 0 && electricItem != null && (stack.getMaxStackSize() == 1 || electricItem.getCharge() > 0L);
     }
 }
