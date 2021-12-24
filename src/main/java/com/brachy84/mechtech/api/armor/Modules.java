@@ -1,8 +1,6 @@
 package com.brachy84.mechtech.api.armor;
 
-import com.brachy84.mechtech.api.armor.modules.NightVision;
-import com.brachy84.mechtech.api.armor.modules.ProtectionModule;
-import com.brachy84.mechtech.api.armor.modules.SolarGen;
+import com.brachy84.mechtech.api.armor.modules.*;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import gregtech.api.GTValues;
@@ -32,18 +30,24 @@ public class Modules {
     public static final IArmorModule solarGen1 = new SolarGen(() -> MetaItems.COVER_SOLAR_PANEL_LV.getStackForm(), GTValues.V[1], 1);
     public static final IArmorModule solarGen2 = new SolarGen(() -> MetaItems.COVER_SOLAR_PANEL_MV.getStackForm(), GTValues.V[2], 2);
     public static final IArmorModule solarGen3 = new SolarGen(() -> MetaItems.COVER_SOLAR_PANEL_HV.getStackForm(), GTValues.V[3], 3);
+    public static final IArmorModule JETPACK = new JetpackModule();
+    public static final IArmorModule ADVANCED_JETPACK = new AdvancedJetpack();
+    public static final IArmorModule SHOCK_ABSORBER = new ShockAbsorber();
 
     static {
         registerModule(0, nightVision);
         registerModule(1, solarGen1);
         registerModule(2, solarGen2);
         registerModule(3, solarGen3);
+        registerModule(4, JETPACK);
+        registerModule(5, ADVANCED_JETPACK);
+        registerModule(6, SHOCK_ABSORBER);
 
         double MAX_ABSORB = 0.25807; // if the all armor pieces have a module with this absorbtion, the entity will get ~0 damage
 
-        registerMaterialArmorModule(1000, Materials.Aluminium, 0.3, 0.0, MAX_ABSORB / 6, 256);
+        registerMaterialArmorModule(1000, Materials.Aluminium, 1, 0.0, MAX_ABSORB / 6, 256);
         registerMaterialArmorModule(1001, Materials.Polyethylene, 0.02, 0, MAX_ABSORB / 12, 6);
-        registerMaterialArmorModule(2000, Materials.Neutronium, 100, 100, MAX_ABSORB, 16384);
+        registerMaterialArmorModule(2000, Materials.Neutronium, 2, 1, MAX_ABSORB, 16384);
     }
 
     public static void registerModule(int id, IArmorModule module) {

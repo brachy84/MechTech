@@ -1,6 +1,8 @@
 package com.brachy84.mechtech.api.armor.modules;
 
 import com.brachy84.mechtech.api.armor.IArmorModule;
+import com.brachy84.mechtech.api.armor.Modules;
+import com.google.common.collect.Lists;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IElectricItem;
 import net.minecraft.client.Minecraft;
@@ -12,6 +14,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.items.IItemHandler;
 
+import java.util.Collection;
 import java.util.function.Supplier;
 
 public class SolarGen implements IArmorModule {
@@ -42,13 +45,19 @@ public class SolarGen implements IArmorModule {
                     if (generated <= 0)
                         break;
                 }
+                player.inventoryContainer.detectAndSendChanges();
             }
         }
     }
 
     @Override
     public boolean canPlaceIn(EntityEquipmentSlot slot, ItemStack modularArmorPiece, IItemHandler modularSlots) {
-        return slot == EntityEquipmentSlot.HEAD && IArmorModule.moduleCount(this, modularSlots) == 0;
+        return slot == EntityEquipmentSlot.HEAD;
+    }
+
+    @Override
+    public Collection<IArmorModule> getIncompatibleModules() {
+        return Lists.newArrayList(Modules.solarGen1, Modules.solarGen2, Modules.solarGen3);
     }
 
     @Override
@@ -57,7 +66,7 @@ public class SolarGen implements IArmorModule {
     }
 
     @Override
-    public String getLocalizedName() {
-        return "mechtech.modules.solar_gen." + tier + ".name";
+    public String getModuleId() {
+        return "solar_gen." + tier;
     }
 }

@@ -12,12 +12,12 @@ public class MTMetaItems {
     public static MetaItem<?>.MetaValueItem WIRELESS_RECEIVER;
     public static MetaItem<?>.MetaValueItem WIRELESS_BINDER;
 
+    public static MetaItem<?>.MetaValueItem SHOCK_ABSORBER;
+
     public static ArmorMetaItem<?>.ArmorMetaValueItem MODULAR_HELMET;
     public static ArmorMetaItem<?>.ArmorMetaValueItem MODULAR_CHESTPLATE;
     public static ArmorMetaItem<?>.ArmorMetaValueItem MODULAR_LEGGINGS;
     public static ArmorMetaItem<?>.ArmorMetaValueItem MODULAR_BOOTS;
-
-    public static MetaItem<?>.MetaValueItem ARMOR_PLATING;
 
     public static final Map<Material, MetaItem<?>.MetaValueItem> MATERIAL_ARMOR_PLATINGS = new HashMap<>();
 

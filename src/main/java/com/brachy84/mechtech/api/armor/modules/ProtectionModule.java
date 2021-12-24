@@ -22,6 +22,7 @@ public class ProtectionModule implements IArmorModule {
     private ItemStack stack;
     public final double armor, toughness, absorption;
     public final int durability;
+    public boolean doGenerateMaterialRecipe = true;
 
     public ProtectionModule(Material material, ItemStack stack, double armor, double toughness, double absorption, int durability) {
         this.material = material;
@@ -36,12 +37,18 @@ public class ProtectionModule implements IArmorModule {
         return material;
     }
 
+    public ProtectionModule dontGenerateMaterialRecipe() {
+        this.doGenerateMaterialRecipe = false;
+        return this;
+    }
+
     public void setStack(ItemStack stack) {
         this.stack = stack;
     }
 
     @Override
-    public void onTick(World world, EntityPlayer player, ItemStack modularArmorPiece, NBTTagCompound armorData) {
+    public int maxModules() {
+        return Integer.MAX_VALUE;
     }
 
     @Override
@@ -81,7 +88,8 @@ public class ProtectionModule implements IArmorModule {
 
     @Override
     public int getArmorDisplay(EntityPlayer player, ItemStack armorPiece, int slot) {
-        EntityEquipmentSlot equipmentSlot;
+        return 6;
+        /*EntityEquipmentSlot equipmentSlot;
         switch (slot) {
             case 0:
                 equipmentSlot = EntityEquipmentSlot.FEET;
@@ -95,7 +103,7 @@ public class ProtectionModule implements IArmorModule {
             default:
                 equipmentSlot = EntityEquipmentSlot.HEAD;
         }
-        return (int) (absorption * ModularArmor.armorDamageSpread(equipmentSlot) * 4);
+        return (int) (absorption * ModularArmor.armorDamageSpread(equipmentSlot) * 4);*/
     }
 
     @Override
@@ -123,5 +131,10 @@ public class ProtectionModule implements IArmorModule {
     @Override
     public String getLocalizedName() {
         return I18n.format("mechtech.modules.armor_plating.name", material.getLocalizedName());
+    }
+
+    @Override
+    public String getModuleId() {
+        return "armor_plating";
     }
 }

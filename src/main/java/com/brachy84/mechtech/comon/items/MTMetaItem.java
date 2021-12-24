@@ -12,11 +12,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.MathHelper;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static com.brachy84.mechtech.comon.items.MTMetaItems.MATERIAL_ARMOR_PLATINGS;
-import static com.brachy84.mechtech.comon.items.MTMetaItems.WIRELESS_RECEIVER;
+import static com.brachy84.mechtech.comon.items.MTMetaItems.*;
 
 public class MTMetaItem extends StandardMetaItem {
 
@@ -27,15 +27,23 @@ public class MTMetaItem extends StandardMetaItem {
     @Override
     public void registerSubItems() {
         WIRELESS_RECEIVER = addItem(0, "wireless_receiver");
+        SHOCK_ABSORBER = addItem(1, "shock_absorber")
+                .addComponents(Modules.SHOCK_ABSORBER, canBeUsedinMATooltip(I18n.format("metaitem.shock_absorber.tooltip")));
         //WIRELESS_BINDER = addItem(2001, "wireless_binder");
 
         MetaItems.NIGHTVISION_GOGGLES.addComponents(Modules.nightVision, canBeUsedinMATooltip());
         MetaItems.COVER_SOLAR_PANEL_LV.addComponents(Modules.solarGen1, canBeUsedinMATooltip());
         MetaItems.COVER_SOLAR_PANEL_MV.addComponents(Modules.solarGen2, canBeUsedinMATooltip());
         MetaItems.COVER_SOLAR_PANEL_HV.addComponents(Modules.solarGen3, canBeUsedinMATooltip());
+        MetaItems.IMPELLER_JETPACK.addComponents(Modules.JETPACK, canBeUsedinMATooltip());
+        MetaItems.ADVANCED_IMPELLER_JETPACK.addComponents(Modules.ADVANCED_JETPACK, canBeUsedinMATooltip());
+
+
+        // Armor Platings
         for (Map.Entry<Integer, Material> entry : Modules.getArmorModules().entrySet()) {
             ProtectionModule module = (ProtectionModule) Modules.getModule(entry.getKey());
             MetaItem<?>.MetaValueItem metaValueItem = addItem(entry.getKey(), "armor_plating_" + entry.getValue().toString())
+                    // armor module & color provider
                     .addComponents(Modules.getModule(entry.getKey()), ((IItemColorProvider) (stack, layer) -> entry.getValue().getMaterialRGB()))
                     .addComponents(new IItemBehaviour() {
                         @Override
@@ -50,8 +58,11 @@ public class MTMetaItem extends StandardMetaItem {
                             lines.add(I18n.format("mechtech.modules.armor_plating.tooltip.3", module.toughness));
                         }
                     })
+                    // name provider
                     .addComponents(((IItemNameProvider) (stack, name) -> I18n.format("mechtech.modules.armor_plating.name", entry.getValue().getLocalizedName())))
+                    // stack size provider
                     .addComponents((IItemMaxStackSizeProvider) (itemStack, i) -> 64)
+                    // durability handler
                     .addComponents(new IItemDurabilityManager() {
                         @Override
                         public boolean showsDurabilityBar(ItemStack itemStack) {
@@ -70,6 +81,7 @@ public class MTMetaItem extends StandardMetaItem {
                             return MathHelper.hsvToRGB((1.0f - (float) getDurabilityForDisplay(itemStack)) / 3.0f, 1.0f, 1.0f);
                         }
                     })
+                    // tooltip
                     .addComponents(canBeUsedinMATooltip());
             MATERIAL_ARMOR_PLATINGS.put(entry.getValue(), metaValueItem);
 
@@ -78,11 +90,12 @@ public class MTMetaItem extends StandardMetaItem {
         //MetaItems.TOOL_DATA_STICK.addComponents(new DataStickBehavior());
     }
 
-    private IItemBehaviour canBeUsedinMATooltip() {
+    private IItemBehaviour canBeUsedinMATooltip(String... additionalLines) {
         return new IItemBehaviour() {
             @Override
             public void addInformation(ItemStack itemStack, List<String> lines) {
                 lines.add(I18n.format("mechtech.modular_armor.usable"));
+                lines.addAll(Arrays.asList(additionalLines));
             }
         };
     }

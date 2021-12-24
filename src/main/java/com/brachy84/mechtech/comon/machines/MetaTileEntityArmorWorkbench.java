@@ -4,6 +4,7 @@ import codechicken.lib.render.CCRenderState;
 import codechicken.lib.render.pipeline.ColourMultiplier;
 import codechicken.lib.render.pipeline.IVertexOperation;
 import codechicken.lib.vec.Matrix4;
+import com.brachy84.mechtech.api.armor.IArmorModule;
 import com.brachy84.mechtech.api.armor.ModularArmor;
 import com.brachy84.mechtech.client.BatterySlot;
 import com.brachy84.mechtech.client.ClientHandler;
@@ -24,6 +25,8 @@ import gregtech.api.util.GTUtility;
 import gregtech.api.util.Position;
 import gregtech.api.util.Size;
 import gregtech.client.renderer.texture.Textures;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
@@ -54,10 +57,17 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
             {151, 60}
     };
 
+    private static final String REQUIRED = "mechtech.modular_workbench.error1";
+    private static final String INCOMPATIBLE = "mechtech.modular_workbench.error2";
+    private static final String NOT_MODULE = "mechtech.modular_workbench.error3";
+    private static final String MAX_MODULES = "mechtech.modular_workbench.error4";
+    private static final String INVALID_SLOT = "mechtech.modular_workbench.error5";
+
     private ItemStack lastArmor = ItemStack.EMPTY;
     private ItemStackHandler mainSlot;
     private ItemStackHandler moduleSlotHandler;
     private ItemStackHandler batterySlotHandler;
+    private String errorMsg = "";
 
     public MetaTileEntityArmorWorkbench(ResourceLocation metaTileEntityId) {
         super(metaTileEntityId);
@@ -94,7 +104,8 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
     @Override
     protected ModularUI createUI(EntityPlayer player) {
         ModularUI.Builder builder = ModularUI.builder(ClientHandler.ARMOR_WORKBENCH_BACKGROUND, 176, 166);
-        builder.bindPlayerInventory(entityPlayer.inventory);
+        builder.bindPlayerInventory(player.inventory);
+        builder.dynamicLabel(56, 8, () -> errorMsg, 0x8A1F11);
 
         WidgetGroup moduleSlots = new WidgetGroup(Position.ORIGIN, new Size(176, 84));
         for (int i = 0; i < slotPositions.length; i++) {

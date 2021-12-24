@@ -9,13 +9,13 @@ import java.util.function.Predicate;
 
 public class ModuleSlot extends SlotWidget {
 
-    private Predicate<IArmorModule> armorModulePredicate;
+    private Predicate<ItemStack> armorModulePredicate;
 
     public ModuleSlot(IItemHandler inventory, int slotIndex, int xPosition, int yPosition) {
         super(inventory, slotIndex, xPosition, yPosition, true, true);
     }
 
-    public ModuleSlot setArmorModulePredicate(Predicate<IArmorModule> armorModulePredicate) {
+    public ModuleSlot setPredicate(Predicate<ItemStack> armorModulePredicate) {
         this.armorModulePredicate = armorModulePredicate;
         return this;
     }
@@ -24,9 +24,6 @@ public class ModuleSlot extends SlotWidget {
     public boolean canPutStack(ItemStack stack) {
         if(!isEnabled())
             return false;
-        IArmorModule module = IArmorModule.getOf(stack);
-        if(module == null)
-            return false;
-        return armorModulePredicate.test(module);
+        return armorModulePredicate.test(stack);
     }
 }

@@ -28,6 +28,7 @@ public class NightVision implements IArmorModule {
             } else {
                 player.removePotionEffect(MobEffects.NIGHT_VISION);
             }
+            player.inventoryContainer.detectAndSendChanges();
         }
     }
 
@@ -40,7 +41,7 @@ public class NightVision implements IArmorModule {
 
     @Override
     public boolean canPlaceIn(EntityEquipmentSlot slot, ItemStack modularArmorPiece, IItemHandler modularSlots) {
-        return slot == EntityEquipmentSlot.HEAD && IArmorModule.moduleCount(this, modularSlots) == 0;
+        return slot == EntityEquipmentSlot.HEAD;
     }
 
     @Override
@@ -49,7 +50,7 @@ public class NightVision implements IArmorModule {
     }
 
     @Override
-    public String getLocalizedName() {
-        return I18n.format("mechtech.modules.night_vision.name");
+    public String getModuleId() {
+        return "night_vision";
     }
 }

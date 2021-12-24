@@ -9,6 +9,12 @@ mechtech.machine.tesla_tower.name=Tesla Tower
 mechtech.machine.armor_workbench.name=Armor Workbench
 mechtech.machine.armor_workbench.tooltip=Can be used to modify Modular Armor
 
+mechtech.modular_workbench.error1=Module %s is required
+mechtech.modular_workbench.error2=Incompatible with %s
+mechtech.modular_workbench.error3=This is not a Module
+mechtech.modular_workbench.error4=Can't insert more of this module
+mechtech.modular_workbench.error5=Invalid armor piece
+
 mechtech.multiblock.tesla_tower.range=Range: %s
 mechtech.multiblock.tesla_tower.voltage=Voltage: %d
 mechtech.multiblock.tesla_tower.receivers=Receivers: %d
@@ -29,15 +35,20 @@ mechtech.modules.night_vision.name=Night Vision
 mechtech.modules.solar_gen.1.name=Solar Gen I
 mechtech.modules.solar_gen.2.name=Solar Gen II
 mechtech.modules.solar_gen.3.name=Solar Gen III
+mechtech.modules.jetpack.name=Thruster Jetpack
+mechtech.modules.advanced_jetpack.name=Advanced Thruster Jetpack
+mechtech.modules.shock_absorber.name=Shock Absorber
 
 mechtech.modules.armor_plating.tooltip.1=Durability: %d/%d
 mechtech.modules.armor_plating.tooltip.2=Armor: %d
 mechtech.modules.armor_plating.tooltip.3=Toughness: %d
+mechtech.modules.shock_absorber.tooltip=Absorbs 90% fall damage and 80% knock back (does not stack)
 
 metaitem.modular_helmet.name=Modular Helmet
 metaitem.modular_chestplate.name=Modular Chestplate
 metaitem.modular_leggings.name=Modular Leggings
 metaitem.modular_boots.name=Modular Boots
+metaitem.shock_absorber.name=Shock Absorber
 
 metaitem.modular_armor.no_battery=§4Insert Batteries!
 metaitem.modular_armor.installed_modules=§bInstalled Modules: §7(%d/%d)

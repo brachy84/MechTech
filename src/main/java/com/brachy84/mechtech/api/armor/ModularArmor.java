@@ -356,6 +356,8 @@ public class ModularArmor implements ISpecialArmorLogic {
             for (ItemStack stack1 : modules) {
                 NBTTagCompound moduleNbt = new NBTTagCompound();
                 IArmorModule module = IArmorModule.getOf(stack1);
+                if(module == null)
+                    throw new NullPointerException("Module is null");
                 moduleNbt.setInteger("ID", Modules.getModuleId(module));
                 module.writeExtraData(moduleNbt, stack1);
                 modulesNbt.appendTag(moduleNbt);
