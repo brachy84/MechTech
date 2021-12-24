@@ -92,7 +92,7 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
     }
 
     @Override
-    protected ModularUI createUI(EntityPlayer entityPlayer) {
+    protected ModularUI createUI(EntityPlayer player) {
         ModularUI.Builder builder = ModularUI.builder(ClientHandler.ARMOR_WORKBENCH_BACKGROUND, 176, 166);
         builder.bindPlayerInventory(entityPlayer.inventory);
 
@@ -127,7 +127,7 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
             moduleSlots.addWidget(slot);
         }
         builder.image(-26, 0, 26, 88, ClientHandler.ARMOR_SLOTS_BACKGROUND);
-        ArmorInventoryWrapper armorInventory = new ArmorInventoryWrapper(entityPlayer);
+        ArmorInventoryWrapper armorInventory = new ArmorInventoryWrapper(player);
         builder.slot(armorInventory, 0, -18, 62, GuiTextures.SLOT);
         builder.slot(armorInventory, 1, -18, 44, GuiTextures.SLOT);
         builder.slot(armorInventory, 2, -18, 26, GuiTextures.SLOT);
@@ -158,7 +158,35 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
                             if (count == modularArmor.getModuleSlots())
                                 continue;
                             count++;
-                            ((ModuleSlot) widget).setArmorModulePredicate(module -> module.canPlaceIn(modularArmor.getSlot(), stack, moduleSlotHandler));
+                            ((ModuleSlot) widget).setPredicate(stack1 -> {
+                                IArmorModule module = IArmorModule.getOf(stack1);
+                                if(module == null) {
+                                    setErrorMsg(player, NOT_MODULE);
+                                    return false;
+                                }
+                                if(!module.canPlaceIn(modularArmor.getSlot(), stack, moduleSlotHandler)) {
+                                    setErrorMsg(player, INVALID_SLOT);
+                                    return false;
+                                }
+                                if(!(module.maxModules() <= 0 || module.maxModules() > IArmorModule.moduleCount(module, moduleSlotHandler))) {
+                                    setErrorMsg(player, MAX_MODULES);
+                                    return false;
+                                }
+                                List<IArmorModule> modules = getModules();
+                                for(IArmorModule module1 : modules) {
+                                    if(module1.getIncompatibleModules().contains(module) || module.getIncompatibleModules().contains(module1)) {
+                                        setErrorMsg(player, INCOMPATIBLE, module1.getLocalizedName());
+                                        return false;
+                                    }
+                                }
+                                for(IArmorModule module1 : module.getRequiredModules()) {
+                                    if(!modules.contains(module1)) {
+                                        setErrorMsg(player, REQUIRED, module1.getLocalizedName());
+                                        return false;
+                                    }
+                                }
+                                return true;
+                            });
                         }
                         widget.setActive(true);
                         widget.setVisible(true);
@@ -190,7 +218,23 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
         });
         builder.widget(mainSlot);
         builder.widget(moduleSlots);
-        return builder.build(getHolder(), entityPlayer);
+        return builder.build(getHolder(), player);
+    }
+
+    private void setErrorMsg(EntityPlayer player, String msg, Object... data) {
+        if(player instanceof EntityPlayerSP) {
+            this.errorMsg = I18n.format(msg, data);
+        }
+    }
+
+    private List<IArmorModule> getModules() {
+        List<IArmorModule> modules = new ArrayList<>();
+        for(int i = 0; i < moduleSlotHandler.getSlots(); i++) {
+            IArmorModule module = IArmorModule.getOf(moduleSlotHandler.getStackInSlot(i));
+            if(module != null)
+                modules.add(module);
+        }
+        return modules;
     }
 
     @Override

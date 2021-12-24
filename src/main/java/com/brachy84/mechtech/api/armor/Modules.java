@@ -20,6 +20,10 @@ public class Modules {
     private static final BiMap<Integer, IArmorModule> REGISTRY = HashBiMap.create(2000);
     private static final Map<Integer, Material> ARMOR_MODULES = new HashMap<>();
 
+    public static Iterable<IArmorModule> getRegisteredModules() {
+        return REGISTRY.values();
+    }
+
     public static Map<Integer, Material> getArmorModules() {
         return Collections.unmodifiableMap(ARMOR_MODULES);
     }
@@ -57,6 +61,10 @@ public class Modules {
     }
 
     public static int getModuleId(IArmorModule module) {
-        return REGISTRY.inverse().get(module);
+        Integer id = REGISTRY.inverse().get(module);
+        if(id == null) {
+            throw new IllegalStateException("Module " + module.getModuleId() + " is not registered");
+        }
+        return id;
     }
 }

@@ -2,6 +2,7 @@ package com.brachy84.mechtech.api.armor;
 
 import gregtech.api.items.metaitem.MetaItem;
 import gregtech.api.items.metaitem.stats.IItemComponent;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -19,6 +20,8 @@ import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public interface IArmorModule extends IItemComponent {
@@ -57,6 +60,33 @@ public interface IArmorModule extends IItemComponent {
                 count += stack.getCount();
         }
         return count;
+    }
+
+    /**
+     * Called when the module is placed in the workbench.
+     *
+     * @return how many of this modules can be in the same armor piece
+     */
+    default int maxModules() {
+        return 1;
+    }
+
+    /**
+     * Called when the module is placed in the workbench. If any if these modules is not already there, it can not be placed.
+     *
+     * @return required modules
+     */
+    default Collection<IArmorModule> getRequiredModules() {
+        return Collections.emptyList();
+    }
+
+    /**
+     * Called when the module is placed in the workbench. If any if these modules is already there, it can not be placed.
+     *
+     * @return incompatible modules
+     */
+    default Collection<IArmorModule> getIncompatibleModules() {
+        return Collections.emptyList();
     }
 
     /**
@@ -171,5 +201,9 @@ public interface IArmorModule extends IItemComponent {
      * @return the name of this module. Will only show in the armor piece tooltip
      */
     @SideOnly(Side.CLIENT)
-    String getLocalizedName();
+    default String getLocalizedName() {
+        return I18n.format("mechtech.modules." + getModuleId() + ".name");
+    }
+
+    String getModuleId();
 }
