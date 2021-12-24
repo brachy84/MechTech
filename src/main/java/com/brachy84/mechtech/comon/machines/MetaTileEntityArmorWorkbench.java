@@ -6,10 +6,7 @@ import codechicken.lib.render.pipeline.IVertexOperation;
 import codechicken.lib.vec.Matrix4;
 import com.brachy84.mechtech.api.armor.IArmorModule;
 import com.brachy84.mechtech.api.armor.ModularArmor;
-import com.brachy84.mechtech.client.BatterySlot;
-import com.brachy84.mechtech.client.ClientHandler;
-import com.brachy84.mechtech.client.ModuleSlot;
-import com.brachy84.mechtech.client.SlotThatActuallyNotfiesListeners;
+import com.brachy84.mechtech.client.*;
 import com.google.common.collect.Lists;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IElectricItem;
@@ -25,8 +22,6 @@ import gregtech.api.util.GTUtility;
 import gregtech.api.util.Position;
 import gregtech.api.util.Size;
 import gregtech.client.renderer.texture.Textures;
-import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
@@ -67,7 +62,6 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
     private ItemStackHandler mainSlot;
     private ItemStackHandler moduleSlotHandler;
     private ItemStackHandler batterySlotHandler;
-    private String errorMsg = "";
 
     public MetaTileEntityArmorWorkbench(ResourceLocation metaTileEntityId) {
         super(metaTileEntityId);
@@ -105,7 +99,8 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
     protected ModularUI createUI(EntityPlayer player) {
         ModularUI.Builder builder = ModularUI.builder(ClientHandler.ARMOR_WORKBENCH_BACKGROUND, 176, 166);
         builder.bindPlayerInventory(player.inventory);
-        builder.dynamicLabel(56, 8, () -> errorMsg, 0x8A1F11);
+        ErrorTextWidget errorTextWidget = new ErrorTextWidget(136, 8).setCentered(true).setWidth(71);
+        builder.widget(errorTextWidget);
 
         WidgetGroup moduleSlots = new WidgetGroup(Position.ORIGIN, new Size(176, 84));
         for (int i = 0; i < slotPositions.length; i++) {
@@ -120,17 +115,8 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
             int[] pos = batterySlots[i];
             SlotWidget slot = new BatterySlot(batterySlotHandler, i, pos[0], pos[1])
                     .setFilter(stack -> {
-                        long totalCap = 0;
-                        for (int j = 0; j < batterySlotHandler.getSlots(); j++) {
-                            ItemStack stack1 = batterySlotHandler.getStackInSlot(j);
-                            if (stack1.isEmpty()) continue;
-                            IElectricItem electricItem = stack1.getCapability(GregtechCapabilities.CAPABILITY_ELECTRIC_ITEM, null);
-                            if (electricItem == null) continue;
-                            long max = electricItem.getMaxCharge();
-                            if (Long.MAX_VALUE - totalCap > max || (totalCap += max) >= Long.MAX_VALUE)
-                                return false;
-                        }
-                        return true;
+                        IElectricItem electricItem = stack.getCapability(GregtechCapabilities.CAPABILITY_ELECTRIC_ITEM, null);
+                        return electricItem != null && electricItem.getMaxCharge() <= Long.MAX_VALUE / 3.0;
                     });
             slot.setBackgroundTexture(GuiTextures.SLOT, GuiTextures.BATTERY_OVERLAY);
             slot.setActive(false);
@@ -171,28 +157,28 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
                             count++;
                             ((ModuleSlot) widget).setPredicate(stack1 -> {
                                 IArmorModule module = IArmorModule.getOf(stack1);
-                                if(module == null) {
-                                    setErrorMsg(player, NOT_MODULE);
+                                if (module == null) {
+                                    errorTextWidget.updateText(NOT_MODULE);
                                     return false;
                                 }
-                                if(!module.canPlaceIn(modularArmor.getSlot(), stack, moduleSlotHandler)) {
-                                    setErrorMsg(player, INVALID_SLOT);
+                                if (!module.canPlaceIn(modularArmor.getSlot(), stack, moduleSlotHandler)) {
+                                    errorTextWidget.updateText(INVALID_SLOT);
                                     return false;
                                 }
-                                if(!(module.maxModules() <= 0 || module.maxModules() > IArmorModule.moduleCount(module, moduleSlotHandler))) {
-                                    setErrorMsg(player, MAX_MODULES);
+                                if (!(module.maxModules() <= 0 || module.maxModules() > IArmorModule.moduleCount(module, moduleSlotHandler))) {
+                                    errorTextWidget.updateText(MAX_MODULES);
                                     return false;
                                 }
                                 List<IArmorModule> modules = getModules();
-                                for(IArmorModule module1 : modules) {
-                                    if(module1.getIncompatibleModules().contains(module) || module.getIncompatibleModules().contains(module1)) {
-                                        setErrorMsg(player, INCOMPATIBLE, module1.getLocalizedName());
+                                for (IArmorModule module1 : modules) {
+                                    if (module1.getIncompatibleModules().contains(module) || module.getIncompatibleModules().contains(module1)) {
+                                        errorTextWidget.updateText(INCOMPATIBLE, module1.getLocalizedName());
                                         return false;
                                     }
                                 }
-                                for(IArmorModule module1 : module.getRequiredModules()) {
-                                    if(!modules.contains(module1)) {
-                                        setErrorMsg(player, REQUIRED, module1.getLocalizedName());
+                                for (IArmorModule module1 : module.getRequiredModules()) {
+                                    if (!modules.contains(module1)) {
+                                        errorTextWidget.updateText(REQUIRED, module1.getLocalizedName());
                                         return false;
                                     }
                                 }
@@ -232,17 +218,11 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
         return builder.build(getHolder(), player);
     }
 
-    private void setErrorMsg(EntityPlayer player, String msg, Object... data) {
-        if(player instanceof EntityPlayerSP) {
-            this.errorMsg = I18n.format(msg, data);
-        }
-    }
-
     private List<IArmorModule> getModules() {
         List<IArmorModule> modules = new ArrayList<>();
-        for(int i = 0; i < moduleSlotHandler.getSlots(); i++) {
+        for (int i = 0; i < moduleSlotHandler.getSlots(); i++) {
             IArmorModule module = IArmorModule.getOf(moduleSlotHandler.getStackInSlot(i));
-            if(module != null)
+            if (module != null)
                 modules.add(module);
         }
         return modules;
@@ -310,7 +290,7 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
             ItemStack currentStack = getStackInSlot(slot);
             if (amount <= 0 || currentStack.isEmpty())
                 return ItemStack.EMPTY;
-            if(!simulate)
+            if (!simulate)
                 setStackInSlot(slot, ItemStack.EMPTY);
             return currentStack;
         }
