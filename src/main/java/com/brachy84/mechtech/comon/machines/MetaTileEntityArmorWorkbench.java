@@ -6,6 +6,7 @@ import codechicken.lib.render.pipeline.IVertexOperation;
 import codechicken.lib.vec.Matrix4;
 import com.brachy84.mechtech.api.armor.ModularArmor;
 import com.brachy84.mechtech.client.BatterySlot;
+import com.brachy84.mechtech.client.ClientHandler;
 import com.brachy84.mechtech.client.ModuleSlot;
 import com.brachy84.mechtech.client.SlotThatActuallyNotfiesListeners;
 import com.google.common.collect.Lists;
@@ -92,7 +93,7 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
 
     @Override
     protected ModularUI createUI(EntityPlayer entityPlayer) {
-        ModularUI.Builder builder = ModularUI.defaultBuilder();
+        ModularUI.Builder builder = ModularUI.builder(ClientHandler.ARMOR_WORKBENCH_BACKGROUND, 176, 166);
         builder.bindPlayerInventory(entityPlayer.inventory);
 
         WidgetGroup moduleSlots = new WidgetGroup(Position.ORIGIN, new Size(176, 84));
@@ -125,14 +126,14 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
             slot.setVisible(false);
             moduleSlots.addWidget(slot);
         }
-
+        builder.image(-26, 0, 26, 88, ClientHandler.ARMOR_SLOTS_BACKGROUND);
         ArmorInventoryWrapper armorInventory = new ArmorInventoryWrapper(entityPlayer);
-        builder.slot(armorInventory, 0, 4, -18, GuiTextures.SLOT);
-        builder.slot(armorInventory, 1, 22, -18, GuiTextures.SLOT);
-        builder.slot(armorInventory, 2, 40, -18, GuiTextures.SLOT);
-        builder.slot(armorInventory, 3, 58, -18, GuiTextures.SLOT);
+        builder.slot(armorInventory, 0, -18, 62, GuiTextures.SLOT);
+        builder.slot(armorInventory, 1, -18, 44, GuiTextures.SLOT);
+        builder.slot(armorInventory, 2, -18, 26, GuiTextures.SLOT);
+        builder.slot(armorInventory, 3, -18, 8, GuiTextures.SLOT);
 
-        SlotWidget mainSlot = new SlotThatActuallyNotfiesListeners(this.mainSlot, 0, 79, 26).setChangeListener(() -> {
+        SlotWidget mainSlot = new SlotThatActuallyNotfiesListeners(this.mainSlot, 0, 79, 26).setBackgroundTexture(GuiTextures.SLOT).setChangeListener(() -> {
             ItemStack stack = this.mainSlot.getStackInSlot(0);
             for (Widget widget : moduleSlots.widgets) {
                 widget.setActive(false);
@@ -186,7 +187,7 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
                     getImportItems().setStackInSlot(i, ItemStack.EMPTY);
                 }
             }
-        }).setBackgroundTexture(GuiTextures.SLOT);
+        });
         builder.widget(mainSlot);
         builder.widget(moduleSlots);
         return builder.build(getHolder(), entityPlayer);
@@ -202,7 +203,7 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound data) {
         NBTTagCompound nbt = super.writeToNBT(data);
-        nbt.setTag("LastArmor", lastArmor.writeToNBT(new NBTTagCompound()));
+        nbt.setTag("LastArmor", lastArmor.serializeNBT());
         return nbt;
     }
 
