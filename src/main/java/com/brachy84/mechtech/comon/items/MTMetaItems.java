@@ -24,7 +24,7 @@ public class MTMetaItems {
     public static void init() {
         MTMetaItem item = new MTMetaItem();
         MTArmorItem armorItem = new MTArmorItem();
-        item.setRegistryName("mt_meta_item");
-        armorItem.setRegistryName("mt_armor_item");
+        item.setRegistryName("meta_item");
+        armorItem.setRegistryName("meta_armor");
     }
 }

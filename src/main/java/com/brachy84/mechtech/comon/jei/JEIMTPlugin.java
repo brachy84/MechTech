@@ -35,8 +35,8 @@ public class JEIMTPlugin implements IModPlugin {
     public void onRuntimeAvailable(IJeiRuntime jeiRuntime) {
         IRecipeRegistry registry = jeiRuntime.getRecipeRegistry();
 
-        if (MTConfig.multis.tokamak.enableTokamak) {
-            /*IFocus<ItemStack> focus = registry.createFocus(IFocus.Mode.OUTPUT, GATileEntities.ADVANCED_FUSION_REACTOR.getStackForm());
+        /*if (MTConfig.multis.tokamak.enableTokamak) {
+            IFocus<ItemStack> focus = registry.createFocus(IFocus.Mode.OUTPUT, GATileEntities.ADVANCED_FUSION_REACTOR.getStackForm());
             IRecipeCategory category = registry.getRecipeCategory(MUTLIBLOCK_INFOS);
             if(category == null) return;
             registry.getRecipeWrappers(category, focus).forEach(wrapper -> {
@@ -46,8 +46,8 @@ public class JEIMTPlugin implements IModPlugin {
             });
             //IRecipeWrapper recipe = registry.getRecipeWrapper(new FusionReactor4Info(), MUTLIBLOCK_INFOS);
             //if(recipe == null) return;
-            //registry.hideRecipe(recipe, MUTLIBLOCK_INFOS);*/
-        }
+            //registry.hideRecipe(recipe, MUTLIBLOCK_INFOS);
+        }*/
     }
 
     public String getRecipeMapJeiCategory(RecipeMap<?> recipeMap) {

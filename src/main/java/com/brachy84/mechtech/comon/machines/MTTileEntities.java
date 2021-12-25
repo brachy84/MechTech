@@ -16,14 +16,6 @@ public class MTTileEntities {
     public static MetaTileEntityArmorWorkbench ARMOR_WORKBENCH;
 
     public static void init() {
-        if (Loader.isModLoaded("gtadditions")) {
-            if (MTConfig.multis.teslaTower.enabled) {
-                //TESLA_TOWER = GregTechAPI.registerMetaTileEntity(15000, new MetaTileEntityTeslaTower(loc("tesla_tower")));
-            }
-        }
-        if (MTConfig.multis.tokamak.enableTokamak) {
-            //GATileEntities.ADVANCED_FUSION_REACTOR = register(15001, new MetaTileEntityTokamak(new ResourceLocation(Gregicality.MODID, "advanced_fusion_reactor")));
-        }
         ARMOR_WORKBENCH = register(10100, new MetaTileEntityArmorWorkbench(loc("armor_workbench")));
     }
 
