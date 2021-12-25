@@ -1,6 +1,6 @@
 package com.brachy84.mechtech.api.armor.modules;
 
-import com.brachy84.mechtech.api.armor.IArmorModule;
+import com.brachy84.mechtech.api.armor.IModule;
 import com.brachy84.mechtech.api.armor.Modules;
 import com.google.common.collect.Lists;
 import gregtech.api.capability.GregtechCapabilities;
@@ -19,7 +19,7 @@ import net.minecraftforge.items.IItemHandler;
 
 import java.util.Collection;
 
-public class JetpackModule implements IArmorModule {
+public class JetpackModule implements IModule {
 
     private static final int ENERGY_PER_USE = 125;
 
@@ -27,7 +27,7 @@ public class JetpackModule implements IArmorModule {
     }
 
     @Override
-    public Collection<IArmorModule> getIncompatibleModules() {
+    public Collection<IModule> getIncompatibleModules() {
         return Lists.newArrayList(Modules.ADVANCED_JETPACK);
     }
 

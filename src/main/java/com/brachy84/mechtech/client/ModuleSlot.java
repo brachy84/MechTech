@@ -1,6 +1,5 @@
 package com.brachy84.mechtech.client;
 
-import com.brachy84.mechtech.api.armor.IArmorModule;
 import gregtech.api.gui.widgets.SlotWidget;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;

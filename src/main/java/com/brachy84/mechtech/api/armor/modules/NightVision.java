@@ -1,10 +1,9 @@
 package com.brachy84.mechtech.api.armor.modules;
 
-import com.brachy84.mechtech.api.armor.IArmorModule;
+import com.brachy84.mechtech.api.armor.IModule;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IElectricItem;
 import gregtech.common.items.MetaItems;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
@@ -15,7 +14,7 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.world.World;
 import net.minecraftforge.items.IItemHandler;
 
-public class NightVision implements IArmorModule {
+public class NightVision implements IModule {
 
     @Override
     public void onTick(World world, EntityPlayer player, ItemStack modularArmorPiece, NBTTagCompound moduleData) {

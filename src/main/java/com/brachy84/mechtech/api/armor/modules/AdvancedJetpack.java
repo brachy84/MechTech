@@ -1,6 +1,6 @@
 package com.brachy84.mechtech.api.armor.modules;
 
-import com.brachy84.mechtech.api.armor.IArmorModule;
+import com.brachy84.mechtech.api.armor.IModule;
 import com.brachy84.mechtech.api.armor.Modules;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IElectricItem;
@@ -16,13 +16,13 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.items.IItemHandler;
 
-public class AdvancedJetpack implements IArmorModule {
+public class AdvancedJetpack implements IModule {
 
     private static final int ENERGY_PER_USE = 512;
 
     @Override
     public boolean canPlaceIn(EntityEquipmentSlot slot, ItemStack modularArmorPiece, IItemHandler modularSlots) {
-        return slot == EntityEquipmentSlot.CHEST && IArmorModule.moduleCount(this, modularSlots) == 0 && IArmorModule.moduleCount(Modules.JETPACK, modularSlots) == 0;
+        return slot == EntityEquipmentSlot.CHEST && IModule.moduleCount(this, modularSlots) == 0 && IModule.moduleCount(Modules.JETPACK, modularSlots) == 0;
     }
 
     @Override

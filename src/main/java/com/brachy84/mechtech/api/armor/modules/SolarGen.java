@@ -1,6 +1,6 @@
 package com.brachy84.mechtech.api.armor.modules;
 
-import com.brachy84.mechtech.api.armor.IArmorModule;
+import com.brachy84.mechtech.api.armor.IModule;
 import com.brachy84.mechtech.api.armor.Modules;
 import com.google.common.collect.Lists;
 import gregtech.api.capability.GregtechCapabilities;
@@ -17,7 +17,7 @@ import net.minecraftforge.items.IItemHandler;
 import java.util.Collection;
 import java.util.function.Supplier;
 
-public class SolarGen implements IArmorModule {
+public class SolarGen implements IModule {
 
     private final Supplier<ItemStack> item;
     private final long gen;
@@ -56,7 +56,7 @@ public class SolarGen implements IArmorModule {
     }
 
     @Override
-    public Collection<IArmorModule> getIncompatibleModules() {
+    public Collection<IModule> getIncompatibleModules() {
         return Lists.newArrayList(Modules.solarGen1, Modules.solarGen2, Modules.solarGen3);
     }
 

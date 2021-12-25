@@ -1,35 +1,29 @@
 package com.brachy84.mechtech.api.armor.modules;
 
 import com.brachy84.mechtech.api.armor.IArmorModule;
-import com.brachy84.mechtech.api.armor.ModularArmor;
+import com.brachy84.mechtech.api.armor.IDurabilityModule;
 import gregtech.api.unification.material.Material;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.world.World;
-import net.minecraftforge.common.ISpecialArmor;
 import net.minecraftforge.items.IItemHandler;
 
-public class ProtectionModule implements IArmorModule {
+public class ProtectionModule implements IArmorModule, IDurabilityModule {
 
     private final Material material;
     private ItemStack stack;
-    public final double armor, toughness, absorption;
+    public final double armor, toughness;
     public final int durability;
     public boolean doGenerateMaterialRecipe = true;
 
-    public ProtectionModule(Material material, ItemStack stack, double armor, double toughness, double absorption, int durability) {
+    public ProtectionModule(Material material, ItemStack stack, double armor, double toughness, int durability) {
         this.material = material;
         this.stack = stack;
         this.armor = armor;
         this.toughness = toughness;
-        this.absorption = absorption;
         this.durability = durability;
     }
 
@@ -57,53 +51,18 @@ public class ProtectionModule implements IArmorModule {
     }
 
     @Override
-    public ActionResult<ISpecialArmor.ArmorProperties> modifyArmorProperties(ISpecialArmor.ArmorProperties properties, EntityLivingBase entity, ItemStack modularArmorPiece, DamageSource source, double damage, EntityEquipmentSlot slot) {
-        if (!source.isUnblockable()) {
-            properties.Armor += armor * ModularArmor.armorDamageSpread(slot);
-            properties.Toughness += toughness * ModularArmor.armorDamageSpread(slot);
-            properties.AbsorbRatio += absorption * ModularArmor.armorDamageSpread(slot);
-        }
-        return ActionResult.newResult(EnumActionResult.PASS, properties);
+    public double getArmor(EntityEquipmentSlot slot) {
+        return armor;
     }
 
     @Override
-    public boolean isDamageable() {
-        return true;
+    public double getToughness(EntityEquipmentSlot slot) {
+        return toughness;
     }
 
     @Override
-    public int damage(EntityLivingBase entityLivingBase, ItemStack modularArmorPiece, NBTTagCompound moduleData, DamageSource damageSource, int amount, EntityEquipmentSlot entityEquipmentSlot) {
-        if (!moduleData.hasKey("Dmg")) {
-            amount = Math.min(amount, durability);
-            moduleData.setInteger("Dmg", amount);
-            if (amount == durability) moduleData.setBoolean("Destroyed", true);
-        } else {
-            int dmg = moduleData.getInteger("Dmg");
-            amount = Math.min(amount, durability - dmg);
-            moduleData.setInteger("Dmg", dmg + amount);
-            if (dmg + amount == durability) moduleData.setBoolean("Destroyed", true);
-        }
-        return amount;
-    }
-
-    @Override
-    public int getArmorDisplay(EntityPlayer player, ItemStack armorPiece, int slot) {
-        return 6;
-        /*EntityEquipmentSlot equipmentSlot;
-        switch (slot) {
-            case 0:
-                equipmentSlot = EntityEquipmentSlot.FEET;
-                break;
-            case 1:
-                equipmentSlot = EntityEquipmentSlot.LEGS;
-                break;
-            case 2:
-                equipmentSlot = EntityEquipmentSlot.CHEST;
-                break;
-            default:
-                equipmentSlot = EntityEquipmentSlot.HEAD;
-        }
-        return (int) (absorption * ModularArmor.armorDamageSpread(equipmentSlot) * 4);*/
+    public int getMaxDurability(NBTTagCompound moduleData) {
+        return durability;
     }
 
     @Override

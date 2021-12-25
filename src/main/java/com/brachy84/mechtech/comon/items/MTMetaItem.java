@@ -48,14 +48,15 @@ public class MTMetaItem extends StandardMetaItem {
                     .addComponents(new IItemBehaviour() {
                         @Override
                         public void addInformation(ItemStack itemStack, List<String> lines) {
+                            lines.add("$e" + entry.getValue().getChemicalFormula());
                             NBTTagCompound nbt = itemStack.getTagCompound();
                             int damaged = 0;
-                            if (nbt != null && nbt.hasKey("Dmg")) {
-                                damaged = nbt.getInteger("Dmg");
-                            }
-                            lines.add(I18n.format("mechtech.modules.armor_plating.tooltip.1", damaged, module.durability));
+                            if(nbt != null)
+                                damaged = (int) module.getDamage(nbt);
+                            lines.add(I18n.format("mechtech.modules.armor_plating.tooltip.1", module.durability - damaged, module.durability));
                             lines.add(I18n.format("mechtech.modules.armor_plating.tooltip.2", module.armor));
                             lines.add(I18n.format("mechtech.modules.armor_plating.tooltip.3", module.toughness));
+                            lines.add(I18n.format("mechtech.modular_armor.usable"));
                         }
                     })
                     // name provider
@@ -67,22 +68,20 @@ public class MTMetaItem extends StandardMetaItem {
                         @Override
                         public boolean showsDurabilityBar(ItemStack itemStack) {
                             NBTTagCompound nbt = itemStack.getTagCompound();
-                            return nbt != null && nbt.getInteger("Dmg") > 0;
+                            return nbt != null && module.getDamage(nbt) > 0;
                         }
 
                         @Override
                         public double getDurabilityForDisplay(ItemStack itemStack) {
                             NBTTagCompound nbt = itemStack.getTagCompound();
-                            return nbt == null ? 0 : nbt.getInteger("Dmg") / ((double) module.durability);
+                            return nbt == null ? 0 : module.getDamage(nbt) / ((double) module.durability);
                         }
 
                         @Override
                         public int getRGBDurabilityForDisplay(ItemStack itemStack) {
                             return MathHelper.hsvToRGB((1.0f - (float) getDurabilityForDisplay(itemStack)) / 3.0f, 1.0f, 1.0f);
                         }
-                    })
-                    // tooltip
-                    .addComponents(canBeUsedinMATooltip());
+                    });
             MATERIAL_ARMOR_PLATINGS.put(entry.getValue(), metaValueItem);
 
             module.setStack(metaValueItem.getStackForm());

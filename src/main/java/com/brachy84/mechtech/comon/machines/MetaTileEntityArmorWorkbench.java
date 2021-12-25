@@ -4,7 +4,7 @@ import codechicken.lib.render.CCRenderState;
 import codechicken.lib.render.pipeline.ColourMultiplier;
 import codechicken.lib.render.pipeline.IVertexOperation;
 import codechicken.lib.vec.Matrix4;
-import com.brachy84.mechtech.api.armor.IArmorModule;
+import com.brachy84.mechtech.api.armor.IModule;
 import com.brachy84.mechtech.api.armor.ModularArmor;
 import com.brachy84.mechtech.client.*;
 import com.google.common.collect.Lists;
@@ -162,7 +162,7 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
                                 continue;
                             count++;
                             ((ModuleSlot) widget).setPredicate(stack1 -> {
-                                IArmorModule module = IArmorModule.getOf(stack1);
+                                IModule module = IModule.getOf(stack1);
                                 if (module == null) {
                                     errorTextWidget.updateText(NOT_MODULE);
                                     return false;
@@ -171,18 +171,18 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
                                     errorTextWidget.updateText(INVALID_SLOT);
                                     return false;
                                 }
-                                if (!(module.maxModules() <= 0 || module.maxModules() > IArmorModule.moduleCount(module, moduleSlotHandler))) {
+                                if (!(module.maxModules() <= 0 || module.maxModules() > IModule.moduleCount(module, moduleSlotHandler))) {
                                     errorTextWidget.updateText(MAX_MODULES);
                                     return false;
                                 }
-                                List<IArmorModule> modules = getModules();
-                                for (IArmorModule module1 : modules) {
+                                List<IModule> modules = getModules();
+                                for (IModule module1 : modules) {
                                     if (module1.getIncompatibleModules().contains(module) || module.getIncompatibleModules().contains(module1)) {
                                         errorTextWidget.updateText(INCOMPATIBLE, module1.getLocalizedName());
                                         return false;
                                     }
                                 }
-                                for (IArmorModule module1 : module.getRequiredModules()) {
+                                for (IModule module1 : module.getRequiredModules()) {
                                     if (!modules.contains(module1)) {
                                         errorTextWidget.updateText(REQUIRED, module1.getLocalizedName());
                                         return false;
@@ -224,10 +224,10 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
         return builder.build(getHolder(), player);
     }
 
-    private List<IArmorModule> getModules() {
-        List<IArmorModule> modules = new ArrayList<>();
+    private List<IModule> getModules() {
+        List<IModule> modules = new ArrayList<>();
         for (int i = 0; i < moduleSlotHandler.getSlots(); i++) {
-            IArmorModule module = IArmorModule.getOf(moduleSlotHandler.getStackInSlot(i));
+            IModule module = IModule.getOf(moduleSlotHandler.getStackInSlot(i));
             if (module != null)
                 modules.add(module);
         }

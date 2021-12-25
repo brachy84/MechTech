@@ -1,7 +1,7 @@
 package com.brachy84.mechtech.comon;
 
 import com.brachy84.mechtech.MechTech;
-import com.brachy84.mechtech.api.armor.IArmorModule;
+import com.brachy84.mechtech.api.armor.IModule;
 import com.brachy84.mechtech.api.armor.ModularArmor;
 import com.brachy84.mechtech.api.armor.Modules;
 import com.brachy84.mechtech.api.armor.modules.ProtectionModule;
@@ -25,7 +25,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-import java.util.Collection;
 import java.util.List;
 
 @Mod.EventBusSubscriber(modid = MechTech.MODID)
@@ -38,7 +37,7 @@ public class CommonProxy {
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void registerRecipes(RegistryEvent.Register<IRecipe> event) {
         Recipes.init();
-        for(IArmorModule module : Modules.getRegisteredModules()) {
+        for(IModule module : Modules.getRegisteredModules()) {
             if(module instanceof ProtectionModule) {
                 ProtectionModule protectionModule = (ProtectionModule) module;
                 if(protectionModule.doGenerateMaterialRecipe && protectionModule.getMaterial() != null && protectionModule.getMaterial().hasFlag(MaterialFlags.GENERATE_PLATE)) {
@@ -66,8 +65,8 @@ public class CommonProxy {
                 ItemStack stack = player.inventory.armorInventory.get(i);
                 ModularArmor modularArmor = ModularArmor.get(stack);
                 if(modularArmor != null) {
-                    List<IArmorModule> modules = ModularArmor.getModulesOf(stack);
-                    for(IArmorModule module : modules) {
+                    List<IModule> modules = ModularArmor.getModulesOf(stack);
+                    for(IModule module : modules) {
                         if(module == Modules.SHOCK_ABSORBER) {
                             event.setStrength(event.getStrength() * 0.2f);
                             return;

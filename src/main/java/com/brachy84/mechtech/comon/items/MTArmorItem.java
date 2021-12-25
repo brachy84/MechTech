@@ -1,6 +1,6 @@
 package com.brachy84.mechtech.comon.items;
 
-import com.brachy84.mechtech.api.armor.IArmorModule;
+import com.brachy84.mechtech.api.armor.IModule;
 import com.brachy84.mechtech.api.armor.ModularArmor;
 import com.brachy84.mechtech.comon.MTConfig;
 import gregtech.api.capability.GregtechCapabilities;
@@ -43,7 +43,7 @@ public class MTArmorItem extends ArmorMetaItem<ArmorMetaItem<?>.ArmorMetaValueIt
             } else {
                 lines.add(I18n.format("metaitem.modular_armor.tooltip.unsneak"));
             }
-            Collection<IArmorModule> modules = ModularArmor.getModulesOf(itemStack);
+            Collection<IModule> modules = ModularArmor.getModulesOf(itemStack);
             ModularArmor modularArmor = ModularArmor.get(itemStack);
             String unlocalizedTooltip = "metaitem." + item.unlocalizedName + ".tooltip";
             if (I18n.hasKey(unlocalizedTooltip)) {
@@ -52,10 +52,10 @@ public class MTArmorItem extends ArmorMetaItem<ArmorMetaItem<?>.ArmorMetaValueIt
 
             if (modules.size() > 0) {
                 lines.add(I18n.format("metaitem.modular_armor.installed_modules", modules.size(), modularArmor.getModuleSlots()));
-                for (IArmorModule module : modules) {
+                for (IModule module : modules) {
                     lines.add(" - " + module.getLocalizedName());
                 }
-                for (IArmorModule module : modules) {
+                for (IModule module : modules) {
                     module.addTooltip(itemStack, worldIn, lines, tooltipFlag);
                 }
             } else {

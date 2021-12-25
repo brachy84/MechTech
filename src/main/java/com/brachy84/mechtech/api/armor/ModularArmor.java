@@ -8,6 +8,7 @@ import gregtech.api.items.armor.ArmorMetaItem;
 import gregtech.api.items.armor.IArmorLogic;
 import gregtech.api.items.armor.ISpecialArmorLogic;
 import gregtech.api.items.metaitem.stats.IItemBehaviour;
+import gregtech.api.util.GTLog;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -20,7 +21,6 @@ import net.minecraft.util.*;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ISpecialArmor;
 import net.minecraftforge.common.util.Constants;
-import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -55,22 +55,93 @@ public class ModularArmor implements ISpecialArmorLogic {
     }
 
     @Override
-    public ISpecialArmor.ArmorProperties getProperties(EntityLivingBase entityLivingBase, @Nonnull ItemStack itemStack, DamageSource damageSource, double v, EntityEquipmentSlot entityEquipmentSlot) {
-        Collection<IArmorModule> modules = getModulesOf(itemStack);
-        ISpecialArmor.ArmorProperties properties = new ISpecialArmor.ArmorProperties(0, 0, Integer.MAX_VALUE);
-        properties.Slot = entityEquipmentSlot.getIndex();
-        for (IArmorModule module : modules) {
-            ActionResult<ISpecialArmor.ArmorProperties> result = module.modifyArmorProperties(properties, entityLivingBase, itemStack, damageSource, v, entityEquipmentSlot);
-            properties = result.getResult();
-            if (result.getType() != EnumActionResult.PASS)
-                break;
+    public ISpecialArmor.ArmorProperties getProperties(EntityLivingBase entityLivingBase, @Nonnull ItemStack itemStack, DamageSource damageSource, double damage, EntityEquipmentSlot entityEquipmentSlot) {
+        GTLog.logger.info("Get Properties for source {}, damage {}, slot {}", damageSource.damageType, damage, slot);
+        NBTTagCompound nbt = itemStack.getTagCompound();
+        if (nbt == null || !nbt.hasKey(MODULES))
+            return new ISpecialArmor.ArmorProperties(0, 0, 0);
+        List<AbsorbResult> armorModules = new ArrayList<>();
+        List<AbsorbResult> specialArmorModules = new ArrayList<>();
+        NBTTagList modulesNbt = nbt.getTagList(MODULES, Constants.NBT.TAG_COMPOUND);
+        for (int i = 0; i < modulesNbt.tagCount(); i++) {
+            NBTTagCompound moduleNbt = modulesNbt.getCompoundTagAt(i);
+            IModule module = Modules.getModule(moduleNbt.getInteger("ID"));
+            if (!moduleNbt.getBoolean("Destroyed")) {
+                if(!damageSource.isUnblockable() && module instanceof IArmorModule) {
+                    AbsorbResult absorbResult = new AbsorbResult();
+                    absorbResult.armor = ((IArmorModule) module).getArmor(slot);
+                    absorbResult.toughness = ((IArmorModule) module).getToughness(slot);
+                    absorbResult.setModule(module, moduleNbt);
+                    armorModules.add(absorbResult);
+                } else if(module instanceof ISpecialArmorModule) {
+                    AbsorbResult absorbResult = ((ISpecialArmorModule) module).getArmorProperties(entityLivingBase, itemStack, moduleNbt, damageSource, damage, entityEquipmentSlot);
+                    if (absorbResult != null && !absorbResult.isZero()) {
+                        absorbResult.setModule(module, moduleNbt);
+                        specialArmorModules.add(absorbResult);
+                    }
+                }
+            }
         }
+
+        double originalDamage = damage;
+
+        specialArmorModules.sort(AbsorbResult::compareTo);
+        ISpecialArmor.ArmorProperties properties = new ISpecialArmor.ArmorProperties(0, 0, 0);
+        for(AbsorbResult absorbResult : specialArmorModules) {
+            properties.Priority = Math.max(properties.Priority, absorbResult.priority);
+            if(Integer.MAX_VALUE - properties.AbsorbMax < absorbResult.max) {
+                properties.AbsorbMax = Integer.MAX_VALUE;
+            } else {
+                properties.AbsorbMax += absorbResult.max;
+            }
+            float moduleDamage = (float) (originalDamage * absorbResult.ratio);
+            if(moduleDamage > absorbResult.max) {
+                moduleDamage = absorbResult.max;
+                absorbResult.ratio = moduleDamage / originalDamage;
+            }
+            properties.AbsorbRatio += absorbResult.ratio;
+            GTLog.logger.info("  do {} special armor module damage", moduleDamage);
+            if(absorbResult.module instanceof IDurabilityModule) {
+                damage -= ((IDurabilityModule) absorbResult.module).damage(entityLivingBase, itemStack, absorbResult.moduleData, damageSource, moduleDamage, entityEquipmentSlot);
+            } else {
+                damage -= moduleDamage;
+            }
+        }
+
+        if(armorModules.size() > 0) {
+            properties.AbsorbMax = Integer.MAX_VALUE;
+            float ta = 0, tt = 0;
+            for(AbsorbResult absorbResult : armorModules) {
+                absorbResult.armor *= getFactor(armorModules.size());
+                absorbResult.toughness *= getFactor(armorModules.size());
+                ta += absorbResult.armor;
+                tt += absorbResult.toughness;
+            }
+            float moduleDamage = (float) (damage - CombatRules.getDamageAfterAbsorb((float) damage, ta, tt));
+            moduleDamage /= armorModules.size();
+            GTLog.logger.info("  do {} armor module damage * {}", moduleDamage, armorModules.size());
+            for(AbsorbResult absorbResult : armorModules) {
+                if(absorbResult.module instanceof IDurabilityModule) {
+                    damage -= ((IDurabilityModule) absorbResult.module).damage(entityLivingBase, itemStack, absorbResult.moduleData, damageSource, moduleDamage, entityEquipmentSlot);
+                } else {
+                    damage -= moduleDamage;
+                }
+            }
+        }
+        damage = Math.max(damage, 0);
+        properties.AbsorbRatio = 1 - (damage / originalDamage);
+        GTLog.logger.info("  damage left {}, ratio {}", damage, properties.AbsorbRatio);
         return properties;
+    }
+
+    private double getFactor(int modules) {
+        return modules == 0 ? 0 : -0.75 * ((modules - 1) / ((double)moduleSlots)) + 1;
+        //return modules == 0 ? 0 : -0.175 * modules + 1.175;
     }
 
     @Override
     public void onArmorTick(World world, EntityPlayer player, ItemStack itemStack) {
-        Collection<IArmorModule> modules = getModulesOf(itemStack);
+        Collection<IModule> modules = getModulesOf(itemStack);
         NBTTagCompound armorNbt = itemStack.getTagCompound();
         NBTTagCompound nbt;
         if (armorNbt != null) {
@@ -80,27 +151,28 @@ public class ModularArmor implements ISpecialArmorLogic {
             nbt = new NBTTagCompound();
             itemStack.setTagCompound(armorNbt);
         }
-        for (IArmorModule module : modules) {
+        for (IModule module : modules) {
             module.onTick(world, player, itemStack, nbt);
         }
         armorNbt.setTag("ModuleData", nbt);
     }
 
     public void onUnequip(World world, EntityLivingBase player, ItemStack modularArmorPiece, ItemStack newStack) {
-        Collection<IArmorModule> modules = getModulesOf(modularArmorPiece);
-        for (IArmorModule module : modules) {
+        Collection<IModule> modules = getModulesOf(modularArmorPiece);
+        for (IModule module : modules) {
             module.onUnequip(world, player, modularArmorPiece, newStack);
         }
     }
 
     @Override
     public int getArmorDisplay(EntityPlayer player, @Nonnull ItemStack armorPiece, int i) {
-        List<IArmorModule> modules = ModularArmor.getModulesOf(armorPiece);
-        int armor = 0;
-        for (IArmorModule module : modules) {
-            armor += module.getArmorDisplay(player, armorPiece, i);
+        List<IModule> modules = ModularArmor.getModulesOf(armorPiece);
+        double armor = 0;
+        for (IModule module : modules) {
+            if(module instanceof IArmorModule)
+            armor += ((IArmorModule) module).getArmor(slot);
         }
-        return armor;
+        return (int) armor;
     }
 
     @Override
@@ -140,9 +212,11 @@ public class ModularArmor implements ISpecialArmorLogic {
     // I hate how this is done, but it seems to be the best solution
     @Override
     public void damageArmor(EntityLivingBase entityLivingBase, ItemStack stack, DamageSource damageSource, int damage, EntityEquipmentSlot entityEquipmentSlot) {
-        NBTTagCompound nbt = stack.getTagCompound();
+        GTLog.logger.info("Would damage armor {}", damage);
+        /*NBTTagCompound nbt = stack.getTagCompound();
         if (nbt == null || !nbt.hasKey(MODULES))
             return;
+        int originalDmg = damage;
         List<Pair<IArmorModule, NBTTagCompound>> modules = new ArrayList<>();
         NBTTagList modulesNbt = nbt.getTagList(MODULES, Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < modulesNbt.tagCount(); i++) {
@@ -172,6 +246,7 @@ public class ModularArmor implements ISpecialArmorLogic {
                 }
             }
         }
+        GTLog.logger.info("Damaged Armor {}", originalDmg - damage);*/
     }
 
     @Override
@@ -316,7 +391,7 @@ public class ModularArmor implements ISpecialArmorLogic {
             NBTTagList modulesNbt = nbt.getTagList(MODULES, Constants.NBT.TAG_COMPOUND);
             for (int i = 0; i < modulesNbt.tagCount(); i++) {
                 NBTTagCompound moduleNbt = modulesNbt.getCompoundTagAt(i);
-                IArmorModule module = Modules.getModule(moduleNbt.getInteger("ID"));
+                IModule module = Modules.getModule(moduleNbt.getInteger("ID"));
                 if (moduleNbt.getBoolean("Destroyed")) {
                     modules.add(module.getDestroyedStack());
                 } else {
@@ -329,17 +404,17 @@ public class ModularArmor implements ISpecialArmorLogic {
         return Collections.emptyList();
     }
 
-    public static List<IArmorModule> getModulesOf(ItemStack stack) {
+    public static List<IModule> getModulesOf(ItemStack stack) {
         ModularArmor armor = get(stack);
         if (armor != null) {
             NBTTagCompound nbt = stack.getTagCompound();
             if (nbt == null || !nbt.hasKey(MODULES))
                 return Collections.emptyList();
             NBTTagList modulesNbt = nbt.getTagList(MODULES, Constants.NBT.TAG_COMPOUND);
-            List<IArmorModule> modules = new ArrayList<>();
+            List<IModule> modules = new ArrayList<>();
             for (int i = 0; i < modulesNbt.tagCount(); i++) {
                 NBTTagCompound moduleNbt = modulesNbt.getCompoundTagAt(i);
-                IArmorModule module = Modules.getModule(moduleNbt.getInteger("ID"));
+                IModule module = Modules.getModule(moduleNbt.getInteger("ID"));
                 if (!moduleNbt.getBoolean("Destroyed"))
                     modules.add(module);
             }
@@ -355,8 +430,8 @@ public class ModularArmor implements ISpecialArmorLogic {
             NBTTagList modulesNbt = new NBTTagList();
             for (ItemStack stack1 : modules) {
                 NBTTagCompound moduleNbt = new NBTTagCompound();
-                IArmorModule module = IArmorModule.getOf(stack1);
-                if(module == null)
+                IModule module = IModule.getOf(stack1);
+                if (module == null)
                     throw new NullPointerException("Module is null");
                 moduleNbt.setInteger("ID", Modules.getModuleId(module));
                 module.writeExtraData(moduleNbt, stack1);
@@ -384,21 +459,6 @@ public class ModularArmor implements ISpecialArmorLogic {
                     newList.appendTag(modulesNbt.get(i));
             }
             nbt.setTag(MODULES, newList);
-        }
-    }
-
-    public static double armorDamageSpread(EntityEquipmentSlot slot) {
-        switch (slot) {
-            case HEAD:
-                return 0.20;
-            case CHEST:
-                return 0.375;
-            case LEGS:
-                return 0.275;
-            case FEET:
-                return 0.15;
-            default:
-                return 0;
         }
     }
 }
