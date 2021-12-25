@@ -2,6 +2,7 @@ package com.brachy84.mechtech.comon.items;
 
 import com.brachy84.mechtech.api.armor.IArmorModule;
 import com.brachy84.mechtech.api.armor.ModularArmor;
+import com.brachy84.mechtech.comon.MTConfig;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IElectricItem;
 import gregtech.api.items.armor.ArmorMetaItem;
@@ -27,10 +28,10 @@ public class MTArmorItem extends ArmorMetaItem<ArmorMetaItem<?>.ArmorMetaValueIt
 
     @Override
     public void registerSubItems() {
-        MODULAR_HELMET = addItem(100, "modular_helmet").setArmorLogic(new ModularArmor(EntityEquipmentSlot.HEAD, 3));
-        MODULAR_CHESTPLATE = addItem(101, "modular_chestplate").setArmorLogic(new ModularArmor(EntityEquipmentSlot.CHEST, 5));
-        MODULAR_LEGGINGS = addItem(102, "modular_leggings").setArmorLogic(new ModularArmor(EntityEquipmentSlot.LEGS, 4));
-        MODULAR_BOOTS = addItem(103, "modular_boots").setArmorLogic(new ModularArmor(EntityEquipmentSlot.FEET, 2));
+        MODULAR_HELMET = addItem(0, "modular_helmet").setArmorLogic(new ModularArmor(EntityEquipmentSlot.HEAD, MTConfig.modularArmor.helmetSlots));
+        MODULAR_CHESTPLATE = addItem(1, "modular_chestplate").setArmorLogic(new ModularArmor(EntityEquipmentSlot.CHEST, MTConfig.modularArmor.chestPlateSlots));
+        MODULAR_LEGGINGS = addItem(2, "modular_leggings").setArmorLogic(new ModularArmor(EntityEquipmentSlot.LEGS, MTConfig.modularArmor.leggingsSlots));
+        MODULAR_BOOTS = addItem(3, "modular_boots").setArmorLogic(new ModularArmor(EntityEquipmentSlot.FEET, MTConfig.modularArmor.bootsSlot));
     }
 
     @Override

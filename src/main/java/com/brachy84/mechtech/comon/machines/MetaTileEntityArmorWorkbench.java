@@ -39,11 +39,17 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
 
     protected static final int[][] slotPositions = {
             {8, 8},
-            {30, 8},
-            {8, 30},
-            {30, 30},
-            {8, 52},
-            {30, 52},
+            {26, 8},
+            {8, 26},
+            {26, 26},
+            {8, 44},
+            {26, 44},
+            {8, 62},
+            {26, 62},
+            {44, 8},
+            {44, 26},
+            {44, 44},
+            {44, 62},
     };
 
     protected static final int[][] batterySlots = {

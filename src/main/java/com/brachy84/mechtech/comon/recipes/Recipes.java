@@ -43,7 +43,7 @@ public class Recipes {
                 .input(OrePrefix.stick, Materials.StainlessSteel, 7)
                 .input(MetaItems.CARBON_MESH, 5)
                 .input(OrePrefix.plate, Materials.NiobiumNitride)
-                .output(MTMetaItems.MODULAR_HELMET)
+                .output(MTMetaItems.MODULAR_LEGGINGS)
                 .EUt(400)
                 .duration(3600)
                 .buildAndRegister();
