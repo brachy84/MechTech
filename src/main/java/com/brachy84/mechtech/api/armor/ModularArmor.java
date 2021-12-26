@@ -18,6 +18,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.*;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ISpecialArmor;
 import net.minecraftforge.common.util.Constants;
@@ -67,13 +68,14 @@ public class ModularArmor implements ISpecialArmorLogic {
             NBTTagCompound moduleNbt = modulesNbt.getCompoundTagAt(i);
             IModule module = Modules.getModule(moduleNbt.getInteger("ID"));
             if (!moduleNbt.getBoolean("Destroyed")) {
-                if(!damageSource.isUnblockable() && module instanceof IArmorModule) {
+                if (!damageSource.isUnblockable() && module instanceof IArmorModule) {
                     AbsorbResult absorbResult = new AbsorbResult();
                     absorbResult.armor = ((IArmorModule) module).getArmor(slot);
                     absorbResult.toughness = ((IArmorModule) module).getToughness(slot);
                     absorbResult.setModule(module, moduleNbt);
                     armorModules.add(absorbResult);
-                } else if(module instanceof ISpecialArmorModule) {
+                }
+                if (module instanceof ISpecialArmorModule) {
                     AbsorbResult absorbResult = ((ISpecialArmorModule) module).getArmorProperties(entityLivingBase, itemStack, moduleNbt, damageSource, damage, entityEquipmentSlot);
                     if (absorbResult != null && !absorbResult.isZero()) {
                         absorbResult.setModule(module, moduleNbt);
@@ -87,41 +89,47 @@ public class ModularArmor implements ISpecialArmorLogic {
 
         specialArmorModules.sort(AbsorbResult::compareTo);
         ISpecialArmor.ArmorProperties properties = new ISpecialArmor.ArmorProperties(0, 0, 0);
-        for(AbsorbResult absorbResult : specialArmorModules) {
+        for (AbsorbResult absorbResult : specialArmorModules) {
             properties.Priority = Math.max(properties.Priority, absorbResult.priority);
-            if(Integer.MAX_VALUE - properties.AbsorbMax < absorbResult.max) {
+            if (Integer.MAX_VALUE - properties.AbsorbMax < absorbResult.max) {
                 properties.AbsorbMax = Integer.MAX_VALUE;
             } else {
                 properties.AbsorbMax += absorbResult.max;
             }
             float moduleDamage = (float) (originalDamage * absorbResult.ratio);
-            if(moduleDamage > absorbResult.max) {
+            if (moduleDamage > absorbResult.max) {
                 moduleDamage = absorbResult.max;
                 absorbResult.ratio = moduleDamage / originalDamage;
             }
             properties.AbsorbRatio += absorbResult.ratio;
             GTLog.logger.info("  do {} special armor module damage", moduleDamage);
-            if(absorbResult.module instanceof IDurabilityModule) {
+            if (absorbResult.module instanceof IDurabilityModule) {
                 damage -= ((IDurabilityModule) absorbResult.module).damage(entityLivingBase, itemStack, absorbResult.moduleData, damageSource, moduleDamage, entityEquipmentSlot);
             } else {
                 damage -= moduleDamage;
             }
         }
 
-        if(armorModules.size() > 0) {
+        if (armorModules.size() > 0) {
             properties.AbsorbMax = Integer.MAX_VALUE;
             float ta = 0, tt = 0;
-            for(AbsorbResult absorbResult : armorModules) {
-                absorbResult.armor *= getFactor(armorModules.size());
-                absorbResult.toughness *= getFactor(armorModules.size());
+            for (AbsorbResult absorbResult : armorModules) {
                 ta += absorbResult.armor;
                 tt += absorbResult.toughness;
             }
-            float moduleDamage = (float) (damage - CombatRules.getDamageAfterAbsorb((float) damage, ta, tt));
-            moduleDamage /= armorModules.size();
+            if(armorModules.size() > 1) {
+                float factor = (float) getFactor(armorModules.size());
+                ta /= armorModules.size();
+                tt /= armorModules.size();
+                ta *= factor;
+                tt *= factor;
+            }
+            ta *= 4;
+            float moduleDamage = (float) (damage - getDamageAfterAbsorb((float) damage, ta, tt));
+            moduleDamage /= 4;
             GTLog.logger.info("  do {} armor module damage * {}", moduleDamage, armorModules.size());
-            for(AbsorbResult absorbResult : armorModules) {
-                if(absorbResult.module instanceof IDurabilityModule) {
+            for (AbsorbResult absorbResult : armorModules) {
+                if (absorbResult.module instanceof IDurabilityModule) {
                     damage -= ((IDurabilityModule) absorbResult.module).damage(entityLivingBase, itemStack, absorbResult.moduleData, damageSource, moduleDamage, entityEquipmentSlot);
                 } else {
                     damage -= moduleDamage;
@@ -134,9 +142,18 @@ public class ModularArmor implements ISpecialArmorLogic {
         return properties;
     }
 
+    private float getDamageAfterAbsorb(float damage, float totalArmor, float toughnessAttribute) {
+        float f = 2.0F + toughnessAttribute / 4.0F;
+        float f1 = MathHelper.clamp(totalArmor - damage / f, totalArmor * 0.2F, 20.0F);
+        return damage * (1.0F - f1 / 25.0F);
+    }
+
     private double getFactor(int modules) {
-        return modules == 0 ? 0 : -0.75 * ((modules - 1) / ((double)moduleSlots)) + 1;
-        //return modules == 0 ? 0 : -0.175 * modules + 1.175;
+        if(modules <= 1)
+            return 1;
+        if(modules <= 5)
+            return modules * (1 - (modules - 1) / 10.0);
+        return 3 + modules * 0.1;
     }
 
     @Override
@@ -169,8 +186,8 @@ public class ModularArmor implements ISpecialArmorLogic {
         List<IModule> modules = ModularArmor.getModulesOf(armorPiece);
         double armor = 0;
         for (IModule module : modules) {
-            if(module instanceof IArmorModule)
-            armor += ((IArmorModule) module).getArmor(slot);
+            if (module instanceof IArmorModule)
+                armor += (((IArmorModule) module).getArmor(slot) + 0.5);
         }
         return (int) armor;
     }

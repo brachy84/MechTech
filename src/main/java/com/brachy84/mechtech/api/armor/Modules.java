@@ -47,6 +47,8 @@ public class Modules {
         registerMaterialArmorModule(1000, Materials.Aluminium, 3.4, 0.0);
         registerMaterialArmorModule(1001, Materials.Copper, 3.6, 0.0, 150);
         registerMaterialArmorModule(1002, Materials.Bronze, 3.8, 0.0);
+        registerMaterialArmorModule(1003, Materials.Iron, 3.75, 0); // Full vanilla has 15 Armor -> 15 / 4 = 3.75
+        registerMaterialArmorModule(1004, Materials.Diamond, 5, 0.5);
         registerMaterialArmorModule(2000, Materials.Neutronium, 20, 10);
     }
 
