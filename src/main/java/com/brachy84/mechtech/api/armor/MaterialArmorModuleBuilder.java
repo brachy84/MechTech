@@ -1,6 +1,6 @@
 package com.brachy84.mechtech.api.armor;
 
-import com.brachy84.mechtech.api.armor.modules.ProtectionModule;
+import com.brachy84.mechtech.api.armor.modules.MaterialArmorModule;
 import gregtech.api.unification.material.Material;
 import gregtech.api.unification.material.properties.PropertyKey;
 import net.minecraft.item.ItemStack;
@@ -13,13 +13,28 @@ public class MaterialArmorModuleBuilder {
     public double armor, toughness;
     public int durability = 0;
     public ISpecialArmorModule specialArmorModule;
-    private ProtectionModule module;
+    private MaterialArmorModule module;
+    public boolean doGenerateRecipe = true;
+    private ItemStack stack = ItemStack.EMPTY;
 
     public MaterialArmorModuleBuilder(int id, Material material) {
         this.id = id;
         this.material = material;
         this.armor = 3.75;
         this.toughness = 0;
+    }
+
+    /**
+     * Called Internally when the item is registered
+     */
+    public void setStack(ItemStack stack) {
+        this.stack = stack;
+        if(module != null)
+            module.setStack(stack);
+    }
+
+    public ItemStack getStack() {
+        return stack;
     }
 
     public MaterialArmorModuleBuilder armor(double armor) {
@@ -64,6 +79,11 @@ public class MaterialArmorModuleBuilder {
         return this;
     }
 
+    public MaterialArmorModuleBuilder dontGenerateRecipe() {
+        this.doGenerateRecipe = false;
+        return this;
+    }
+
     public void registerModule() {
         armor = Math.max(armor, 0);
         toughness = Math.max(toughness, 0);
@@ -74,11 +94,11 @@ public class MaterialArmorModuleBuilder {
                 durability = 128;
             }
         }
-        this.module = new ProtectionModule(material, ItemStack.EMPTY, armor, toughness, durability, specialArmorModule);
+        this.module = new MaterialArmorModule(material, ItemStack.EMPTY, armor, toughness, durability, specialArmorModule);
         Modules.registerModule(id, module);
     }
 
-    public ProtectionModule getModule() {
+    public MaterialArmorModule getModule() {
         return module;
     }
 

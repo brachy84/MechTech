@@ -2,9 +2,9 @@ package com.brachy84.mechtech.comon;
 
 import com.brachy84.mechtech.MechTech;
 import com.brachy84.mechtech.api.armor.IModule;
+import com.brachy84.mechtech.api.armor.MaterialArmorModuleBuilder;
 import com.brachy84.mechtech.api.armor.ModularArmor;
 import com.brachy84.mechtech.api.armor.Modules;
-import com.brachy84.mechtech.api.armor.modules.ProtectionModule;
 import com.brachy84.mechtech.comon.items.MTMetaItems;
 import com.brachy84.mechtech.comon.recipes.Recipes;
 import gregtech.api.recipes.ModHandler;
@@ -17,7 +17,6 @@ import gregtech.api.unification.stack.UnificationEntry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.living.LivingEquipmentChangeEvent;
 import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
@@ -37,11 +36,10 @@ public class CommonProxy {
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void registerRecipes(RegistryEvent.Register<IRecipe> event) {
         Recipes.init();
-        for(IModule module : Modules.getRegisteredModules()) {
-            if(module instanceof ProtectionModule) {
-                ProtectionModule protectionModule = (ProtectionModule) module;
-                if(protectionModule.doGenerateMaterialRecipe && protectionModule.getMaterial() != null && protectionModule.getMaterial().hasFlag(MaterialFlags.GENERATE_PLATE)) {
-                    generateArmorPlatingRecipe(protectionModule);
+        for(MaterialArmorModuleBuilder builder : Modules.getArmorModules().values()) {
+            if(builder.isRegistered()) {
+                if(builder.doGenerateRecipe && builder.material != null && builder.material.hasFlag(MaterialFlags.GENERATE_PLATE)) {
+                    generateArmorPlatingRecipe(builder);
                 }
             }
         }
@@ -77,9 +75,9 @@ public class CommonProxy {
         }
     }
 
-    private static void generateArmorPlatingRecipe(ProtectionModule module) {
-        ItemStack result = module.getAsItemStack(new NBTTagCompound());
-        Material material = module.getMaterial();
+    private static void generateArmorPlatingRecipe(MaterialArmorModuleBuilder builder) {
+        ItemStack result = builder.getStack();
+        Material material = builder.material;
         if(material.hasProperty(PropertyKey.INGOT)) {
             ModHandler.addShapedRecipe("armor_plating_" + material.toString(), result, "PPh", "PP ", "h  ", 'P', new UnificationEntry(OrePrefix.plate, material));
             RecipeMaps.FORMING_PRESS_RECIPES.recipeBuilder()

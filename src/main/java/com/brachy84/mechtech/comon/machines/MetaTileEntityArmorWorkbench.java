@@ -122,7 +122,7 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
             SlotWidget slot = new BatterySlot(batterySlotHandler, i, pos[0], pos[1])
                     .setFilter(stack -> {
                         IElectricItem electricItem = stack.getCapability(GregtechCapabilities.CAPABILITY_ELECTRIC_ITEM, null);
-                        return electricItem != null && electricItem.getMaxCharge() <= Long.MAX_VALUE / 3.0;
+                        return electricItem != null && electricItem.getMaxCharge() <= Long.MAX_VALUE / batterySlots.length;
                     });
             slot.setBackgroundTexture(GuiTextures.SLOT, GuiTextures.BATTERY_OVERLAY);
             slot.setActive(false);

@@ -6,9 +6,9 @@ public class AbsorbResult implements Comparable<AbsorbResult> {
 
     public static final AbsorbResult ZERO = new AbsorbResult();
 
-    protected double ratio = 0;
-    protected int max = 0;
-    protected int priority = 0;
+    protected double ratio;
+    protected int max;
+    protected int priority;
 
     protected double armor = 0;
     protected double toughness = 0;
@@ -31,7 +31,7 @@ public class AbsorbResult implements Comparable<AbsorbResult> {
     }
 
     public boolean isZero() {
-        return armor <= 0 && toughness <= 0 && ratio <= 0;
+        return this == ZERO || (armor <= 0 && toughness <= 0 && ratio <= 0);
     }
 
     public boolean useRatio() {

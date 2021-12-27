@@ -13,16 +13,15 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.items.IItemHandler;
 
-public class ProtectionModule implements IArmorModule, IDurabilityModule, ISpecialArmorModule {
+public class MaterialArmorModule implements IArmorModule, IDurabilityModule, ISpecialArmorModule {
 
     private final Material material;
     private ItemStack stack;
     public final double armor, toughness;
     public final int durability;
-    public boolean doGenerateMaterialRecipe = true;
     private final ISpecialArmorModule specialArmorModule;
 
-    public ProtectionModule(Material material, ItemStack stack, double armor, double toughness, int durability, ISpecialArmorModule specialArmorModule) {
+    public MaterialArmorModule(Material material, ItemStack stack, double armor, double toughness, int durability, ISpecialArmorModule specialArmorModule) {
         this.material = material;
         this.stack = stack;
         this.armor = armor;
@@ -35,11 +34,9 @@ public class ProtectionModule implements IArmorModule, IDurabilityModule, ISpeci
         return material;
     }
 
-    public ProtectionModule dontGenerateMaterialRecipe() {
-        this.doGenerateMaterialRecipe = false;
-        return this;
-    }
-
+    /**
+     * Should be only called from {@link com.brachy84.mechtech.api.armor.MaterialArmorModuleBuilder#setStack(ItemStack)}
+     */
     public void setStack(ItemStack stack) {
         this.stack = stack;
     }

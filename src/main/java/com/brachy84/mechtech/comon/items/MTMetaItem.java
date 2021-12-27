@@ -2,7 +2,7 @@ package com.brachy84.mechtech.comon.items;
 
 import com.brachy84.mechtech.api.armor.MaterialArmorModuleBuilder;
 import com.brachy84.mechtech.api.armor.Modules;
-import com.brachy84.mechtech.api.armor.modules.ProtectionModule;
+import com.brachy84.mechtech.api.armor.modules.MaterialArmorModule;
 import gregtech.api.items.metaitem.MetaItem;
 import gregtech.api.items.metaitem.StandardMetaItem;
 import gregtech.api.items.metaitem.stats.*;
@@ -44,14 +44,13 @@ public class MTMetaItem extends StandardMetaItem {
             MaterialArmorModuleBuilder builder = entry.getValue();
             if(!builder.isRegistered())
                 continue;
-            ProtectionModule module = builder.getModule();
+            MaterialArmorModule module = builder.getModule();
             MetaItem<?>.MetaValueItem metaValueItem = addItem(entry.getKey(), "armor_plating_" + builder.material.toString())
                     // armor module & color provider
                     .addComponents(Modules.getModule(entry.getKey()), ((IItemColorProvider) (stack, layer) -> builder.material.getMaterialRGB()))
                     .addComponents(new IItemBehaviour() {
                         @Override
                         public void addInformation(ItemStack itemStack, List<String> lines) {
-                            lines.add("$e" + builder.material.getChemicalFormula());
                             NBTTagCompound nbt = itemStack.getTagCompound();
                             int damaged = 0;
                             if(nbt != null)
@@ -87,7 +86,7 @@ public class MTMetaItem extends StandardMetaItem {
                     });
             MATERIAL_ARMOR_PLATINGS.put(builder.material, metaValueItem);
 
-            module.setStack(metaValueItem.getStackForm());
+            builder.setStack(metaValueItem.getStackForm());
         }
         //MetaItems.TOOL_DATA_STICK.addComponents(new DataStickBehavior());
     }

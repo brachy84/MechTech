@@ -81,19 +81,19 @@ public class Modules {
         materialArmorBuilder(1011, Materials.Osmium)
                 .armor(5, 0)
                 .registerModule();
-        materialArmorBuilder(1011, Materials.Iridium)
+        materialArmorBuilder(1012, Materials.Iridium)
                 .armor(3.7, 0.7)
                 .registerModule();
-        materialArmorBuilder(1012, Materials.Osmiridium)
+        materialArmorBuilder(1013, Materials.Osmiridium)
                 .armor(4.7, 0.5)
                 .registerModule();
-        materialArmorBuilder(1013, Materials.HSSE)
+        materialArmorBuilder(1014, Materials.HSSE)
                 .armor(6, 0.5)
                 .registerModule();
-        materialArmorBuilder(1014, Materials.HSSG)
+        materialArmorBuilder(1015, Materials.HSSG)
                 .armor(6.6, 0.5)
                 .registerModule();
-        materialArmorBuilder(1015, Materials.HSSS)
+        materialArmorBuilder(1016, Materials.HSSS)
                 .armor(6, 0.8);
         materialArmorBuilder(2000, Materials.Neutronium)
                 .armor(15, 10)
