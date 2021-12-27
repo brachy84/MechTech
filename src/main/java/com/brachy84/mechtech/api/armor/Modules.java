@@ -66,6 +66,9 @@ public class Modules {
         materialArmorBuilder(1005, Materials.StainlessSteel)
                 .armor(4, 0.15)
                 .registerModule();
+        materialArmorBuilder(1006, Materials.Titanium)
+                .armor(3.9, 0.5)
+                .registerModule();
         materialArmorBuilder(2000, Materials.Neutronium)
                 .armor(15, 10)
                 .specialArmor(((entity, modularArmorPiece, moduleData, source, damage, slot) -> new AbsorbResult(0.8, 100)))
