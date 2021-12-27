@@ -24,9 +24,9 @@ public class MTMetaItem extends StandardMetaItem {
     @Override
     public void registerSubItems() {
         WIRELESS_RECEIVER = addItem(0, "wireless_receiver");
-        SHOCK_ABSORBER = addItem(1, "shock_absorber")
-                .addComponents(Modules.SHOCK_ABSORBER, canBeUsedinMATooltip());
-        //WIRELESS_BINDER = addItem(2001, "wireless_binder");
+        SHOCK_ABSORBER = addItem(1, "shock_absorber").addComponents(Modules.SHOCK_ABSORBER);
+        THICK_ISOLATOR = addItem(2, "thick_insulator").addComponents(Modules.INSULATOR);
+        BINOCULARS = addItem(3, "binoculars").addComponents(Modules.BINOCULARS);
 
         MetaItems.NIGHTVISION_GOGGLES.addComponents(Modules.nightVision);
         MetaItems.COVER_SOLAR_PANEL_LV.addComponents(Modules.solarGen1);
@@ -45,16 +45,6 @@ public class MTMetaItem extends StandardMetaItem {
             MATERIAL_ARMOR_PLATINGS.put(builder.material, metaValueItem);
         }
         //MetaItems.TOOL_DATA_STICK.addComponents(new DataStickBehavior());
-    }
-
-    private IItemBehaviour canBeUsedinMATooltip(String... additionalLines) {
-        return new IItemBehaviour() {
-            @Override
-            public void addInformation(ItemStack itemStack, List<String> lines) {
-                lines.addAll(Arrays.asList(additionalLines));
-                lines.add(I18n.format("mechtech.modular_armor.usable"));
-            }
-        };
     }
 
     @Override

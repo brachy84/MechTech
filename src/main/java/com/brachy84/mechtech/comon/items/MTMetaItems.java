@@ -13,6 +13,8 @@ public class MTMetaItems {
     public static MetaItem<?>.MetaValueItem WIRELESS_BINDER;
 
     public static MetaItem<?>.MetaValueItem SHOCK_ABSORBER;
+    public static MetaItem<?>.MetaValueItem THICK_ISOLATOR;
+    public static MetaItem<?>.MetaValueItem BINOCULARS;
 
     public static ArmorMetaItem<?>.ArmorMetaValueItem MODULAR_HELMET;
     public static ArmorMetaItem<?>.ArmorMetaValueItem MODULAR_CHESTPLATE;
