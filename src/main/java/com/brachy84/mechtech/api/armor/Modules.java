@@ -58,17 +58,43 @@ public class Modules {
                 .armor(3.75) // Full vanilla has 15 Armor -> 15 / 4 = 3.75
                 .registerModule();
         materialArmorBuilder(1004, Materials.Cobalt)
-                .armor(3.85, 0.1)
+                .armor(3.9, 0.1)
                 .registerModule();
         materialArmorBuilder(1005, Materials.Steel)
-                .armor(3.85)
+                .armor(3.95)
                 .registerModule();
-        materialArmorBuilder(1005, Materials.StainlessSteel)
-                .armor(4, 0.15)
+        materialArmorBuilder(1006, Materials.StainlessSteel)
+                .armor(4.2, 0.15)
                 .registerModule();
-        materialArmorBuilder(1006, Materials.Titanium)
-                .armor(3.9, 0.5)
+        materialArmorBuilder(1007, Materials.Titanium)
+                .armor(4.4, 0.5)
                 .registerModule();
+        materialArmorBuilder(1008, Materials.Diamond)
+                .armor(5, 0.5)
+                .registerModule();
+        materialArmorBuilder(1009, Materials.Ruby)
+                .armor(4.1, 0.2)
+                .registerModule();
+        materialArmorBuilder(1010, Materials.Sapphire)
+                .armor(4.1, 0.2)
+                .registerModule();
+        materialArmorBuilder(1011, Materials.Osmium)
+                .armor(5, 0)
+                .registerModule();
+        materialArmorBuilder(1011, Materials.Iridium)
+                .armor(3.7, 0.7)
+                .registerModule();
+        materialArmorBuilder(1012, Materials.Osmiridium)
+                .armor(4.7, 0.5)
+                .registerModule();
+        materialArmorBuilder(1013, Materials.HSSE)
+                .armor(6, 0.5)
+                .registerModule();
+        materialArmorBuilder(1014, Materials.HSSG)
+                .armor(6.6, 0.5)
+                .registerModule();
+        materialArmorBuilder(1015, Materials.HSSS)
+                .armor(6, 0.8);
         materialArmorBuilder(2000, Materials.Neutronium)
                 .armor(15, 10)
                 .specialArmor(((entity, modularArmorPiece, moduleData, source, damage, slot) -> new AbsorbResult(0.8, 100)))
