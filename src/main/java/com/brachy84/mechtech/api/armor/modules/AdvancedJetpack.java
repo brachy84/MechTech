@@ -1,12 +1,13 @@
 package com.brachy84.mechtech.api.armor.modules;
 
 import com.brachy84.mechtech.api.armor.IModule;
+import com.brachy84.mechtech.api.armor.ModularArmor;
 import com.brachy84.mechtech.api.armor.Modules;
+import com.google.common.collect.Lists;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IElectricItem;
 import gregtech.api.items.armor.ArmorUtils;
 import gregtech.api.util.input.EnumKey;
-import gregtech.common.items.MetaItems;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
@@ -16,13 +17,23 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.items.IItemHandler;
 
-public class AdvancedJetpack implements IModule {
+import java.util.Collection;
 
-    private static final int ENERGY_PER_USE = 512;
+public class AdvancedJetpack extends JetpackModule {
+
+    @Override
+    public int getEnergyPerUse() {
+        return 512;
+    }
 
     @Override
     public boolean canPlaceIn(EntityEquipmentSlot slot, ItemStack modularArmorPiece, IItemHandler modularSlots) {
-        return slot == EntityEquipmentSlot.CHEST && IModule.moduleCount(this, modularSlots) == 0 && IModule.moduleCount(Modules.JETPACK, modularSlots) == 0;
+        return slot == EntityEquipmentSlot.CHEST;
+    }
+
+    @Override
+    public Collection<IModule> getIncompatibleModules() {
+        return Lists.newArrayList(Modules.JETPACK);
     }
 
     @Override
@@ -31,111 +42,87 @@ public class AdvancedJetpack implements IModule {
         if(cont == null) {
             return;
         }
-        boolean hoverMode = armorData.hasKey("Hover") && armorData.getBoolean("Hover");
-        boolean flyEnabled = armorData.hasKey("FlyMode") && armorData.getBoolean("FlyMode");
-        byte toggleTimer = armorData.hasKey("ToggleTimer") ? armorData.getByte("ToggleTimer") : 0;
-        boolean result = false;
+        boolean hoverMode = armorData.getBoolean("hover");
+        byte toggleTimer = armorData.getByte("toggleTimer");
 
-        // Mode toggle
-        if (!world.isRemote) {
-            if (ArmorUtils.isKeyDown(player, EnumKey.FLY_KEY) && toggleTimer == 0) {
-                flyEnabled = !flyEnabled;
-                toggleTimer = 10;
-            }
-        }
-
-        if (ArmorUtils.isKeyDown(player, EnumKey.JUMP) && ArmorUtils.isKeyDown(player, EnumKey.MODE_SWITCH) && toggleTimer == 0) {
+        if (toggleTimer == 0 && ArmorUtils.isKeyDown(player, EnumKey.HOVER_KEY)) {
             hoverMode = !hoverMode;
-            toggleTimer = 10;
+            toggleTimer = 5;
+            armorData.setBoolean("hover", hoverMode);
             if (!world.isRemote) {
-                String status = hoverMode ? "metaarmor.jetpack.hover.enable" : "metaarmor.jetpack.hover.disable";
-                player.sendMessage(new TextComponentTranslation(status));
+                if (hoverMode)
+                    player.sendStatusMessage(new TextComponentTranslation("metaarmor.jetpack.hover.enable"), true);
+                else
+                    player.sendStatusMessage(new TextComponentTranslation("metaarmor.jetpack.hover.disable"), true);
             }
         }
 
-        if (player.onGround) hoverMode = false;
+        performFlying(player, hoverMode, modularArmorPiece);
 
-        // Fly mechanics
-        if (flyEnabled && cont.canUse(ENERGY_PER_USE) && !player.isInWater() && !player.isInLava()) {
-            if (hoverMode) {
-                if (!ArmorUtils.isKeyDown(player, EnumKey.JUMP) || !ArmorUtils.isKeyDown(player, EnumKey.SHIFT)) {
-                    if (player.motionY > 0.1D) {
-                        player.motionY -= 0.1D;
-                    }
+        if (toggleTimer > 0) toggleTimer--;
 
-                    if (player.motionY < -0.1D) {
-                        player.motionY += 0.1D;
-                    }
-
-                    if (player.motionY <= 0.1D && player.motionY >= -0.1D) {
-                        player.motionY = 0.0D;
-                    }
-
-                    if (player.motionY > 0.1D || player.motionY < -0.1D) {
-                        if (player.motionY < 0) {
-                            player.motionY += 0.05D;
-                        } else {
-                            player.motionY -= 0.0025D;
-                        }
-                    } else {
-                        player.motionY = 0.0D;
-                    }
-                    ArmorUtils.spawnParticle(world, player, EnumParticleTypes.CLOUD, -0.6D);
-                    ArmorUtils.playJetpackSound(player);
-                }
-
-                if (ArmorUtils.isKeyDown(player, EnumKey.FORWARD)) {
-                    player.moveRelative(0.0F, 0.0F, 0.25F, 0.2F);
-                }
-
-                if (ArmorUtils.isKeyDown(player, EnumKey.JUMP)) {
-                    player.motionY = 0.35D;
-                }
-
-                if (ArmorUtils.isKeyDown(player, EnumKey.SHIFT)) {
-                    player.motionY = -0.35D;
-                }
-
-                if (ArmorUtils.isKeyDown(player, EnumKey.JUMP) && ArmorUtils.isKeyDown(player, EnumKey.SHIFT)) {
-                    player.motionY = 0.0D;
-                }
-
-                player.fallDistance = 0.0F;
-                result = true;
-            } else {
-                if (ArmorUtils.isKeyDown(player, EnumKey.JUMP)) {
-                    if (player.motionY <= 0.8D) player.motionY += 0.2D;
-                    if (ArmorUtils.isKeyDown(player, EnumKey.FORWARD)) {
-                        player.moveRelative(0.0F, 0.0F, 0.85F, 0.1F);
-                    }
-                    ArmorUtils.spawnParticle(world, player, EnumParticleTypes.CLOUD, -0.6D);
-                    ArmorUtils.playJetpackSound(player);
-                    player.fallDistance = 0.0F;
-                    result = true;
-                }
-            }
-        }
-
-        // Fly discharge
-        if (result) {
-            cont.discharge(ENERGY_PER_USE, Integer.MAX_VALUE, true, false, false);
-            ArmorUtils.resetPlayerFloatingTime(player);
-        }
-
-        // Do not spam of server packets
-        if (toggleTimer > 0) {
-            toggleTimer--;
-        }
-
-        armorData.setBoolean("FlyMode", flyEnabled);
-        armorData.setBoolean("Hover", hoverMode);
-        armorData.setByte("ToggleTimer", toggleTimer);
+        armorData.setBoolean("hover", hoverMode);
+        armorData.setByte("toggleTimer", toggleTimer);
         player.inventoryContainer.detectAndSendChanges();
     }
 
     @Override
-    public ItemStack getAsItemStack(NBTTagCompound nbt) {
-        return MetaItems.ADVANCED_IMPELLER_JETPACK.getStackForm();
+    public double getSprintEnergyModifier() {
+        return 2.5D;
+    }
+
+    @Override
+    public double getSprintSpeedModifier() {
+        return 1.3D;
+    }
+
+    @Override
+    public double getVerticalHoverSpeed() {
+        return 0.34D;
+    }
+
+    @Override
+    public double getVerticalHoverSlowSpeed() {
+        return 0.03D;
+    }
+
+    @Override
+    public double getVerticalAcceleration() {
+        return 0.13D;
+    }
+
+    @Override
+    public double getVerticalSpeed() {
+        return 0.48D;
+    }
+
+    @Override
+    public double getSidewaysSpeed() {
+        return 0.14D;
+    }
+
+    @Override
+    public EnumParticleTypes getParticle() {
+        return EnumParticleTypes.CLOUD;
+    }
+
+    @Override
+    public float getFallDamageReduction() {
+        return 2.0f;
+    }
+
+    @Override
+    public void drawHUD(ItemStack item, NBTTagCompound armorData) {
+        ModularArmor.drawEnergyHUD(item);
+        IElectricItem cont = item.getCapability(GregtechCapabilities.CAPABILITY_ELECTRIC_ITEM, null);
+        if (cont == null) return;
+        if (armorData != null) {
+            String status = "metaarmor.hud.status.disabled";
+            if (armorData.getBoolean("hover")) {
+                status = "metaarmor.hud.status.enabled";
+            }
+            ModularArmor.drawHUDText(item, Lists.newArrayList(status));
+        }
     }
 
     @Override
