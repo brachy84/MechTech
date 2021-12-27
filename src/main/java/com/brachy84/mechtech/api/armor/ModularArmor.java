@@ -127,7 +127,7 @@ public class ModularArmor implements ISpecialArmorLogic {
             }
             ta *= 4;
             float moduleDamage = (float) (damage - getDamageAfterAbsorb((float) damage, ta, tt));
-            moduleDamage /= 4;
+            moduleDamage /= armorModules.size();
             GTLog.logger.info("  do {} armor module damage * {}", moduleDamage, armorModules.size());
             for (AbsorbResult absorbResult : armorModules) {
                 if (absorbResult.module instanceof IDurabilityModule) {
