@@ -58,7 +58,13 @@ public class Modules {
                 .armor(3.75) // Full vanilla has 15 Armor -> 15 / 4 = 3.75
                 .registerModule();
         materialArmorBuilder(1004, Materials.Cobalt)
-                .armor(4, 0.1)
+                .armor(3.85, 0.1)
+                .registerModule();
+        materialArmorBuilder(1005, Materials.Steel)
+                .armor(3.85)
+                .registerModule();
+        materialArmorBuilder(1005, Materials.StainlessSteel)
+                .armor(4, 0.15)
                 .registerModule();
         materialArmorBuilder(2000, Materials.Neutronium)
                 .armor(15, 10)
