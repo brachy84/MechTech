@@ -1,14 +1,24 @@
 package com.brachy84.mechtech.comon;
 
+import com.brachy84.mechtech.api.armor.IModule;
 import com.brachy84.mechtech.api.armor.ModularArmor;
+import com.brachy84.mechtech.api.armor.modules.Binoculars;
 import com.brachy84.mechtech.client.ClientHandler;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.client.event.FOVUpdateEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import java.util.List;
 
 @SideOnly(Side.CLIENT)
 @Mod.EventBusSubscriber(Side.CLIENT)
@@ -29,6 +39,30 @@ public class ClientProxy extends CommonProxy {
                 ModularArmor modularArmor = ModularArmor.get(stack);
                 if (modularArmor != null) {
                     modularArmor.drawHUD(stack);
+                }
+            }
+        }
+    }
+
+    @SideOnly(Side.CLIENT)
+    @SubscribeEvent(priority = EventPriority.LOW) //set to low so other mods don't accidentally destroy it easily
+    public static void handleFovEvent(FOVUpdateEvent event) {
+
+        IAttributeInstance iattributeinstance = event.getEntity().getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
+        float f = 1 / ((float) (((iattributeinstance.getAttributeValue() / (double) event.getEntity().capabilities.getWalkSpeed() + 1.0D) / 2.0D)));
+
+        EntityPlayerSP player = Minecraft.getMinecraft().player;
+        ItemStack helmet = player.inventory.armorInventory.get(3);
+        ModularArmor modularArmor = ModularArmor.get(helmet);
+        if (modularArmor != null) {
+            NBTTagCompound armorData = ModularArmor.getArmorData(helmet);
+            if (!armorData.getBoolean("zoom"))
+                return;
+            List<IModule> modules = ModularArmor.getModulesOf(helmet);
+            for (IModule module : modules) {
+                if (module instanceof Binoculars) {
+                    event.setNewfov(event.getNewfov() * 0.333333f * f);//*speedFOV;
+                    break;
                 }
             }
         }

@@ -28,22 +28,26 @@ public class Modules {
         return Collections.unmodifiableMap(ARMOR_MODULES);
     }
 
-    public static final IModule nightVision = new NightVision();
-    public static final IModule solarGen1 = new SolarGen(() -> MetaItems.COVER_SOLAR_PANEL_LV.getStackForm(), GTValues.V[1], 1);
-    public static final IModule solarGen2 = new SolarGen(() -> MetaItems.COVER_SOLAR_PANEL_MV.getStackForm(), GTValues.V[2], 2);
-    public static final IModule solarGen3 = new SolarGen(() -> MetaItems.COVER_SOLAR_PANEL_HV.getStackForm(), GTValues.V[3], 3);
+    public static final IModule NIGHT_VISION = new NightVision();
+    public static final IModule SOLAR_GEN_I = new SolarGen(() -> MetaItems.COVER_SOLAR_PANEL_LV.getStackForm(), GTValues.V[1], 1);
+    public static final IModule SOLAR_GEN_II = new SolarGen(() -> MetaItems.COVER_SOLAR_PANEL_MV.getStackForm(), GTValues.V[2], 2);
+    public static final IModule SOLAR_GEN_III = new SolarGen(() -> MetaItems.COVER_SOLAR_PANEL_HV.getStackForm(), GTValues.V[3], 3);
     public static final IModule JETPACK = new JetpackModule();
     public static final IModule ADVANCED_JETPACK = new AdvancedJetpack();
     public static final IModule SHOCK_ABSORBER = new ShockAbsorber();
+    public static final IModule INSULATOR = new Insulator();
+    public static final IModule BINOCULARS = new Binoculars();
 
     static {
-        registerModule(0, nightVision);
-        registerModule(1, solarGen1);
-        registerModule(2, solarGen2);
-        registerModule(3, solarGen3);
+        registerModule(0, NIGHT_VISION);
+        registerModule(1, SOLAR_GEN_I);
+        registerModule(2, SOLAR_GEN_II);
+        registerModule(3, SOLAR_GEN_III);
         registerModule(4, JETPACK);
         registerModule(5, ADVANCED_JETPACK);
         registerModule(6, SHOCK_ABSORBER);
+        registerModule(7, INSULATOR);
+        registerModule(8, BINOCULARS);
 
         materialArmorBuilder(1000, Materials.Aluminium)
                 .armor(3.4)

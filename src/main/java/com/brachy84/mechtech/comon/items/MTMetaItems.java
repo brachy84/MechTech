@@ -12,10 +12,12 @@ public class MTMetaItems {
     public static MetaItem<?>.MetaValueItem WIRELESS_RECEIVER;
     public static MetaItem<?>.MetaValueItem WIRELESS_BINDER;
 
+    // Modules
     public static MetaItem<?>.MetaValueItem SHOCK_ABSORBER;
     public static MetaItem<?>.MetaValueItem THICK_ISOLATOR;
     public static MetaItem<?>.MetaValueItem BINOCULARS;
 
+    // Armor
     public static ArmorMetaItem<?>.ArmorMetaValueItem MODULAR_HELMET;
     public static ArmorMetaItem<?>.ArmorMetaValueItem MODULAR_CHESTPLATE;
     public static ArmorMetaItem<?>.ArmorMetaValueItem MODULAR_LEGGINGS;

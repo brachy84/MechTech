@@ -157,29 +157,6 @@ public class ModularArmor implements ISpecialArmorLogic {
         return 3 + modules * 0.1;
     }
 
-    public static NBTTagCompound getArmorData(ItemStack itemStack) {
-        NBTTagCompound armorNbt = itemStack.getTagCompound();
-        NBTTagCompound nbt;
-        if (armorNbt != null) {
-            nbt = armorNbt.getCompoundTag("ModuleData");
-        } else {
-            armorNbt = new NBTTagCompound();
-            nbt = new NBTTagCompound();
-            itemStack.setTagCompound(armorNbt);
-        }
-        armorNbt.setTag("ModuleData", nbt);
-        return nbt;
-    }
-
-    public static void setArmorData(ItemStack itemStack, NBTTagCompound nbt) {
-        NBTTagCompound armorNbt = itemStack.getTagCompound();
-        if (armorNbt == null) {
-            armorNbt = new NBTTagCompound();
-            itemStack.setTagCompound(armorNbt);
-        }
-        armorNbt.setTag("ModuleData", nbt);
-    }
-
     @Override
     public void onArmorTick(World world, EntityPlayer player, ItemStack itemStack) {
         Collection<IModule> modules = getModulesOf(itemStack);
@@ -303,6 +280,29 @@ public class ModularArmor implements ISpecialArmorLogic {
         return slot != EntityEquipmentSlot.LEGS ?
                 String.format("gregtech:textures/armor/%s_1.png", armorTexture) :
                 String.format("gregtech:textures/armor/%s_2.png", armorTexture);
+    }
+
+    public static NBTTagCompound getArmorData(ItemStack itemStack) {
+        NBTTagCompound armorNbt = itemStack.getTagCompound();
+        NBTTagCompound nbt;
+        if (armorNbt != null) {
+            nbt = armorNbt.getCompoundTag("ModuleData");
+        } else {
+            armorNbt = new NBTTagCompound();
+            nbt = new NBTTagCompound();
+            itemStack.setTagCompound(armorNbt);
+        }
+        armorNbt.setTag("ModuleData", nbt);
+        return nbt;
+    }
+
+    public static void setArmorData(ItemStack itemStack, NBTTagCompound nbt) {
+        NBTTagCompound armorNbt = itemStack.getTagCompound();
+        if (armorNbt == null) {
+            armorNbt = new NBTTagCompound();
+            itemStack.setTagCompound(armorNbt);
+        }
+        armorNbt.setTag("ModuleData", nbt);
     }
 
     public static long fill(ItemStack stack, long amount, int tier, boolean simulate) {

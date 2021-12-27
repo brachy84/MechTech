@@ -60,7 +60,7 @@ public class SolarGen implements IModule {
 
     @Override
     public Collection<IModule> getIncompatibleModules() {
-        return Lists.newArrayList(Modules.solarGen1, Modules.solarGen2, Modules.solarGen3);
+        return Lists.newArrayList(Modules.SOLAR_GEN_I, Modules.SOLAR_GEN_II, Modules.SOLAR_GEN_III);
     }
 
     @Override

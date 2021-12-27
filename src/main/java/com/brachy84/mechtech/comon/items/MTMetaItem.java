@@ -4,13 +4,8 @@ import com.brachy84.mechtech.api.armor.MaterialArmorModuleBuilder;
 import com.brachy84.mechtech.api.armor.Modules;
 import gregtech.api.items.metaitem.MetaItem;
 import gregtech.api.items.metaitem.StandardMetaItem;
-import gregtech.api.items.metaitem.stats.IItemBehaviour;
 import gregtech.common.items.MetaItems;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.item.ItemStack;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 import static com.brachy84.mechtech.comon.items.MTMetaItems.*;
@@ -23,15 +18,17 @@ public class MTMetaItem extends StandardMetaItem {
 
     @Override
     public void registerSubItems() {
+        // Modules
         WIRELESS_RECEIVER = addItem(0, "wireless_receiver");
         SHOCK_ABSORBER = addItem(1, "shock_absorber").addComponents(Modules.SHOCK_ABSORBER);
         THICK_ISOLATOR = addItem(2, "thick_insulator").addComponents(Modules.INSULATOR);
         BINOCULARS = addItem(3, "binoculars").addComponents(Modules.BINOCULARS);
 
-        MetaItems.NIGHTVISION_GOGGLES.addComponents(Modules.nightVision);
-        MetaItems.COVER_SOLAR_PANEL_LV.addComponents(Modules.solarGen1);
-        MetaItems.COVER_SOLAR_PANEL_MV.addComponents(Modules.solarGen2);
-        MetaItems.COVER_SOLAR_PANEL_HV.addComponents(Modules.solarGen3);
+        // Add modules to existing items
+        MetaItems.NIGHTVISION_GOGGLES.addComponents(Modules.NIGHT_VISION);
+        MetaItems.COVER_SOLAR_PANEL_LV.addComponents(Modules.SOLAR_GEN_I);
+        MetaItems.COVER_SOLAR_PANEL_MV.addComponents(Modules.SOLAR_GEN_II);
+        MetaItems.COVER_SOLAR_PANEL_HV.addComponents(Modules.SOLAR_GEN_III);
         MetaItems.ELECTRIC_JETPACK.addComponents(Modules.JETPACK);
         MetaItems.ELECTRIC_JETPACK_ADVANCED.addComponents(Modules.ADVANCED_JETPACK);
 
