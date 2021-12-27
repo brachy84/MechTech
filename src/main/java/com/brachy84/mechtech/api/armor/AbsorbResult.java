@@ -4,6 +4,8 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class AbsorbResult implements Comparable<AbsorbResult> {
 
+    public static final AbsorbResult ZERO = new AbsorbResult();
+
     protected double ratio = 0;
     protected int max = 0;
     protected int priority = 0;

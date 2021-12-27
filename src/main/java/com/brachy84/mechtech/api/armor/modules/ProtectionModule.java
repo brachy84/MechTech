@@ -1,7 +1,9 @@
 package com.brachy84.mechtech.api.armor.modules;
 
+import com.brachy84.mechtech.api.armor.AbsorbResult;
 import com.brachy84.mechtech.api.armor.IArmorModule;
 import com.brachy84.mechtech.api.armor.IDurabilityModule;
+import com.brachy84.mechtech.api.armor.ISpecialArmorModule;
 import gregtech.api.unification.material.Material;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.EntityLivingBase;
@@ -11,20 +13,22 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.items.IItemHandler;
 
-public class ProtectionModule implements IArmorModule, IDurabilityModule {
+public class ProtectionModule implements IArmorModule, IDurabilityModule, ISpecialArmorModule {
 
     private final Material material;
     private ItemStack stack;
     public final double armor, toughness;
     public final int durability;
     public boolean doGenerateMaterialRecipe = true;
+    private final ISpecialArmorModule specialArmorModule;
 
-    public ProtectionModule(Material material, ItemStack stack, double armor, double toughness, int durability) {
+    public ProtectionModule(Material material, ItemStack stack, double armor, double toughness, int durability, ISpecialArmorModule specialArmorModule) {
         this.material = material;
         this.stack = stack;
         this.armor = armor;
         this.toughness = toughness;
         this.durability = durability;
+        this.specialArmorModule = specialArmorModule;
     }
 
     public Material getMaterial() {
@@ -95,5 +99,10 @@ public class ProtectionModule implements IArmorModule, IDurabilityModule {
     @Override
     public String getModuleId() {
         return "armor_plating";
+    }
+
+    @Override
+    public AbsorbResult getArmorProperties(EntityLivingBase entity, ItemStack modularArmorPiece, NBTTagCompound moduleData, DamageSource source, double damage, EntityEquipmentSlot slot) {
+        return specialArmorModule == null ? AbsorbResult.ZERO : specialArmorModule.getArmorProperties(entity, modularArmorPiece, moduleData, source, damage, slot);
     }
 }

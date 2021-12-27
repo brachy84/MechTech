@@ -6,10 +6,11 @@ import com.google.common.collect.HashBiMap;
 import gregtech.api.GTValues;
 import gregtech.api.unification.material.Material;
 import gregtech.api.unification.material.Materials;
-import gregtech.api.unification.material.properties.PropertyKey;
+import gregtech.api.util.GTLog;
 import gregtech.common.items.MetaItems;
-import net.minecraft.item.ItemStack;
+import org.apache.logging.log4j.Level;
 
+import java.rmi.AlreadyBoundException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,13 +18,13 @@ import java.util.Map;
 public class Modules {
 
     private static final BiMap<Integer, IModule> REGISTRY = HashBiMap.create(2000);
-    private static final Map<Integer, Material> ARMOR_MODULES = new HashMap<>();
+    private static final Map<Integer, MaterialArmorModuleBuilder> ARMOR_MODULES = new HashMap<>();
 
     public static Iterable<IModule> getRegisteredModules() {
         return REGISTRY.values();
     }
 
-    public static Map<Integer, Material> getArmorModules() {
+    public static Map<Integer, MaterialArmorModuleBuilder> getArmorModules() {
         return Collections.unmodifiableMap(ARMOR_MODULES);
     }
 
@@ -44,28 +45,39 @@ public class Modules {
         registerModule(5, ADVANCED_JETPACK);
         registerModule(6, SHOCK_ABSORBER);
 
-        registerMaterialArmorModule(1000, Materials.Aluminium, 3.4, 0.0);
-        registerMaterialArmorModule(1001, Materials.Copper, 3.6, 0.0, 150);
-        registerMaterialArmorModule(1002, Materials.Bronze, 3.8, 0.0);
-        registerMaterialArmorModule(1003, Materials.Iron, 3.75, 0); // Full vanilla has 15 Armor -> 15 / 4 = 3.75
-        registerMaterialArmorModule(1004, Materials.Diamond, 5, 0.5);
-        registerMaterialArmorModule(2000, Materials.Neutronium, 20, 10);
+        materialArmorBuilder(1000, Materials.Aluminium)
+                .armor(3.4)
+                .registerModule();
+        materialArmorBuilder(1001, Materials.Copper)
+                .armor(3.6)
+                .registerModule();
+        materialArmorBuilder(1002, Materials.Bronze)
+                .armor(3.6)
+                .registerModule();
+        materialArmorBuilder(1003, Materials.Iron)
+                .armor(3.75) // Full vanilla has 15 Armor -> 15 / 4 = 3.75
+                .registerModule();
+        materialArmorBuilder(1004, Materials.Cobalt)
+                .armor(4, 0.1)
+                .registerModule();
+        materialArmorBuilder(2000, Materials.Neutronium)
+                .armor(15, 10)
+                .specialArmor(((entity, modularArmorPiece, moduleData, source, damage, slot) -> new AbsorbResult(0.8, 100)))
+                .registerModule();
     }
 
     public static void registerModule(int id, IModule module) {
+        if (REGISTRY.containsKey(id)) {
+            GTLog.logger.throwing(Level.ERROR, new AlreadyBoundException("Can't register module with id " + id + " as it already exists"));
+            return;
+        }
         REGISTRY.put(id, module);
     }
 
-    public static void registerMaterialArmorModule(int id, Material material, double armor, double toughness) {
-        if(material.hasProperty(PropertyKey.TOOL)) {
-            registerMaterialArmorModule(id, material, armor, toughness, material.getProperty(PropertyKey.TOOL).getToolDurability());
-        }
-    }
-
-    public static void registerMaterialArmorModule(int id, Material material, double armor, double toughness, int durability) {
-        ARMOR_MODULES.put(id, material);
-        ProtectionModule module = new ProtectionModule(material, ItemStack.EMPTY, armor, toughness, durability);
-        registerModule(id, module);
+    public static MaterialArmorModuleBuilder materialArmorBuilder(int id, Material material) {
+        MaterialArmorModuleBuilder builder = new MaterialArmorModuleBuilder(id, material);
+        ARMOR_MODULES.put(id, builder);
+        return builder;
     }
 
     public static IModule getModule(int id) {
@@ -74,7 +86,7 @@ public class Modules {
 
     public static int getModuleId(IModule module) {
         Integer id = REGISTRY.inverse().get(module);
-        if(id == null) {
+        if (id == null) {
             throw new IllegalStateException("Module " + module.getModuleId() + " is not registered");
         }
         return id;

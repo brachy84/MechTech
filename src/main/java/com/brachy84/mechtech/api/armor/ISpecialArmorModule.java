@@ -6,7 +6,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 
-public interface ISpecialArmorModule extends IModule {
+@FunctionalInterface
+public interface ISpecialArmorModule {
 
     /**
      * Modifies armor values when damaged.

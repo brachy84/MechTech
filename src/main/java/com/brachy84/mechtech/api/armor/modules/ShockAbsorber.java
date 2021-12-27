@@ -11,7 +11,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.items.IItemHandler;
 
-public class ShockAbsorber implements ISpecialArmorModule {
+public class ShockAbsorber implements IModule, ISpecialArmorModule {
 
     @Override
     public boolean canPlaceIn(EntityEquipmentSlot slot, ItemStack modularArmorPiece, IItemHandler modularSlots) {
