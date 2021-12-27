@@ -31,13 +31,13 @@ public class SolarGen implements IModule {
 
     @Override
     public void onTick(World world, EntityPlayer player, ItemStack modularArmorPiece, NBTTagCompound armorData) {
-        if(!world.isRemote && world.canSeeSky(new BlockPos(player.posX, player.posY + player.getEyeHeight(), player.posZ))) {
+        if (!world.isRemote && world.canSeeSky(new BlockPos(player.posX, player.posY + player.getEyeHeight(), player.posZ))) {
             float sunBrightness = world.getSunBrightness(Minecraft.getMinecraft().getRenderPartialTicks());
             sunBrightness -= 0.2f;
             sunBrightness /= 0.8f; // undo mc's trickery
-            if(sunBrightness > 0.1f) {
+            if (sunBrightness > 0.1f) {
                 int generated = (int) (gen * sunBrightness);
-                for(int i = 3; i >= 0; i--) { // charge from head to feet
+                for (int i = 3; i >= 0; i--) { // charge from head to feet
                     ItemStack stack = player.inventory.armorInventory.get(i);
                     if (stack.isEmpty())
                         continue;
@@ -61,11 +61,6 @@ public class SolarGen implements IModule {
     @Override
     public Collection<IModule> getIncompatibleModules() {
         return Lists.newArrayList(Modules.solarGen1, Modules.solarGen2, Modules.solarGen3);
-    }
-
-    @Override
-    public ItemStack getAsItemStack(NBTTagCompound nbt) {
-        return item.get();
     }
 
     @Override

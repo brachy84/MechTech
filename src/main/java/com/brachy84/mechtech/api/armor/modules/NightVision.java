@@ -3,7 +3,6 @@ package com.brachy84.mechtech.api.armor.modules;
 import com.brachy84.mechtech.api.armor.IModule;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IElectricItem;
-import gregtech.common.items.MetaItems;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
@@ -41,11 +40,6 @@ public class NightVision implements IModule {
     @Override
     public boolean canPlaceIn(EntityEquipmentSlot slot, ItemStack modularArmorPiece, IItemHandler modularSlots) {
         return slot == EntityEquipmentSlot.HEAD;
-    }
-
-    @Override
-    public ItemStack getAsItemStack(NBTTagCompound nbt) {
-        return MetaItems.NIGHTVISION_GOGGLES.getStackForm();
     }
 
     @Override

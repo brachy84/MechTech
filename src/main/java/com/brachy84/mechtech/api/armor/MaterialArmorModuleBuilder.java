@@ -1,6 +1,7 @@
 package com.brachy84.mechtech.api.armor;
 
 import com.brachy84.mechtech.api.armor.modules.MaterialArmorModule;
+import gregtech.api.items.metaitem.MetaItem;
 import gregtech.api.unification.material.Material;
 import gregtech.api.unification.material.properties.PropertyKey;
 import net.minecraft.item.ItemStack;
@@ -15,7 +16,6 @@ public class MaterialArmorModuleBuilder {
     public ISpecialArmorModule specialArmorModule;
     private MaterialArmorModule module;
     public boolean doGenerateRecipe = true;
-    private ItemStack stack = ItemStack.EMPTY;
 
     public MaterialArmorModuleBuilder(int id, Material material) {
         this.id = id;
@@ -24,17 +24,13 @@ public class MaterialArmorModuleBuilder {
         this.toughness = 0;
     }
 
-    /**
-     * Called Internally when the item is registered
-     */
-    public void setStack(ItemStack stack) {
-        this.stack = stack;
-        if(module != null)
-            module.setStack(stack);
-    }
-
-    public ItemStack getStack() {
-        return stack;
+    public ItemStack getItemStack() {
+        if (module == null)
+            return ItemStack.EMPTY;
+        MetaItem<?>.MetaValueItem metaValueItem = module.getMetaValueItem();
+        if (metaValueItem == null)
+            return ItemStack.EMPTY;
+        return metaValueItem.getStackForm();
     }
 
     public MaterialArmorModuleBuilder armor(double armor) {
@@ -72,7 +68,7 @@ public class MaterialArmorModuleBuilder {
 
     public MaterialArmorModuleBuilder specialArmor(DamageSource source, double absorbtion, int maxAbsorbtion) {
         this.specialArmorModule = ((entity, modularArmorPiece, moduleData, source1, damage, slot) -> {
-            if(source == source1)
+            if (source == source1)
                 return new AbsorbResult(absorbtion, maxAbsorbtion);
             return AbsorbResult.ZERO;
         });
@@ -87,14 +83,14 @@ public class MaterialArmorModuleBuilder {
     public void registerModule() {
         armor = Math.max(armor, 0);
         toughness = Math.max(toughness, 0);
-        if(durability <= 0) {
-            if(material.hasProperty(PropertyKey.TOOL)) {
+        if (durability <= 0) {
+            if (material.hasProperty(PropertyKey.TOOL)) {
                 durability = material.getProperty(PropertyKey.TOOL).getToolDurability();
             } else {
                 durability = 128;
             }
         }
-        this.module = new MaterialArmorModule(material, ItemStack.EMPTY, armor, toughness, durability, specialArmorModule);
+        this.module = new MaterialArmorModule(material, armor, toughness, durability, specialArmorModule);
         Modules.registerModule(id, module);
     }
 

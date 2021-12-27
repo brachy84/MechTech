@@ -3,7 +3,6 @@ package com.brachy84.mechtech.api.armor.modules;
 import com.brachy84.mechtech.api.armor.AbsorbResult;
 import com.brachy84.mechtech.api.armor.IModule;
 import com.brachy84.mechtech.api.armor.ISpecialArmorModule;
-import com.brachy84.mechtech.comon.items.MTMetaItems;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
@@ -19,18 +18,13 @@ public class ShockAbsorber implements IModule, ISpecialArmorModule {
     }
 
     @Override
-    public ItemStack getAsItemStack(NBTTagCompound nbt) {
-        return MTMetaItems.SHOCK_ABSORBER.getStackForm();
-    }
-
-    @Override
     public String getModuleId() {
         return "shock_absorber";
     }
 
     @Override
     public AbsorbResult getArmorProperties(EntityLivingBase entity, ItemStack modularArmorPiece, NBTTagCompound moduleData, DamageSource source, double damage, EntityEquipmentSlot slot) {
-        if(slot == EntityEquipmentSlot.FEET && source == DamageSource.FALL) {
+        if (slot == EntityEquipmentSlot.FEET && source == DamageSource.FALL) {
             return new AbsorbResult(0.9, 40, 10);
         }
         return new AbsorbResult();

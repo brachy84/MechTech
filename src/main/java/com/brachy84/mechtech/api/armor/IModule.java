@@ -1,6 +1,7 @@
 package com.brachy84.mechtech.api.armor;
 
 import gregtech.api.items.metaitem.MetaItem;
+import gregtech.api.items.metaitem.stats.IItemBehaviour;
 import gregtech.api.items.metaitem.stats.IItemComponent;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
@@ -9,7 +10,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -17,11 +17,15 @@ import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
-public interface IModule extends IItemComponent {
+public interface IModule extends IItemBehaviour {
+
+    /**
+     * Stored the MetaValueItems for the modules
+     * !SHOULD NOT BE EDITED!
+     */
+    static Map<IModule, MetaItem<?>.MetaValueItem> itemMap = new HashMap<>();
 
     @Nullable
     static IModule getOf(ItemStack stack) {
@@ -41,6 +45,14 @@ public interface IModule extends IItemComponent {
     }
 
     /**
+     * !SHOULD NOT BE EDITED!
+     */
+    @Override
+    default void onAddedToItem(MetaItem.MetaValueItem metaValueItem) {
+        itemMap.put(this, metaValueItem);
+    }
+
+    /**
      * Returns how many modules of the module are in the handler.
      * Can be used in {@link #canPlaceIn(EntityEquipmentSlot, ItemStack, IItemHandler)} to set a maximum.
      *
@@ -50,10 +62,10 @@ public interface IModule extends IItemComponent {
      */
     static int moduleCount(IModule module, IItemHandler handler) {
         int count = 0;
-        ItemStack moduleItem = module.getAsItemStack(new NBTTagCompound());
+        ItemStack moduleItem = module.getMetaValueItem().getStackForm();
         for (int i = 0; i < handler.getSlots(); i++) {
             ItemStack stack = handler.getStackInSlot(i);
-            if (!stack.isEmpty() && moduleItem.getItem() == stack.getItem() && moduleItem.getMetadata() == stack.getMetadata() && ItemStack.areItemStackTagsEqual(moduleItem, stack))
+            if (!stack.isEmpty() && moduleItem.getItem() == stack.getItem() && moduleItem.getMetadata() == stack.getMetadata())
                 count += stack.getCount();
         }
         return count;
@@ -132,20 +144,32 @@ public interface IModule extends IItemComponent {
     /**
      * Called when the module is saved to the armor piece
      *
-     * @param nbt        data
+     * @param nbt        armor data (write here)
      * @param moduleItem this module as item
      */
-    default void writeExtraData(NBTTagCompound nbt, ItemStack moduleItem) {
+    default void writeExtraDataToArmor(NBTTagCompound nbt, ItemStack moduleItem) {
     }
 
     /**
-     * ItemStack representation of this module. This item will be put into the {@link com.brachy84.mechtech.comon.machines.MetaTileEntityArmorWorkbench}
+     * Called when the ItemStack from this module is created. Write data here that was written in {@link #writeExtraDataToArmor(NBTTagCompound, ItemStack)}
      *
-     * @param nbt contains extra data that was written in {@link #writeExtraData(NBTTagCompound, ItemStack)}
-     * @return ItemStack representation
+     * @param nbt data stored in the armor
+     * @return data stored in the item
      */
-    ItemStack getAsItemStack(NBTTagCompound nbt);
+    @Nullable
+    default NBTTagCompound writeExtraDataToModuleItem(NBTTagCompound nbt) {
+        return null;
+    }
 
+    /**
+     * @return the meta item this module was added to
+     * !SHOULD NOT BE EDITED!
+     */
+    default MetaItem<?>.MetaValueItem getMetaValueItem() {
+        return itemMap.get(this);
+    }
+
+    @Deprecated
     default ItemStack getDestroyedStack() {
         return ItemStack.EMPTY;
     }
@@ -158,5 +182,30 @@ public interface IModule extends IItemComponent {
         return I18n.format("mechtech.modules." + getModuleId() + ".name");
     }
 
+    /**
+     * @return a unique id
+     */
     String getModuleId();
+
+    /**
+     * Called in onRender event to draw player HUD
+     *
+     * @param armorPiece armor piece item
+     * @param armorData  data stored in armor (This is NOT the data from {@link #writeExtraDataToArmor(NBTTagCompound, ItemStack)}),
+     *                   it is the same data as in {@link #onTick(World, EntityPlayer, ItemStack, NBTTagCompound)})
+     */
+    @SideOnly(Side.CLIENT)
+    default void drawHUD(ItemStack armorPiece, NBTTagCompound armorData) {
+    }
+
+    /**
+     * Adds tooltip lines to the item form
+     *
+     * @param itemStack this module as item
+     * @param lines     tooltip
+     */
+    @Override
+    default void addInformation(ItemStack itemStack, List<String> lines) {
+        lines.add(I18n.format("mechtech.modular_armor.usable"));
+    }
 }

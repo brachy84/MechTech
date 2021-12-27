@@ -22,13 +22,14 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ISpecialArmor;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import java.util.*;
 
 public class ModularArmor implements ISpecialArmorLogic {
-
-    private static final UUID[] ARMOR_MODIFIERS = new UUID[]{UUID.fromString("845DB27C-C624-495F-8C9F-6020A9A58B6B"), UUID.fromString("D8499B04-0E66-4726-AB29-64469D734E0D"), UUID.fromString("9F3D476D-C118-4544-8365-64846904B48E"), UUID.fromString("2AD3F246-FEE1-4E67-B886-69FD380BB150")};
 
     public static ModularArmor get(ItemStack stack) {
         if (stack.getItem() instanceof ArmorMetaItem) {
@@ -117,7 +118,7 @@ public class ModularArmor implements ISpecialArmorLogic {
                 ta += absorbResult.armor;
                 tt += absorbResult.toughness;
             }
-            if(armorModules.size() > 1) {
+            if (armorModules.size() > 1) {
                 float factor = (float) getFactor(armorModules.size());
                 ta /= armorModules.size();
                 tt /= armorModules.size();
@@ -149,16 +150,14 @@ public class ModularArmor implements ISpecialArmorLogic {
     }
 
     private double getFactor(int modules) {
-        if(modules <= 1)
+        if (modules <= 1)
             return 1;
-        if(modules <= 5)
+        if (modules <= 5)
             return modules * (1 - (modules - 1) / 10.0);
         return 3 + modules * 0.1;
     }
 
-    @Override
-    public void onArmorTick(World world, EntityPlayer player, ItemStack itemStack) {
-        Collection<IModule> modules = getModulesOf(itemStack);
+    public static NBTTagCompound getArmorData(ItemStack itemStack) {
         NBTTagCompound armorNbt = itemStack.getTagCompound();
         NBTTagCompound nbt;
         if (armorNbt != null) {
@@ -168,10 +167,27 @@ public class ModularArmor implements ISpecialArmorLogic {
             nbt = new NBTTagCompound();
             itemStack.setTagCompound(armorNbt);
         }
+        armorNbt.setTag("ModuleData", nbt);
+        return nbt;
+    }
+
+    public static void setArmorData(ItemStack itemStack, NBTTagCompound nbt) {
+        NBTTagCompound armorNbt = itemStack.getTagCompound();
+        if (armorNbt == null) {
+            armorNbt = new NBTTagCompound();
+            itemStack.setTagCompound(armorNbt);
+        }
+        armorNbt.setTag("ModuleData", nbt);
+    }
+
+    @Override
+    public void onArmorTick(World world, EntityPlayer player, ItemStack itemStack) {
+        Collection<IModule> modules = getModulesOf(itemStack);
+        NBTTagCompound nbt = getArmorData(itemStack);
         for (IModule module : modules) {
             module.onTick(world, player, itemStack, nbt);
         }
-        armorNbt.setTag("ModuleData", nbt);
+        setArmorData(itemStack, nbt);
     }
 
     public void onUnequip(World world, EntityLivingBase player, ItemStack modularArmorPiece, ItemStack newStack) {
@@ -270,6 +286,15 @@ public class ModularArmor implements ISpecialArmorLogic {
     public Multimap<String, AttributeModifier> getAttributeModifiers(EntityEquipmentSlot equipmentSlot, ItemStack itemStack) {
         ImmutableMultimap.Builder<String, AttributeModifier> builder = new ImmutableMultimap.Builder<>();
         return builder.build();
+    }
+
+    @SideOnly(Side.CLIENT)
+    public void drawHUD(ItemStack item) {
+        List<IModule> modules = getModulesOf(item);
+        NBTTagCompound nbt = getArmorData(item);
+        modules.forEach(module -> {
+            module.drawHUD(item, nbt);
+        });
     }
 
     @Override
@@ -409,10 +434,12 @@ public class ModularArmor implements ISpecialArmorLogic {
             for (int i = 0; i < modulesNbt.tagCount(); i++) {
                 NBTTagCompound moduleNbt = modulesNbt.getCompoundTagAt(i);
                 IModule module = Modules.getModule(moduleNbt.getInteger("ID"));
-                if (moduleNbt.getBoolean("Destroyed")) {
-                    modules.add(module.getDestroyedStack());
-                } else {
-                    modules.add(module.getAsItemStack(moduleNbt));
+                if (!moduleNbt.getBoolean("Destroyed")) {
+                    ItemStack stack1 = module.getMetaValueItem().getStackForm();
+                    NBTTagCompound itemNbt = module.writeExtraDataToModuleItem(moduleNbt);
+                    if (itemNbt != null)
+                        stack1.setTagCompound(itemNbt);
+                    modules.add(stack1);
                 }
             }
             return modules;
@@ -441,6 +468,26 @@ public class ModularArmor implements ISpecialArmorLogic {
         return Collections.emptyList();
     }
 
+    public static List<Pair<IModule, NBTTagCompound>> getModulesWithData(ItemStack stack) {
+        ModularArmor armor = get(stack);
+        if (armor != null) {
+            NBTTagCompound nbt = stack.getTagCompound();
+            if (nbt == null || !nbt.hasKey(MODULES))
+                return Collections.emptyList();
+            NBTTagList modulesNbt = nbt.getTagList(MODULES, Constants.NBT.TAG_COMPOUND);
+            List<Pair<IModule, NBTTagCompound>> modules = new ArrayList<>();
+            for (int i = 0; i < modulesNbt.tagCount(); i++) {
+                NBTTagCompound moduleNbt = modulesNbt.getCompoundTagAt(i);
+                IModule module = Modules.getModule(moduleNbt.getInteger("ID"));
+                if (!moduleNbt.getBoolean("Destroyed"))
+                    modules.add(Pair.of(module, moduleNbt));
+            }
+            return modules;
+        }
+
+        return Collections.emptyList();
+    }
+
     public static void writeModulesTo(Collection<ItemStack> modules, ItemStack stack) {
         ModularArmor armor = get(stack);
         if (armor != null) {
@@ -451,7 +498,7 @@ public class ModularArmor implements ISpecialArmorLogic {
                 if (module == null)
                     throw new NullPointerException("Module is null");
                 moduleNbt.setInteger("ID", Modules.getModuleId(module));
-                module.writeExtraData(moduleNbt, stack1);
+                module.writeExtraDataToArmor(moduleNbt, stack1);
                 modulesNbt.appendTag(moduleNbt);
             }
             NBTTagCompound nbt = stack.getTagCompound();
@@ -477,5 +524,14 @@ public class ModularArmor implements ISpecialArmorLogic {
             }
             nbt.setTag(MODULES, newList);
         }
+    }
+
+    @SideOnly(Side.CLIENT)
+    public static void drawEnergyHUD(ItemStack armor) {
+        // TODO draw elements (possibly with TOP?)
+    }
+
+    public static void drawHUDText(ItemStack armor, List<String> lines) {
+        // TODO draw elements (possibly with TOP?)
     }
 }

@@ -2,18 +2,10 @@ package com.brachy84.mechtech.comon;
 
 import com.brachy84.mechtech.MechTech;
 import com.brachy84.mechtech.api.armor.IModule;
-import com.brachy84.mechtech.api.armor.MaterialArmorModuleBuilder;
 import com.brachy84.mechtech.api.armor.ModularArmor;
 import com.brachy84.mechtech.api.armor.Modules;
 import com.brachy84.mechtech.comon.items.MTMetaItems;
 import com.brachy84.mechtech.comon.recipes.Recipes;
-import gregtech.api.recipes.ModHandler;
-import gregtech.api.recipes.RecipeMaps;
-import gregtech.api.unification.material.Material;
-import gregtech.api.unification.material.info.MaterialFlags;
-import gregtech.api.unification.material.properties.PropertyKey;
-import gregtech.api.unification.ore.OrePrefix;
-import gregtech.api.unification.stack.UnificationEntry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
@@ -36,36 +28,29 @@ public class CommonProxy {
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void registerRecipes(RegistryEvent.Register<IRecipe> event) {
         Recipes.init();
-        for(MaterialArmorModuleBuilder builder : Modules.getArmorModules().values()) {
-            if(builder.isRegistered()) {
-                if(builder.doGenerateRecipe && builder.material != null && builder.material.hasFlag(MaterialFlags.GENERATE_PLATE)) {
-                    generateArmorPlatingRecipe(builder);
-                }
-            }
-        }
     }
 
     @SubscribeEvent
     public static void onEquipmentChangeEvent(LivingEquipmentChangeEvent event) {
-        if(event.getFrom().isEmpty())
+        if (event.getFrom().isEmpty())
             return;
         ModularArmor modularArmor = ModularArmor.get(event.getFrom());
-        if(modularArmor != null) {
+        if (modularArmor != null) {
             modularArmor.onUnequip(event.getEntity().world, event.getEntityLiving(), event.getFrom(), event.getTo());
         }
     }
 
     @SubscribeEvent
     public static void onKnockback(LivingKnockBackEvent event) {
-        if(event.getEntityLiving() instanceof EntityPlayer) {
+        if (event.getEntityLiving() instanceof EntityPlayer) {
             EntityPlayer player = (EntityPlayer) event.getEntityLiving();
-            for(int i = 0; i < 4; i++) {
+            for (int i = 0; i < 4; i++) {
                 ItemStack stack = player.inventory.armorInventory.get(i);
                 ModularArmor modularArmor = ModularArmor.get(stack);
-                if(modularArmor != null) {
+                if (modularArmor != null) {
                     List<IModule> modules = ModularArmor.getModulesOf(stack);
-                    for(IModule module : modules) {
-                        if(module == Modules.SHOCK_ABSORBER) {
+                    for (IModule module : modules) {
+                        if (module == Modules.SHOCK_ABSORBER) {
                             event.setStrength(event.getStrength() * 0.2f);
                             return;
                         }
@@ -75,29 +60,5 @@ public class CommonProxy {
         }
     }
 
-    private static void generateArmorPlatingRecipe(MaterialArmorModuleBuilder builder) {
-        ItemStack result = builder.getStack();
-        Material material = builder.material;
-        if(material.hasProperty(PropertyKey.INGOT)) {
-            ModHandler.addShapedRecipe("armor_plating_" + material.toString(), result, "PPh", "PP ", "h  ", 'P', new UnificationEntry(OrePrefix.plate, material));
-            RecipeMaps.FORMING_PRESS_RECIPES.recipeBuilder()
-                    .input(OrePrefix.plate, material, 2)
-                    .input(OrePrefix.plate, material, 2)
-                    .outputs(result)
-                    .duration(160)
-                    .EUt(44)
-                    .buildAndRegister();
-        } else if(material.hasProperty(PropertyKey.GEM)) {
 
-            // TODO gem plating recipe
-            ModHandler.addShapedRecipe("armor_plating_" + material.toString(), result, "PPh", "PP ", "h  ", 'P', new UnificationEntry(OrePrefix.plate, material));
-            RecipeMaps.FORMING_PRESS_RECIPES.recipeBuilder()
-                    .input(OrePrefix.plate, material, 2)
-                    .input(OrePrefix.plate, material, 2)
-                    .outputs(result)
-                    .duration(160)
-                    .EUt(44)
-                    .buildAndRegister();
-        }
-    }
 }
