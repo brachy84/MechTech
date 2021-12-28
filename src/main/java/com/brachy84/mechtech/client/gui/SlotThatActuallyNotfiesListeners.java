@@ -1,4 +1,4 @@
-package com.brachy84.mechtech.client;
+package com.brachy84.mechtech.client.gui;
 
 import com.brachy84.mechtech.api.armor.ModularArmor;
 import gregtech.api.gui.widgets.SlotWidget;

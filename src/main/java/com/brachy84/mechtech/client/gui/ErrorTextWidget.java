@@ -1,4 +1,4 @@
-package com.brachy84.mechtech.client;
+package com.brachy84.mechtech.client.gui;
 
 import gregtech.api.gui.IRenderContext;
 import gregtech.api.gui.Widget;
