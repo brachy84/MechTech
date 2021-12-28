@@ -15,16 +15,13 @@ import net.minecraft.world.World;
 import net.minecraftforge.items.IItemHandler;
 
 import java.util.Collection;
-import java.util.function.Supplier;
 
 public class SolarGen implements IModule {
 
-    private final Supplier<ItemStack> item;
     private final long gen;
     private final int tier;
 
-    public SolarGen(Supplier<ItemStack> item, long gen, int tier) {
-        this.item = item;
+    public SolarGen(long gen, int tier) {
         this.gen = gen;
         this.tier = tier;
     }

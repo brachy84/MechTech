@@ -7,7 +7,6 @@ import gregtech.api.GTValues;
 import gregtech.api.unification.material.Material;
 import gregtech.api.unification.material.Materials;
 import gregtech.api.util.GTLog;
-import gregtech.common.items.MetaItems;
 import org.apache.logging.log4j.Level;
 
 import java.rmi.AlreadyBoundException;
@@ -29,9 +28,9 @@ public class Modules {
     }
 
     public static final IModule NIGHT_VISION = new NightVision();
-    public static final IModule SOLAR_GEN_I = new SolarGen(() -> MetaItems.COVER_SOLAR_PANEL_LV.getStackForm(), GTValues.V[1], 1);
-    public static final IModule SOLAR_GEN_II = new SolarGen(() -> MetaItems.COVER_SOLAR_PANEL_MV.getStackForm(), GTValues.V[2], 2);
-    public static final IModule SOLAR_GEN_III = new SolarGen(() -> MetaItems.COVER_SOLAR_PANEL_HV.getStackForm(), GTValues.V[3], 3);
+    public static final IModule SOLAR_GEN_I = new SolarGen(GTValues.V[1], 1);
+    public static final IModule SOLAR_GEN_II = new SolarGen(GTValues.V[2], 2);
+    public static final IModule SOLAR_GEN_III = new SolarGen(GTValues.V[3], 3);
     public static final IModule JETPACK = new JetpackModule();
     public static final IModule ADVANCED_JETPACK = new AdvancedJetpack();
     public static final IModule SHOCK_ABSORBER = new ShockAbsorber();
