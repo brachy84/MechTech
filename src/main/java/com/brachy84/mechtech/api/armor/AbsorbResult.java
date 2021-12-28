@@ -59,10 +59,8 @@ public class AbsorbResult implements Comparable<AbsorbResult> {
     }
 
     @Override
-    public int compareTo(AbsorbResult o)
-    {
-        if (o.priority != priority)
-        {
+    public int compareTo(AbsorbResult o) {
+        if (o.priority != priority) {
             return o.priority - priority;
         }
         double left =  (  ratio == 0 ? 0 :   max * 100.0D /   ratio);

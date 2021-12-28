@@ -41,9 +41,11 @@ mechtech.modules.shock_absorber.name=Shock Absorber
 mechtech.modules.insulator.name=Thick Insulator
 mechtech.modules.binoculars.name=Binoculars
 
-mechtech.modules.armor_plating.tooltip.1=Durability: %d/%d
-mechtech.modules.armor_plating.tooltip.2=Armor: %d
-mechtech.modules.armor_plating.tooltip.3=Toughness: %d
+mechtech.modules.armor_plating.tooltip.1=§rDurability: §a%d/%d
+mechtech.modules.armor_plating.tooltip.2=§rArmor: §a%d
+mechtech.modules.armor_plating.tooltip.3=§rToughness: §a%d
+mechtech.modules.armor_plating.tooltip.unsneak=§aHold Shift
+mechtech.modules.armor_plating.tooltip.sneak=Armor Platings can be used to strengthen the defense of a Modular Armor, but the efficiency gets worse the more platings you use in one armor piece.
 mechtech.modules.binoculars.zoom.enable=Zoom enabled
 mechtech.modules.binoculars.zoom.disable=Zoom disabled
 

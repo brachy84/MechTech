@@ -25,7 +25,7 @@ public interface IModule extends IItemBehaviour {
      * Stored the MetaValueItems for the modules
      * !SHOULD NOT BE EDITED!
      */
-    static Map<IModule, MetaItem<?>.MetaValueItem> itemMap = new HashMap<>();
+    static Map<IModule, MetaItem<?>.MetaValueItem> NO_TOUCHY = new HashMap<>();
 
     @Nullable
     static IModule getOf(ItemStack stack) {
@@ -49,7 +49,7 @@ public interface IModule extends IItemBehaviour {
      */
     @Override
     default void onAddedToItem(MetaItem.MetaValueItem metaValueItem) {
-        itemMap.put(this, metaValueItem);
+        NO_TOUCHY.put(this, metaValueItem);
     }
 
     /**
@@ -166,7 +166,7 @@ public interface IModule extends IItemBehaviour {
      * !SHOULD NOT BE EDITED!
      */
     default MetaItem<?>.MetaValueItem getMetaValueItem() {
-        return itemMap.get(this);
+        return NO_TOUCHY.get(this);
     }
 
     @Deprecated

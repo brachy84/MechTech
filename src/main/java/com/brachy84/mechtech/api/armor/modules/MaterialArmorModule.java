@@ -18,6 +18,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.items.IItemHandler;
+import org.lwjgl.input.Keyboard;
 
 import java.util.List;
 
@@ -100,6 +101,11 @@ public class MaterialArmorModule implements IArmorModule, IDurabilityModule, ISp
 
     @Override
     public void addInformation(ItemStack itemStack, List<String> lines) {
+        if (Keyboard.isKeyDown(42) || Keyboard.isKeyDown(54)) {
+            lines.add(I18n.format("mechtech.modules.armor_plating.tooltip.sneak"));
+        } else {
+            lines.add(I18n.format("mechtech.modules.armor_plating.tooltip.unsneak"));
+        }
         NBTTagCompound nbt = itemStack.getTagCompound();
         int damaged = 0;
         if (nbt != null)
