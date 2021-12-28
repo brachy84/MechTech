@@ -3,6 +3,7 @@ package com.brachy84.mechtech;
 import com.brachy84.mechtech.comon.CommonProxy;
 import com.brachy84.mechtech.comon.cover.MTCoverBehaviors;
 import com.brachy84.mechtech.comon.machines.MTTileEntities;
+import com.brachy84.mechtech.network.NetworkHandler;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ISpecialArmor;
 import net.minecraftforge.fml.common.Mod;
@@ -30,8 +31,9 @@ public class MechTech {
         return new ResourceLocation(MODID, path);
     }
 
-    @EventHandler
-    public void preInit(FMLPreInitializationEvent event) {
+    @Mod.EventHandler
+    public void onPreInit(FMLPreInitializationEvent event) {
+        NetworkHandler.init();
         proxy.preLoad();
         MTTileEntities.init();
     }

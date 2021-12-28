@@ -18,7 +18,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
 import java.util.List;
@@ -58,13 +57,13 @@ public class ClientProxy extends CommonProxy {
 
         float zoom = (float) (1 / MTConfig.modules.binocularZoom);
 
-        if(Mouse.isButtonDown(1)) {
+        if (Mouse.isButtonDown(1)) {
             ItemStack binoculars = MTMetaItems.BINOCULARS.getStackForm();
             ItemStack stack = player.getHeldItemMainhand();
-            if(stack.getItem() != binoculars.getItem() || stack.getMetadata() != binoculars.getMetadata()) {
+            if (stack.getItem() != binoculars.getItem() || stack.getMetadata() != binoculars.getMetadata()) {
                 stack = player.getHeldItemOffhand();
             }
-            if(stack.getItem() == binoculars.getItem() && stack.getMetadata() == binoculars.getMetadata()) {
+            if (stack.getItem() == binoculars.getItem() && stack.getMetadata() == binoculars.getMetadata()) {
                 event.setNewfov(event.getNewfov() * zoom * f);//*speedFOV;
                 return;
             }
