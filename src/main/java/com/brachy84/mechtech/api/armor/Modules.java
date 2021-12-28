@@ -42,6 +42,7 @@ public class Modules {
     public static final IModule INSULATOR = new Insulator();
     public static final IModule BINOCULARS = new Binoculars();
     public static final IModule AUTO_FEEDER = new AutoFeeder();
+    public static final IModule TESLA_COIL = new TeslaCoil();
 
     static {
         registerModule(0, NIGHT_VISION);
@@ -54,6 +55,7 @@ public class Modules {
         registerModule(7, INSULATOR);
         registerModule(8, BINOCULARS);
         registerModule(9, AUTO_FEEDER);
+        registerModule(10, TESLA_COIL);
 
         materialArmorBuilder(1000, Materials.Aluminium)
                 .armor(3.4)

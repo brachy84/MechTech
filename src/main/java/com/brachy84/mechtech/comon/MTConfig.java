@@ -40,5 +40,22 @@ public class MTConfig {
         @Config.Name("Binocular zoom level (default: 5x zoom)")
         @Config.RangeDouble
         public double binocularZoom = 5;
+
+        @Config.Name("Tesla Coil damage")
+        @Config.RangeDouble
+        public double teslaCoilDamage = 5;
+
+        @Config.Name("Tesla Coil range (radius)")
+        @Config.RangeDouble
+        public double teslaCoilRange = 5;
+
+        @Config.Name("Tesla Coil max entities damaged per second")
+        @Config.RangeInt(min = 0)
+        public int teslaCoilMaxEntitiesPerSecond = 5;
+
+        @Config.Name("Tesla Coil damage energy ratio")
+        @Config.Comment("Determine how much energy should be drawn per damage dealt. 0 will disable energy use")
+        @Config.RangeDouble
+        public double teslaCoilDamageEnergyRatio = 40;
     }
 }
