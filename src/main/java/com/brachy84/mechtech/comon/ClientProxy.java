@@ -4,6 +4,7 @@ import com.brachy84.mechtech.api.armor.IModule;
 import com.brachy84.mechtech.api.armor.ModularArmor;
 import com.brachy84.mechtech.api.armor.modules.Binoculars;
 import com.brachy84.mechtech.client.ClientHandler;
+import com.brachy84.mechtech.comon.items.MTMetaItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -17,6 +18,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 
 import java.util.List;
 
@@ -52,6 +55,21 @@ public class ClientProxy extends CommonProxy {
         float f = 1 / ((float) (((iattributeinstance.getAttributeValue() / (double) event.getEntity().capabilities.getWalkSpeed() + 1.0D) / 2.0D)));
 
         EntityPlayerSP player = Minecraft.getMinecraft().player;
+
+        float zoom = (float) (1 / MTConfig.modules.binocularZoom);
+
+        if(Mouse.isButtonDown(1)) {
+            ItemStack binoculars = MTMetaItems.BINOCULARS.getStackForm();
+            ItemStack stack = player.getHeldItemMainhand();
+            if(stack.getItem() != binoculars.getItem() || stack.getMetadata() != binoculars.getMetadata()) {
+                stack = player.getHeldItemOffhand();
+            }
+            if(stack.getItem() == binoculars.getItem() && stack.getMetadata() == binoculars.getMetadata()) {
+                event.setNewfov(event.getNewfov() * zoom * f);//*speedFOV;
+                return;
+            }
+        }
+
         ItemStack helmet = player.inventory.armorInventory.get(3);
         ModularArmor modularArmor = ModularArmor.get(helmet);
         if (modularArmor != null) {
@@ -61,7 +79,7 @@ public class ClientProxy extends CommonProxy {
             List<IModule> modules = ModularArmor.getModulesOf(helmet);
             for (IModule module : modules) {
                 if (module instanceof Binoculars) {
-                    event.setNewfov(event.getNewfov() * 0.333333f * f);//*speedFOV;
+                    event.setNewfov(event.getNewfov() * zoom * f);//*speedFOV;
                     break;
                 }
             }
