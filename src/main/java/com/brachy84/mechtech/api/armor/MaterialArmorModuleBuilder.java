@@ -1,12 +1,18 @@
 package com.brachy84.mechtech.api.armor;
 
 import com.brachy84.mechtech.api.armor.modules.MaterialArmorModule;
+import crafttweaker.annotations.ZenRegister;
 import gregtech.api.items.metaitem.MetaItem;
 import gregtech.api.unification.material.Material;
 import gregtech.api.unification.material.properties.PropertyKey;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
+import stanhebben.zenscript.annotations.Optional;
+import stanhebben.zenscript.annotations.ZenClass;
+import stanhebben.zenscript.annotations.ZenMethod;
 
+@ZenClass("mods.mechtech.armor.MaterialArmorModuleBuilder")
+@ZenRegister
 public class MaterialArmorModuleBuilder {
 
     public final int id;
@@ -54,7 +60,8 @@ public class MaterialArmorModuleBuilder {
         return this;
     }
 
-    public MaterialArmorModuleBuilder armor(double armor, double toughness, int durability) {
+    @ZenMethod
+    public MaterialArmorModuleBuilder armor(double armor, @Optional double toughness, @Optional int durability) {
         this.armor = armor;
         this.toughness = toughness;
         this.durability = durability;
@@ -75,11 +82,13 @@ public class MaterialArmorModuleBuilder {
         return this;
     }
 
+    @ZenMethod
     public MaterialArmorModuleBuilder dontGenerateRecipe() {
         this.doGenerateRecipe = false;
         return this;
     }
 
+    @ZenMethod
     public void registerModule() {
         armor = Math.max(armor, 0);
         toughness = Math.max(toughness, 0);
