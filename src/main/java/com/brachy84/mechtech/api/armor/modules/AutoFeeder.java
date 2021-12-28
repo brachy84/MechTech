@@ -16,7 +16,7 @@ public class AutoFeeder implements IModule {
 
     @Override
     public boolean canPlaceIn(EntityEquipmentSlot slot, ItemStack modularArmorPiece, IItemHandler modularSlots) {
-        return slot == EntityEquipmentSlot.HEAD;
+        return slot != EntityEquipmentSlot.FEET;
     }
 
     @Override
@@ -34,8 +34,8 @@ public class AutoFeeder implements IModule {
         }
 
         // find food item in inventory
-        int hunger = 0;
-        float saturation = 0;
+        int hunger;
+        float saturation;
         outer:
         for(int i = 0; i < player.inventory.mainInventory.size(); i++) {
             ItemStack stack = player.inventory.mainInventory.get(i);
@@ -43,27 +43,27 @@ public class AutoFeeder implements IModule {
                 continue;
             if(stack.getItem() instanceof ItemFood) {
                 hunger = ((ItemFood) stack.getItem()).getHealAmount(stack);
-                saturation = ((ItemFood) stack.getItem()).getSaturationModifier(stack);
-                stack.shrink(1);
-                break;
+                ItemStack remainder = stack.getItem().onItemUseFinish(stack, world, player);
+                if(hunger > needed)
+                    armorData.setByte("food", (byte) (hunger - needed));
+                player.inventory.mainInventory.set(i, remainder);
+                return;
             }
             if(stack.getItem() instanceof MetaItem) {
                 for(IItemComponent component : ((MetaItem<?>) stack.getItem()).getItem(stack).getAllStats()) {
                     if(component instanceof IFoodBehavior) {
                         hunger = ((IFoodBehavior) component).getFoodLevel(stack, player);
                         saturation = ((IFoodBehavior) component).getSaturation(stack, player);
+                        int toFeed = Math.min(needed, hunger);
+                        player.getFoodStats().addStats(toFeed, saturation);
+                        if(toFeed < hunger) {
+                            armorData.setByte("food", (byte) (hunger - toFeed));
+                        }
+                        ((IFoodBehavior) component).onFoodEaten(stack, player);
                         stack.shrink(1);
                         break outer;
                     }
                 }
-            }
-        }
-        // feed item to player, store remaining hunger points
-        if(hunger > 0) {
-            int toFeed = Math.min(needed, hunger);
-            player.getFoodStats().addStats(hunger, saturation);
-            if(toFeed < hunger) {
-                armorData.setByte("food", (byte) (hunger - toFeed));
             }
         }
     }
