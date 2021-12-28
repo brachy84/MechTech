@@ -18,11 +18,12 @@ public class MTMetaItem extends StandardMetaItem {
 
     @Override
     public void registerSubItems() {
-        // Modules
         WIRELESS_RECEIVER = addItem(0, "wireless_receiver");
+        // Modules
         SHOCK_ABSORBER = addItem(1, "shock_absorber").addComponents(Modules.SHOCK_ABSORBER);
         THICK_ISOLATOR = addItem(2, "thick_insulator").addComponents(Modules.INSULATOR);
         BINOCULARS = addItem(3, "binoculars").addComponents(Modules.BINOCULARS);
+        AUTO_FEEDER = addItem(4, "auto_feeder").addComponents(Modules.AUTO_FEEDER);
 
         // Add modules to existing items
         MetaItems.NIGHTVISION_GOGGLES.addComponents(Modules.NIGHT_VISION);

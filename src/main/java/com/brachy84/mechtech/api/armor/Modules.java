@@ -41,6 +41,7 @@ public class Modules {
     public static final IModule SHOCK_ABSORBER = new ShockAbsorber();
     public static final IModule INSULATOR = new Insulator();
     public static final IModule BINOCULARS = new Binoculars();
+    public static final IModule AUTO_FEEDER = new AutoFeeder();
 
     static {
         registerModule(0, NIGHT_VISION);
@@ -52,6 +53,7 @@ public class Modules {
         registerModule(6, SHOCK_ABSORBER);
         registerModule(7, INSULATOR);
         registerModule(8, BINOCULARS);
+        registerModule(9, AUTO_FEEDER);
 
         materialArmorBuilder(1000, Materials.Aluminium)
                 .armor(3.4)

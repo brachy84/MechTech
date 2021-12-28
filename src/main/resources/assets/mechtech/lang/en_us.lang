@@ -40,6 +40,7 @@ mechtech.modules.advanced_jetpack.name=Advanced Thruster Jetpack
 mechtech.modules.shock_absorber.name=Shock Absorber
 mechtech.modules.insulator.name=Thick Insulator
 mechtech.modules.binoculars.name=Binoculars
+mechtech.modules.auto_feeder.name=Auto Feeder
 
 mechtech.modules.armor_plating.tooltip.1=§rDurability: §a%d/%d
 mechtech.modules.armor_plating.tooltip.2=§rArmor: §a%d
@@ -59,9 +60,11 @@ metaitem.shock_absorber.name=Shock Absorber
 metaitem.shock_absorber.tooltip=Absorbs 90%% fall damage and reduces knock back (does not stack)
 metaitem.binoculars.name=Binoculars
 metaitem.thick_insulator.name=Thick Insulator
+metaitem.auto_feeder.name=Auto Feeder
+metaitem.auto_feeder.tooltip=Automatically feeds the first food item it finds from the player inventory. Don't worry it wont waste any food.
 
 metaitem.modular_armor.no_battery=§4Insert Batteries!
 metaitem.modular_armor.installed_modules=§bInstalled Modules: §7(%d/%d)
 metaitem.modular_armor.no_modules=§cNo Modules installed
 
-mechtech.modular_armor.usable=Can be used as a module in the Modular Armor
+mechtech.modular_armor.usable=§3Can be used as a module in the Modular Armor

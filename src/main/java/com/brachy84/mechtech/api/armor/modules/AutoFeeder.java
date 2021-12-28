@@ -1,0 +1,75 @@
+package com.brachy84.mechtech.api.armor.modules;
+
+import com.brachy84.mechtech.api.armor.IModule;
+import gregtech.api.items.metaitem.MetaItem;
+import gregtech.api.items.metaitem.stats.IFoodBehavior;
+import gregtech.api.items.metaitem.stats.IItemComponent;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.item.ItemFood;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.World;
+import net.minecraftforge.items.IItemHandler;
+
+public class AutoFeeder implements IModule {
+
+    @Override
+    public boolean canPlaceIn(EntityEquipmentSlot slot, ItemStack modularArmorPiece, IItemHandler modularSlots) {
+        return slot == EntityEquipmentSlot.HEAD;
+    }
+
+    @Override
+    public void onTick(World world, EntityPlayer player, ItemStack modularArmorPiece, NBTTagCompound armorData) {
+        int needed = 20 - player.getFoodStats().getFoodLevel();
+        if(needed == 0)
+            return;
+        byte food = armorData.getByte("food");
+        // try to feed stored food
+        if(food > 0) {
+            int toFeed = Math.min(food, needed);
+            player.getFoodStats().addStats(toFeed, 0);
+            armorData.setByte("food", (byte) (food - toFeed));
+            return;
+        }
+
+        // find food item in inventory
+        int hunger = 0;
+        float saturation = 0;
+        outer:
+        for(int i = 0; i < player.inventory.mainInventory.size(); i++) {
+            ItemStack stack = player.inventory.mainInventory.get(i);
+            if(stack.isEmpty())
+                continue;
+            if(stack.getItem() instanceof ItemFood) {
+                hunger = ((ItemFood) stack.getItem()).getHealAmount(stack);
+                saturation = ((ItemFood) stack.getItem()).getSaturationModifier(stack);
+                stack.shrink(1);
+                break;
+            }
+            if(stack.getItem() instanceof MetaItem) {
+                for(IItemComponent component : ((MetaItem<?>) stack.getItem()).getItem(stack).getAllStats()) {
+                    if(component instanceof IFoodBehavior) {
+                        hunger = ((IFoodBehavior) component).getFoodLevel(stack, player);
+                        saturation = ((IFoodBehavior) component).getSaturation(stack, player);
+                        stack.shrink(1);
+                        break outer;
+                    }
+                }
+            }
+        }
+        // feed item to player, store remaining hunger points
+        if(hunger > 0) {
+            int toFeed = Math.min(needed, hunger);
+            player.getFoodStats().addStats(hunger, saturation);
+            if(toFeed < hunger) {
+                armorData.setByte("food", (byte) (hunger - toFeed));
+            }
+        }
+    }
+
+    @Override
+    public String getModuleId() {
+        return "auto_feeder";
+    }
+}

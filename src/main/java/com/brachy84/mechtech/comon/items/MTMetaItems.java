@@ -16,6 +16,7 @@ public class MTMetaItems {
     public static MetaItem<?>.MetaValueItem SHOCK_ABSORBER;
     public static MetaItem<?>.MetaValueItem THICK_ISOLATOR;
     public static MetaItem<?>.MetaValueItem BINOCULARS;
+    public static MetaItem<?>.MetaValueItem AUTO_FEEDER;
 
     // Armor
     public static ArmorMetaItem<?>.ArmorMetaValueItem MODULAR_HELMET;
