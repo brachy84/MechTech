@@ -8,7 +8,7 @@ buildscript {
         maven { url = "http://maven.minecraftforge.net/" }
     }
     dependencies {
-        classpath("com.github.GregTechCE:ForgeGradle:FG_2.3-SNAPSHOT")
+        classpath("net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT")
     }
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
@@ -49,13 +49,14 @@ repositories {
 }
 
 dependencies {
-    deobfCompile "gregtechce:gregtech:1.12.2:1.17.0.764"
     deobfCompile "codechicken-lib-1-8:CodeChickenLib-1.12.2:3.2.3.358:universal"
-    deobfCompile "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.20.554"
+    deobfCompile "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.20.670"
     deobfCompile "mezz.jei:jei_1.12.2:4.16.1.302"
 
     compile files(
-            "libs/Gregicality-1.12.2-0.23-RC.jar",
+            //"libs/Gregicality-1.12.2-0.23-RC.jar",
+            //"libs/CraftTweaker2-1.12-4.1.20.670.jar",
+            "libs/gregtech-1.12.2-2.0.0-alpha.jar"
     )
 }
 
