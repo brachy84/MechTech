@@ -8,6 +8,8 @@ import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.Vec3d;
 
+import java.awt.*;
+
 public class SModuleParticles implements IPacket {
 
     private Vec3d source;
@@ -37,7 +39,6 @@ public class SModuleParticles implements IPacket {
         buf.writeDouble(target.x);
         buf.writeDouble(target.y);
         buf.writeDouble(target.z);
-
     }
 
     @Override
@@ -48,7 +49,9 @@ public class SModuleParticles implements IPacket {
 
     @Override
     public void executeClient(NetHandlerPlayClient handler) {
-        Lightning lightning = new Lightning(Minecraft.getMinecraft().world, source, target);
+        Lightning lightning = new Lightning(Minecraft.getMinecraft().world, source, target)
+                .setColor(new Color(83, 166, 189, 153).getRGB(), new Color(167, 192, 199, 204).getRGB())
+                .setup();
         Minecraft.getMinecraft().effectRenderer.addEffect(lightning);
         GTLog.logger.info("Spawning Particle");
     }

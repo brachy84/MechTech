@@ -1,11 +1,11 @@
 package com.brachy84.mechtech;
 
+import com.brachy84.mechtech.client.Sounds;
 import com.brachy84.mechtech.comon.CommonProxy;
 import com.brachy84.mechtech.comon.cover.MTCoverBehaviors;
 import com.brachy84.mechtech.comon.machines.MTTileEntities;
 import com.brachy84.mechtech.network.NetworkHandler;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.ISpecialArmor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -13,9 +13,6 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 
 @Mod(modid = MechTech.MODID, name = MechTech.NAME, version = MechTech.VERSION, dependencies = "required-after:gregtech;")
 public class MechTech {
@@ -35,6 +32,7 @@ public class MechTech {
     public void onPreInit(FMLPreInitializationEvent event) {
         NetworkHandler.init();
         proxy.preLoad();
+        Sounds.registerSounds();
         MTTileEntities.init();
     }
 

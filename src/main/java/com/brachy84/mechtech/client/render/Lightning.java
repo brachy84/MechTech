@@ -1,5 +1,6 @@
 package com.brachy84.mechtech.client.render;
 
+import gregtech.api.util.XSTR;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -14,10 +15,14 @@ public class Lightning extends Particle {
 
     protected Vec3d target;
 
-    private final int STEPS;
-    private static final int BRIGHTNESS = 13 << 4;
+    private int minSteps = 3, maxSteps = 6;
+    private int STEPS;
+    private static final int BRIGHTNESS = 15 << 4;
 
-    private final double[][] precomputedSteps;
+    private float scale = 1f;
+    private int color1 = 0xFFFFFFFF, color2 = 0xFFFFFFFF;
+
+    private double[][] precomputedSteps;
     private final double[] vertices = new double[3];
     private final double[] verticesWithUV = new double[3];
     private boolean hasData = false;
@@ -25,15 +30,18 @@ public class Lightning extends Particle {
     public Lightning(World worldIn, double posXIn, double posYIn, double posZIn, Vec3d target) {
         super(worldIn, posXIn, posYIn, posZIn);
         this.target = target;
-        setMaxAge(4);
+        rand = new XSTR();
+        setMaxAge(2);
         particleGravity = 0;
-        STEPS = rand.nextInt(3) + 3;
-        this.precomputedSteps = new double[STEPS][3];
         this.motionX = 0;
         this.motionY = 0;
         this.motionZ = 0;
-        regen();
+        this.particleScale = rand.nextFloat() * 0.2f + 0.9f;
         canCollide = false;
+        this.prevPosX = this.posX;
+        this.prevPosY = this.posY;
+        this.prevPosZ = this.posZ;
+        this.particleAlpha = 0.7f;
     }
 
     public Lightning(World worldIn, Entity source, Entity target) {
@@ -52,59 +60,82 @@ public class Lightning extends Particle {
         this(worldIn, posXIn, posYIn, posZIn, new Vec3d(target.getX() + 0.5, target.getY() + 0.5, target.getZ() + 0.5));
     }
 
-    protected void regen()
-    {
-        final double i = 1.0 / ( this.getSteps() - 1 );
-        final double lastDirectionX = target.x * i;
-        final double lastDirectionY = target.y * i;
-        final double lastDirectionZ = target.z * i;
-
-        final double len = Math.sqrt( lastDirectionX * lastDirectionX + lastDirectionY * lastDirectionY + lastDirectionZ * lastDirectionZ );
-        for( int s = 0; s < STEPS; s++ )
-        {
-            precomputedSteps[s][0] = ( lastDirectionX + ( rand.nextDouble() - 0.5 ) * len * 1.2 ) / 2.0;
-            precomputedSteps[s][1] = ( lastDirectionY + ( rand.nextDouble() - 0.5 ) * len * 1.2 ) / 2.0;
-            precomputedSteps[s][2] = ( lastDirectionZ + ( rand.nextDouble() - 0.5 ) * len * 1.2 ) / 2.0;
-        }
+    public Lightning setSteps(int min, int max) {
+        this.minSteps = min;
+        this.maxSteps = max;
+        return this;
     }
 
-    protected int getSteps()
-    {
+    public Lightning setScale(float scale) {
+        this.scale = scale;
+        return this;
+    }
+
+    public Lightning setColor(int color1, int color2) {
+        this.color1 = color1;
+        this.color2 = color2;
+        return this;
+    }
+
+    public Lightning setup() {
+        STEPS = rand.nextInt(maxSteps - minSteps) + minSteps + 1;
+        this.precomputedSteps = new double[STEPS][3];
+        regen();
+        return this;
+    }
+
+    protected void regen() {
+        int l = STEPS - 1;
+
+        double lastX = posX;
+        double lastY = posY;
+        double lastZ = posZ;
+
+        double dx = target.x - posX, dy = target.y - posY, dz = target.z - posZ;
+        double avrX = dx / l, avrY = dy / l, avrZ = dz / l;
+
+        for (int i = 0; i < l - 1; i++) {
+            double x = avrX + (avrX * 1.4 * (rand.nextDouble() - 0.5));
+            double y = avrY + (avrY * 1.4 * (rand.nextDouble() - 0.5));
+            double z = avrZ + (avrZ * 1.4 * (rand.nextDouble() - 0.5));
+            precomputedSteps[i][0] = x;
+            precomputedSteps[i][1] = y;
+            precomputedSteps[i][2] = z;
+            lastX += x;
+            lastY += y;
+            lastZ += z;
+        }
+
+        precomputedSteps[l - 1][0] = target.x - lastX + (avrX * 0.6 * (rand.nextDouble() - 0.5));
+        precomputedSteps[l - 1][1] = target.y - lastY + (avrY * 0.6 * (rand.nextDouble() - 0.5));
+        precomputedSteps[l - 1][2] = target.z - lastZ + (avrZ * 0.6 * (rand.nextDouble() - 0.5));
+
+        // the last one doesn't seem to do anything
+        precomputedSteps[l][0] = 1;
+        precomputedSteps[l][1] = 1;
+        precomputedSteps[l][2] = 1;
+    }
+
+    protected int getSteps() {
         return STEPS;
     }
 
     @Override
-    public void onUpdate()
-    {
-        this.prevPosX = this.posX;
-        this.prevPosY = this.posY;
-        this.prevPosZ = this.posZ;
-
-        if( this.particleAge++ >= this.particleMaxAge )
-        {
+    public void onUpdate() {
+        if (precomputedSteps == null)
+            setup();
+        if (this.particleAge++ >= this.particleMaxAge) {
             this.setExpired();
         }
-
-        this.motionY -= 0.04D * this.particleGravity;
-        this.move( this.motionX, this.motionY, this.motionZ );
-        this.motionX *= 0.9800000190734863D;
-        this.motionY *= 0.9800000190734863D;
-        this.motionZ *= 0.9800000190734863D;
     }
 
     @Override
-    public void renderParticle(final BufferBuilder tess, final Entity entity, final float l, final float rX, final float rY, final float rZ, final float rYZ, final float rXY )
-    {
-        final float j = 1.0f;
-        float red = this.particleRed * j * 0.9f;
-        float green = this.particleGreen * j * 0.95f;
-        float blue = this.particleBlue * j;
-        final float alpha = this.particleAlpha;
+    public void renderParticle(BufferBuilder tess, Entity entityIn, float l, final float rX, final float rY, final float rZ, final float rYZ, final float rXY) {
+        float red;
+        float green;
+        float blue;
+        float alpha;
 
-        /*if( this.particleAge == 3 )
-        {
-            this.regen();
-        }*/
         double f6 = this.particleTextureIndexX / 16.0;
         final double f7 = f6 + 0.0324375F;
         double f8 = this.particleTextureIndexY / 16.0;
@@ -113,7 +144,7 @@ public class Lightning extends Particle {
         f6 = f7;
         f8 = f9;
 
-        double scale = 0.02;// 0.02F * this.particleScale;
+        double scale;
 
         final double[] a = new double[3];
         final double[] b = new double[3];
@@ -124,42 +155,40 @@ public class Lightning extends Particle {
 
         final EntityPlayer p = Minecraft.getMinecraft().player;
         double offX = -rZ;
-        double offY = MathHelper.cos( (float) ( Math.PI / 2.0f + p.rotationPitch * 0.017453292F ) );
+        double offY = MathHelper.cos((float) (Math.PI / 2.0f + p.rotationPitch * 0.017453292F));
         double offZ = rX;
 
-        for( int layer = 0; layer < 2; layer++ )
-        {
-            if( layer == 0 )
-            {
-                scale = 0.04;
+        for (int layer = 0; layer < 2; layer++) {
+            if (layer == 0) {
+                scale = 0.02;
                 offX *= 0.001;
                 offY *= 0.001;
                 offZ *= 0.001;
-                red = this.particleRed * j * 0.4f;
-                green = this.particleGreen * j * 0.25f;
-                blue = this.particleBlue * j * 0.45f;
-            }
-            else
-            {
+                red = ((color1 >> 16) & 0xFF) / 255f;
+                green = ((color1 >> 8) & 0xFF) / 255f;
+                blue = ((color1) & 0xFF) / 255f;
+                alpha = ((color1 >> 24) & 0xFF) / 255f;
+            } else {
                 offX = 0;
                 offY = 0;
                 offZ = 0;
-                scale = 0.02;
-                red = this.particleRed * j * 0.9f;
-                green = this.particleGreen * j * 0.65f;
-                blue = this.particleBlue * j * 0.85f;
+                scale = 0.015;
+                red = ((color2 >> 16) & 0xFF) / 255f;
+                green = ((color2 >> 8) & 0xFF) / 255f;
+                blue = ((color2) & 0xFF) / 255f;
+                alpha = ((color2 >> 24) & 0xFF) / 255f;
             }
 
-            for( int cycle = 0; cycle < 3; cycle++ )
-            {
+            scale *= particleScale * this.scale;
+
+            for (int cycle = 0; cycle < 3; cycle++) {
                 this.clear();
 
-                double x = ( this.prevPosX + ( this.posX - this.prevPosX ) * l - interpPosX ) - offX;
-                double y = ( this.prevPosY + ( this.posY - this.prevPosY ) * l - interpPosY ) - offY;
-                double z = ( this.prevPosZ + ( this.posZ - this.prevPosZ ) * l - interpPosZ ) - offZ;
+                double x = (this.prevPosX - interpPosX) - offX;
+                double y = (this.prevPosY - interpPosY) - offY;
+                double z = (this.prevPosZ - interpPosZ) - offZ;
 
-                for( int s = 0; s < STEPS; s++ )
-                {
+                for (int s = 0; s < STEPS; s++) {
                     final double xN = x + this.precomputedSteps[s][0];
                     final double yN = y + this.precomputedSteps[s][1];
                     final double zN = z + this.precomputedSteps[s][2];
@@ -168,27 +197,24 @@ public class Lightning extends Particle {
                     final double yD = yN - y;
                     final double zD = zN - z;
 
-                    if( cycle == 0 )
-                    {
-                        ox = ( yD * 0 ) - ( 1 * zD );
-                        oy = ( zD * 0 ) - ( 0 * xD );
-                        oz = ( xD * 1 ) - ( 0 * yD );
+                    if (cycle == 0) {
+                        ox = -zD;
+                        oy = 0;
+                        oz = xD;
                     }
-                    if( cycle == 1 )
-                    {
-                        ox = ( yD * 1 ) - ( 0 * zD );
-                        oy = ( zD * 0 ) - ( 1 * xD );
-                        oz = ( xD * 0 ) - ( 0 * yD );
+                    if (cycle == 1) {
+                        ox = yD;
+                        oy = -xD;
+                        oz = 0;
                     }
-                    if( cycle == 2 )
-                    {
-                        ox = ( yD * 0 ) - ( 0 * zD );
-                        oy = ( zD * 1 ) - ( 0 * xD );
-                        oz = ( xD * 0 ) - ( 1 * yD );
+                    if (cycle == 2) {
+                        ox = 0;
+                        oy = zD;
+                        oz = -yD;
                     }
 
                     final double ss = Math
-                            .sqrt( ox * ox + oy * oy + oz * oz ) / ( ( ( (double) STEPS - (double) s ) / STEPS ) * scale );
+                            .sqrt(ox * ox + oy * oy + oz * oz) / ((((double) STEPS - (double) s) / STEPS) * scale);
                     ox /= ss;
                     oy /= ss;
                     oz /= ss;
@@ -201,7 +227,7 @@ public class Lightning extends Particle {
                     b[1] = y;
                     b[2] = z;
 
-                    this.draw( red, green, blue, tess, a, b, f6, f8 );
+                    this.draw(red, green, blue, alpha, tess, a, b, f6, f8);
 
                     x = xN;
                     y = yN;
@@ -209,52 +235,43 @@ public class Lightning extends Particle {
                 }
             }
         }
-        /*
-         * GL11.glPushAttrib( GL11.GL_ALL_ATTRIB_BITS ); GL11.glDisable( GL11.GL_CULL_FACE ); tess.draw();
-         * GL11.glPopAttrib(); tess.startDrawingQuads();
-         */
     }
 
-    private void clear()
-    {
+    private void clear() {
         this.hasData = false;
     }
 
-    private void draw( float red, float green, float blue, final BufferBuilder tess, final double[] a, final double[] b, final double f6, final double f8 )
-    {
-        if( this.hasData )
-        {
-            tess.pos( a[0], a[1], a[2] )
-                    .tex( f6, f8 )
-                    .color( red, green, blue, this.particleAlpha )
-                    .lightmap( BRIGHTNESS, BRIGHTNESS )
+    private void draw(float red, float green, float blue, float alpha, final BufferBuilder tess, final double[] a, final double[] b, final double f6, final double f8) {
+        if (this.hasData) {
+            tess.pos(a[0], a[1], a[2])
+                    .tex(f6, f8)
+                    .color(red, green, blue, alpha)
+                    .lightmap(BRIGHTNESS, BRIGHTNESS)
                     .endVertex();
-            tess.pos( this.vertices[0], this.vertices[1], this.vertices[2] )
-                    .tex( f6, f8 )
-                    .color( red, green, blue, this.particleAlpha )
-                    .lightmap( BRIGHTNESS, BRIGHTNESS )
+            tess.pos(this.vertices[0], this.vertices[1], this.vertices[2])
+                    .tex(f6, f8)
+                    .color(red, green, blue, alpha)
+                    .lightmap(BRIGHTNESS, BRIGHTNESS)
                     .endVertex();
-            tess.pos( this.verticesWithUV[0], this.verticesWithUV[1], this.verticesWithUV[2] )
-                    .tex( f6, f8 )
-                    .color( red, green, blue, this.particleAlpha )
-                    .lightmap( BRIGHTNESS, BRIGHTNESS )
+            tess.pos(this.verticesWithUV[0], this.verticesWithUV[1], this.verticesWithUV[2])
+                    .tex(f6, f8)
+                    .color(red, green, blue, alpha)
+                    .lightmap(BRIGHTNESS, BRIGHTNESS)
                     .endVertex();
-            tess.pos( b[0], b[1], b[2] )
-                    .tex( f6, f8 )
-                    .color( red, green, blue, this.particleAlpha )
-                    .lightmap( BRIGHTNESS, BRIGHTNESS )
+            tess.pos(b[0], b[1], b[2])
+                    .tex(f6, f8)
+                    .color(red, green, blue, alpha)
+                    .lightmap(BRIGHTNESS, BRIGHTNESS)
                     .endVertex();
         }
         this.hasData = true;
-        for( int x = 0; x < 3; x++ )
-        {
+        for (int x = 0; x < 3; x++) {
             this.vertices[x] = a[x];
             this.verticesWithUV[x] = b[x];
         }
     }
 
-    protected double[][] getPrecomputedSteps()
-    {
+    protected double[][] getPrecomputedSteps() {
         return this.precomputedSteps;
     }
 }
