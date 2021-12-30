@@ -1,6 +1,4 @@
-package com.brachy84.mechtech.comon.recipes.recipes;
-
-import com.brachy84.mechtech.comon.MTConfig;
+package com.brachy84.mechtech.common.recipes.recipes;
 
 public class MetaTileEntityRecipes {
 

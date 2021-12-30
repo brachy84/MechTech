@@ -3,7 +3,7 @@ package com.brachy84.mechtech.api.armor.modules;
 import com.brachy84.mechtech.api.armor.IModule;
 import com.brachy84.mechtech.client.Sounds;
 import com.brachy84.mechtech.network.packets.SModuleParticles;
-import com.brachy84.mechtech.comon.MTConfig;
+import com.brachy84.mechtech.common.MTConfig;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IElectricItem;
 import gregtech.api.damagesources.DamageSources;
@@ -49,7 +49,7 @@ public class TeslaCoil implements IModule {
             int count = 0;
             for (Entity entity : livings) {
                 EntityLivingBase living = (EntityLivingBase) entity;
-                float dmg = (float) Math.min(damage, living.getMaxHealth() - living.getHealth());
+                float dmg = (float) Math.min(damage, living.getHealth());
                 long energy = (long) (dmg * edRatio);
                 if (electricItem.discharge(energy, Integer.MAX_VALUE, false, false, true) != energy)
                     break;
@@ -80,6 +80,6 @@ public class TeslaCoil implements IModule {
     }
 
     private void playSound(World world, EntityPlayer player) {
-        world.playSound(player, player.posX, player.posY + 1.5, player.posZ, Sounds.TESLA_ZAP, SoundCategory.PLAYERS, 1f, 1f);
+        world.playSound(player, player.posX, player.posY + 2.2, player.posZ, Sounds.TESLA_ZAP, SoundCategory.PLAYERS, 5f, 1f);
     }
 }

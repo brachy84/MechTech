@@ -1,4 +1,4 @@
-package com.brachy84.mechtech.comon.machines;
+package com.brachy84.mechtech.common.machines;
 
 import codechicken.lib.render.CCRenderState;
 import codechicken.lib.render.pipeline.ColourMultiplier;

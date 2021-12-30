@@ -1,4 +1,4 @@
-package com.brachy84.mechtech.comon.machines.multis;
+package com.brachy84.mechtech.common.machines.multis;
 /*
 import gregicadditions.item.GAMetaBlocks;
 import gregicadditions.item.fusion.GAFusionCasing;

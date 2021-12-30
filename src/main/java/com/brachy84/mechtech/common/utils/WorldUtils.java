@@ -1,4 +1,4 @@
-package com.brachy84.mechtech.comon.utils;
+package com.brachy84.mechtech.common.utils;
 
 import net.minecraft.util.math.BlockPos;
 

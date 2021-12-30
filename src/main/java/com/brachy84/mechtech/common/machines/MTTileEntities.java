@@ -1,11 +1,9 @@
-package com.brachy84.mechtech.comon.machines;
+package com.brachy84.mechtech.common.machines;
 
-import com.brachy84.mechtech.comon.MTConfig;
 import com.brachy84.mechtech.MechTech;
 import gregtech.api.GregTechAPI;
 import gregtech.api.metatileentity.MetaTileEntity;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.Loader;
 
 /**
  * Claimed range 10100-10499

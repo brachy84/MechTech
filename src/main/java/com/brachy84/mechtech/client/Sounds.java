@@ -12,11 +12,11 @@ public class Sounds {
 
     public static void registerSounds() {
         GTLog.logger.info("Register sounds");
-        TESLA_ZAP = registerSound("tesla_coil");
+        TESLA_ZAP = registerSound("player.tesla_coil");
     }
 
     private static SoundEvent registerSound(String soundNameIn) {
-        ResourceLocation location = new ResourceLocation(GTValues.MODID, soundNameIn);
+        ResourceLocation location = new ResourceLocation(MechTech.MODID, soundNameIn);
         SoundEvent event = new SoundEvent(location);
         event.setRegistryName(location);
         ForgeRegistries.SOUND_EVENTS.register(event);

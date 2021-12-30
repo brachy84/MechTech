@@ -1,4 +1,4 @@
-package com.brachy84.mechtech.comon.cover;
+package com.brachy84.mechtech.common.cover;
 
 import codechicken.lib.render.CCRenderState;
 import codechicken.lib.render.pipeline.IVertexOperation;

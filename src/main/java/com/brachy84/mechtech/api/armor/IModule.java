@@ -125,7 +125,7 @@ public interface IModule extends IItemBehaviour {
      *
      * @param slot              slot of the armor piece
      * @param modularArmorPiece armor piece
-     * @param modularSlots      item handler of the modular slots of the {@link com.brachy84.mechtech.comon.machines.MetaTileEntityArmorWorkbench}
+     * @param modularSlots      item handler of the modular slots of the {@link com.brachy84.mechtech.common.machines.MetaTileEntityArmorWorkbench}
      * @return if the armor accepts this module
      */
     boolean canPlaceIn(EntityEquipmentSlot slot, ItemStack modularArmorPiece, IItemHandler modularSlots);

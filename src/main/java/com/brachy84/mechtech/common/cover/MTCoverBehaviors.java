@@ -1,7 +1,7 @@
-package com.brachy84.mechtech.comon.cover;
+package com.brachy84.mechtech.common.cover;
 
 import com.brachy84.mechtech.MechTech;
-import com.brachy84.mechtech.comon.items.MTMetaItems;
+import com.brachy84.mechtech.common.items.MTMetaItems;
 import gregtech.api.GregTechAPI;
 import gregtech.api.cover.CoverBehavior;
 import gregtech.api.cover.CoverDefinition;

@@ -1,4 +1,4 @@
-package com.brachy84.mechtech.comon.items;
+package com.brachy84.mechtech.common.items;
 
 import gregtech.api.items.armor.ArmorMetaItem;
 import gregtech.api.items.metaitem.MetaItem;

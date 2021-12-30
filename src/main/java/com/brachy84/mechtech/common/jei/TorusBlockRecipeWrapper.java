@@ -1,4 +1,4 @@
-package com.brachy84.mechtech.comon.jei;
+package com.brachy84.mechtech.common.jei;
 
 //import gregicadditions.GAValues;
 /*

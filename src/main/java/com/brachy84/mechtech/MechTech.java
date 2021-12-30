@@ -1,9 +1,9 @@
 package com.brachy84.mechtech;
 
 import com.brachy84.mechtech.client.Sounds;
-import com.brachy84.mechtech.comon.CommonProxy;
-import com.brachy84.mechtech.comon.cover.MTCoverBehaviors;
-import com.brachy84.mechtech.comon.machines.MTTileEntities;
+import com.brachy84.mechtech.common.CommonProxy;
+import com.brachy84.mechtech.common.cover.MTCoverBehaviors;
+import com.brachy84.mechtech.common.machines.MTTileEntities;
 import com.brachy84.mechtech.network.NetworkHandler;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.Mod;

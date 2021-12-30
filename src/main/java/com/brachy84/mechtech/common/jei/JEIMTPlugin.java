@@ -1,6 +1,5 @@
-package com.brachy84.mechtech.comon.jei;
+package com.brachy84.mechtech.common.jei;
 
-import com.brachy84.mechtech.comon.MTConfig;
 import com.brachy84.mechtech.MechTech;
 import gregtech.api.GTValues;
 import gregtech.api.recipes.RecipeMap;

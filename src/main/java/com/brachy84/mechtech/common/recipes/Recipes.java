@@ -1,10 +1,10 @@
-package com.brachy84.mechtech.comon.recipes;
+package com.brachy84.mechtech.common.recipes;
 
 import com.brachy84.mechtech.api.armor.MaterialArmorModuleBuilder;
 import com.brachy84.mechtech.api.armor.Modules;
-import com.brachy84.mechtech.comon.items.MTMetaItems;
-import com.brachy84.mechtech.comon.machines.MTTileEntities;
-import com.brachy84.mechtech.comon.recipes.recipes.MetaTileEntityRecipes;
+import com.brachy84.mechtech.common.items.MTMetaItems;
+import com.brachy84.mechtech.common.machines.MTTileEntities;
+import com.brachy84.mechtech.common.recipes.recipes.MetaTileEntityRecipes;
 import gregtech.api.recipes.ModHandler;
 import gregtech.api.recipes.RecipeMaps;
 import gregtech.api.unification.material.Material;

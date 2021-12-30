@@ -1,10 +1,10 @@
-package com.brachy84.mechtech.comon;
+package com.brachy84.mechtech.common;
 
 import com.brachy84.mechtech.api.armor.IModule;
 import com.brachy84.mechtech.api.armor.ModularArmor;
 import com.brachy84.mechtech.api.armor.modules.Binoculars;
 import com.brachy84.mechtech.client.ClientHandler;
-import com.brachy84.mechtech.comon.items.MTMetaItems;
+import com.brachy84.mechtech.common.items.MTMetaItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.SharedMonsterAttributes;

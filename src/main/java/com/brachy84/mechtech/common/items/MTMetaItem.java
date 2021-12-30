@@ -1,4 +1,4 @@
-package com.brachy84.mechtech.comon.items;
+package com.brachy84.mechtech.common.items;
 
 import com.brachy84.mechtech.api.armor.MaterialArmorModuleBuilder;
 import com.brachy84.mechtech.api.armor.Modules;
@@ -8,7 +8,7 @@ import gregtech.common.items.MetaItems;
 
 import java.util.Map;
 
-import static com.brachy84.mechtech.comon.items.MTMetaItems.*;
+import static com.brachy84.mechtech.common.items.MTMetaItems.*;
 
 public class MTMetaItem extends StandardMetaItem {
 

@@ -1,11 +1,11 @@
-package com.brachy84.mechtech.comon;
+package com.brachy84.mechtech.common;
 
 import com.brachy84.mechtech.MechTech;
 import com.brachy84.mechtech.api.armor.IModule;
 import com.brachy84.mechtech.api.armor.ModularArmor;
 import com.brachy84.mechtech.api.armor.Modules;
-import com.brachy84.mechtech.comon.items.MTMetaItems;
-import com.brachy84.mechtech.comon.recipes.Recipes;
+import com.brachy84.mechtech.common.items.MTMetaItems;
+import com.brachy84.mechtech.common.recipes.Recipes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;

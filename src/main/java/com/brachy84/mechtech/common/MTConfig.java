@@ -1,7 +1,6 @@
-package com.brachy84.mechtech.comon;
+package com.brachy84.mechtech.common;
 
 import com.brachy84.mechtech.MechTech;
-import com.brachy84.mechtech.api.armor.Modules;
 import net.minecraftforge.common.config.Config;
 
 @Config(modid = MechTech.MODID)

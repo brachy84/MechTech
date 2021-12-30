@@ -1,8 +1,8 @@
-package com.brachy84.mechtech.comon.items;
+package com.brachy84.mechtech.common.items;
 
 import com.brachy84.mechtech.api.armor.IModule;
 import com.brachy84.mechtech.api.armor.ModularArmor;
-import com.brachy84.mechtech.comon.MTConfig;
+import com.brachy84.mechtech.common.MTConfig;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IElectricItem;
 import gregtech.api.items.armor.ArmorMetaItem;
@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import static com.brachy84.mechtech.comon.items.MTMetaItems.*;
+import static com.brachy84.mechtech.common.items.MTMetaItems.*;
 
 public class MTArmorItem extends ArmorMetaItem<ArmorMetaItem<?>.ArmorMetaValueItem> {
 

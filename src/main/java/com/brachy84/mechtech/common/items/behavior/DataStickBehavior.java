@@ -1,4 +1,4 @@
-package com.brachy84.mechtech.comon.items.behavior;
+package com.brachy84.mechtech.common.items.behavior;
 
 //import gregicadditions.machines.overrides.GATieredMetaTileEntity;
 import gregtech.api.items.metaitem.stats.IItemBehaviour;
