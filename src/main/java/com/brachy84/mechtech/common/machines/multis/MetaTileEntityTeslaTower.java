@@ -13,6 +13,7 @@ import gregtech.api.GTValues;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.GregtechTileCapabilities;
 import gregtech.api.capability.IEnergyContainer;
+import gregtech.api.capability.impl.EnergyContainerBatteryBuffer;
 import gregtech.api.cover.CoverBehavior;
 import gregtech.api.cover.ICoverable;
 import gregtech.api.metatileentity.MetaTileEntity;
@@ -26,7 +27,6 @@ import gregtech.api.unification.material.Material;
 import gregtech.api.unification.material.Materials;
 import gregtech.api.util.BlockInfo;
 import gregtech.api.util.GTLog;
-import gregtech.api.util.GTUtility;
 import gregtech.client.renderer.ICubeRenderer;
 import gregtech.client.renderer.texture.Textures;
 import gregtech.common.blocks.BlockCompressed;
@@ -76,6 +76,7 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
 
     private final Map<BlockPos, EnumFacing> energyHandlers = new HashMap<>();
     private final List<BlockPos> toRemove = new ArrayList<>();
+    private final Set<BlockPos> effectQueue = new HashSet<>();
 
     public MetaTileEntityTeslaTower(ResourceLocation metaTileEntityId) {
         super(metaTileEntityId);
@@ -93,6 +94,18 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
                 }
                 toRemove.forEach(energyHandlers::remove);
                 toRemove.clear();
+            }
+            int toTick = effectQueue.size() / 20;
+            double rest = effectQueue.size() / 20.0 - toTick;
+            if (rest > 0 && GTValues.RNG.nextDouble() <= rest) {
+                toTick++;
+            }
+            Iterator<BlockPos> iterator = effectQueue.iterator();
+            while (toTick > 0 && iterator.hasNext()) {
+                BlockPos pos = iterator.next();
+                playEffects(pos);
+                toTick--;
+                iterator.remove();
             }
         }
     }
@@ -128,7 +141,6 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
                         for (EnumFacing facing : EnumFacing.VALUES) {
                             CoverBehavior cover = coverable.getCoverAtSide(facing);
                             if (cover instanceof CoverWirelessReceiver) {
-                                GTLog.logger.info("Found receiver");
                                 energyHandlers.put(pos.toImmutable(), facing);
                                 break;
                             }
@@ -357,46 +369,51 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
             return true;
         }
         IEnergyContainer energyContainer = te.getCapability(GregtechCapabilities.CAPABILITY_ENERGY_CONTAINER, facing);
-        if (energyContainer == null || !energyContainer.inputsEnergy(facing)/* || energyContainer instanceof EnergyContainerBatteryBuffer*/) {
+        if (energyContainer == null || !energyContainer.inputsEnergy(facing) || energyContainer instanceof EnergyContainerBatteryBuffer) {
             toRemove.add(pos);
             return true;
         }
 
-        if(voltage < energyContainer.getInputVoltage())
+        if (voltage < energyContainer.getInputVoltage()) {
+            GTLog.logger.info("Tier to high at {}" + MechTech.blockPosToString(pos));
             return true;
-
-        // The energy that will be lost (max voltage * factor)
-        long lost = (long) (voltage * getLossFactor(center.getDistance(pos.getX(), pos.getY(), pos.getZ()) /  range));
+        }
 
         long volt = energyContainer.getInputVoltage() * 20;
+        // The energy that will be lost (voltage * factor)
+        long lost = (long) (volt * (1 - getLossFactor(center.getDistance(pos.getX(), pos.getY(), pos.getZ()) / range)));
         volt = Math.min(energyContainer.getEnergyCapacity() - energyContainer.getEnergyStored(), volt);
         // tesla does not have more power than what will be lost, abort
-        if(energyContainerList.getEnergyStored() <= lost) {
+        if (energyContainerList.getEnergyStored() <= lost) {
+            GTLog.logger.info("Not enough stored energy at {}", MechTech.blockPosToString(pos));
             return true;
         }
         energyContainerList.removeEnergy(lost);
-        volt = Math.min(energyContainerList.getEnergyStored(), volt);
-
-        if (volt == 0)
+        long stored = energyContainerList.getEnergyStored();
+        if (stored == 0)
             return false;
+        volt = Math.min(stored, volt);
 
         long changed = energyContainer.addEnergy(volt);
-        if (changed == 0)
+        if (changed == 0) {
+            GTLog.logger.info("Nothing inserted at {}" + MechTech.blockPosToString(pos));
             return true;
+        }
         ampsUsed++;
         if (-energyContainerList.removeEnergy(changed) != changed) {
             GTLog.logger.info("Could not drain enough energy");
             return false;
         }
 
-        if(MTConfig.teslaTower.lightningChance > 0 && (MTConfig.teslaTower.lightningChance == 1 || GTValues.RNG.nextDouble() < MTConfig.teslaTower.lightningChance)) {
-            playEffects(pos);
+        if (MTConfig.teslaTower.lightningChance > 0 && (MTConfig.teslaTower.lightningChance == 1 || GTValues.RNG.nextDouble() < MTConfig.teslaTower.lightningChance)) {
+            //playEffects(pos);
+            effectQueue.add(pos);
         }
         return true;
     }
 
     private double getLossFactor(double distance) {
-        if(distance <= 0.8) {
+        if (distance <= 0.8) {
             return -distance * 0.125 + 1;
         }
         return (1 + Math.exp(-0.030612249)) / (1 + Math.exp((distance - 0.98) / 0.03)) * 0.902;
