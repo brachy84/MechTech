@@ -399,7 +399,7 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
         if(distance <= 0.8) {
             return -distance * 0.125 + 1;
         }
-        return (1 + Math.exp(-0.030612249)) / (1 + Math.exp((distance - 0.98) / 0.03)) * 0.92;
+        return (1 + Math.exp(-0.030612249)) / (1 + Math.exp((distance - 0.98) / 0.03)) * 0.902;
     }
 
     private void playEffects(BlockPos target) {
