@@ -91,10 +91,13 @@ public class Lightning extends Particle {
         double lastY = posY;
         double lastZ = posZ;
 
+        // total distance
         double dx = target.x - posX, dy = target.y - posY, dz = target.z - posZ;
+        // average distance per section
         double avrX = dx / l, avrY = dy / l, avrZ = dz / l;
 
         for (int i = 0; i < l - 1; i++) {
+            // average distance per section + random
             double x = avrX + (avrX * 1.4 * (rand.nextDouble() - 0.5));
             double y = avrY + (avrY * 1.4 * (rand.nextDouble() - 0.5));
             double z = avrZ + (avrZ * 1.4 * (rand.nextDouble() - 0.5));
@@ -106,6 +109,7 @@ public class Lightning extends Particle {
             lastZ += z;
         }
 
+        // last section point directly at target + small random
         precomputedSteps[l - 1][0] = target.x - lastX + (avrX * 0.6 * (rand.nextDouble() - 0.5));
         precomputedSteps[l - 1][1] = target.y - lastY + (avrY * 0.6 * (rand.nextDouble() - 0.5));
         precomputedSteps[l - 1][2] = target.z - lastZ + (avrZ * 0.6 * (rand.nextDouble() - 0.5));

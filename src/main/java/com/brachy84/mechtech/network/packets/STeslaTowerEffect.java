@@ -51,13 +51,14 @@ public class STeslaTowerEffect implements IPacket {
         Vec3d t = new Vec3d(target.getX() + 0.5, target.getY() + 0.5, target.getZ() + 0.5);
         Vec3d d = t.subtract(s);    // difference of start & end
         double x = d.x, z = d.z;
-        double l = Math.sqrt(x * x + z * z);
-        x /= l;
-        z /= l;
-        s = s.add(x * 4, 0, z * 4);
+        double l = Math.sqrt(x * x + z * z);    //
+        x /= l;                                 // normalize d on horizontal axis
+        z /= l;                                 //
+        s = s.add(x * 4, 0, z * 4); // move start by normalized d * 4
+        // result is a position inside the toroid
 
         Lightning lightning = new Lightning(Minecraft.getMinecraft().world, s, t)
-                .setColor(new Color(83, 166, 189, 235).getRGB(), new Color(167, 192, 199, 255).getRGB())
+                .setColor(new Color(83, 166, 189, 205).getRGB(), new Color(167, 192, 199, 235).getRGB())
                 .setScale(25f)
                 .setup();
         Minecraft.getMinecraft().effectRenderer.addEffect(lightning);
