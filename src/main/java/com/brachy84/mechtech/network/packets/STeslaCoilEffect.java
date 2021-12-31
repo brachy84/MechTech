@@ -55,6 +55,6 @@ public class STeslaCoilEffect implements IPacket {
                 .setColor(new Color(83, 166, 189, 153).getRGB(), new Color(167, 192, 199, 204).getRGB())
                 .setup();
         Minecraft.getMinecraft().effectRenderer.addEffect(lightning);
-        Minecraft.getMinecraft().world.playSound(source.x, source.y, source.z, Sounds.TESLA_ZAP, SoundCategory.BLOCKS, 1, 0.8f, false);
+        Minecraft.getMinecraft().world.playSound(source.x, source.y, source.z, Sounds.TESLA_ZAP, SoundCategory.BLOCKS, 1, 1.3f, false);
     }
 }

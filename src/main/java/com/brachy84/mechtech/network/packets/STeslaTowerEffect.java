@@ -62,6 +62,6 @@ public class STeslaTowerEffect implements IPacket {
                 .setScale(25f)
                 .setup();
         Minecraft.getMinecraft().effectRenderer.addEffect(lightning);
-        Minecraft.getMinecraft().world.playSound(s.x, s.y, s.z, Sounds.TESLA_ZAP, SoundCategory.BLOCKS, 3, 1, false);
+        Minecraft.getMinecraft().world.playSound(s.x, s.y, s.z, Sounds.TESLA_ZAP, SoundCategory.BLOCKS, 3, 0.7f, false);
     }
 }
