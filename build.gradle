@@ -13,7 +13,7 @@ buildscript {
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
 
-version = "0.1.1"
+version = "1.0.0-alpha"
 group = "com.brachy84.mechtech" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "mechtech"
 
