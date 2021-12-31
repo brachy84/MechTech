@@ -16,10 +16,12 @@ public class MTTileEntities {
 
     public static MetaTileEntityTeslaTower TESLA_TOWER;
     public static MetaTileEntityArmorWorkbench ARMOR_WORKBENCH;
+    public static EnergySink ENERGY_SINK;
 
     public static void init() {
         ARMOR_WORKBENCH = register(10100, new MetaTileEntityArmorWorkbench(loc("armor_workbench")));
         TESLA_TOWER = register(10101, new MetaTileEntityTeslaTower(loc("tesla_tower")));
+        ENERGY_SINK = register(10490, new EnergySink(loc("energy_sink")));
     }
 
     private static <T extends MetaTileEntity> T register(int id, T t) {
