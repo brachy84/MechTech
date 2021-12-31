@@ -55,7 +55,7 @@ public class ClientProxy extends CommonProxy {
 
         EntityPlayerSP player = Minecraft.getMinecraft().player;
 
-        float zoom = (float) (1 / MTConfig.modules.binocularZoom);
+        float zoom = (float) (1 / MTConfig.modularArmor.modules.binocularZoom);
 
         if (Mouse.isButtonDown(1)) {
             ItemStack binoculars = MTMetaItems.BINOCULARS.getStackForm();
