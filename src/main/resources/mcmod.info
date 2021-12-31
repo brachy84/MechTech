@@ -1,16 +1,18 @@
 [
-{
-  "modid": "examplemod",
-  "name": "Example Mod",
-  "description": "Example placeholder mod.",
-  "version": "${version}",
-  "mcversion": "${mcversion}",
-  "url": "",
-  "updateUrl": "",
-  "authorList": ["ExampleDude"],
-  "credits": "The Forge and FML guys, for making this example",
-  "logoFile": "",
-  "screenshots": [],
-  "dependencies": []
-}
+  {
+    "modid": "mechtech",
+    "name": "MechTech",
+    "description": "A addon for GTCEu with cool stuff",
+    "version": "${version}",
+    "mcversion": "1.12.2",
+    "url": "https://www.curseforge.com/minecraft/mc-mods/mechtech",
+    "authorList": [
+      "brachy84"
+    ],
+    "credits": "",
+    "logoFile": "",
+    "dependencies": [
+      "gregtech"
+    ]
+  }
 ]
