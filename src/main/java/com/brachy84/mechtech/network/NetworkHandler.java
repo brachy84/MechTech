@@ -1,8 +1,8 @@
 package com.brachy84.mechtech.network;
 
 import com.brachy84.mechtech.MechTech;
-import com.brachy84.mechtech.network.packets.SModuleParticles;
-import gregtech.api.GTValues;
+import com.brachy84.mechtech.network.packets.STeslaCoilEffect;
+import com.brachy84.mechtech.network.packets.STeslaTowerEffect;
 import gregtech.api.net.IPacket;
 import gregtech.api.net.NetworkUtils;
 import net.minecraft.client.network.NetHandlerPlayClient;
@@ -29,7 +29,8 @@ public class NetworkHandler {
         channel = NetworkRegistry.INSTANCE.newEventDrivenChannel(MechTech.MODID);
         channel.register(new NetworkHandler());
 
-        registerPacket(SModuleParticles.class);
+        registerPacket(STeslaCoilEffect.class);
+        registerPacket(STeslaTowerEffect.class);
 
         initServer();
         if (FMLCommonHandler.instance().getSide().isClient()) {
@@ -44,7 +45,8 @@ public class NetworkHandler {
     // Register packets as "received on client" here
     @SideOnly(Side.CLIENT)
     protected static void initClient() {
-        registerClientExecutor(SModuleParticles.class);
+        registerClientExecutor(STeslaCoilEffect.class);
+        registerClientExecutor(STeslaTowerEffect.class);
     }
 
 

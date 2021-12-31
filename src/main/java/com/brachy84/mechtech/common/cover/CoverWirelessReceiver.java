@@ -20,7 +20,7 @@ public class CoverWirelessReceiver extends CoverBehavior {
 
     @Override
     public boolean canAttach() {
-        IEnergyContainer container = this.coverHolder.getCapability(GregtechCapabilities.CAPABILITY_ENERGY_CONTAINER, null);
+        IEnergyContainer container = this.coverHolder.getCapability(GregtechCapabilities.CAPABILITY_ENERGY_CONTAINER, attachedSide);
         return container != null && container.inputsEnergy(attachedSide);
     }
 

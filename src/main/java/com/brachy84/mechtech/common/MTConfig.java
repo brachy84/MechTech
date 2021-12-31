@@ -7,9 +7,11 @@ import net.minecraftforge.common.config.Config;
 public class MTConfig {
 
     public static ModularArmor modularArmor = new ModularArmor();
-    public static Modules modules = new Modules();
+    public static TeslaTower teslaTower = new TeslaTower();
 
     public static class ModularArmor {
+        public Modules modules = new Modules();
+
         @Config.Comment("Amount of module slots of the helmet")
         @Config.Name("Helmet slots")
         @Config.RequiresMcRestart
@@ -56,5 +58,13 @@ public class MTConfig {
         @Config.Comment("Determine how much energy should be drawn per damage dealt. 0 will disable energy use")
         @Config.RangeDouble
         public double teslaCoilDamageEnergyRatio = 40;
+    }
+
+    public static class TeslaTower {
+
+        @Config.Name("Lightning chance")
+        @Config.Comment("Chance on each insertion to spawn a lightning")
+        @Config.RangeDouble(min = 0, max = 1)
+        public double lightningChance = 0.5;
     }
 }

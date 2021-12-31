@@ -1,8 +1,7 @@
 package com.brachy84.mechtech.api.armor.modules;
 
 import com.brachy84.mechtech.api.armor.IModule;
-import com.brachy84.mechtech.client.Sounds;
-import com.brachy84.mechtech.network.packets.SModuleParticles;
+import com.brachy84.mechtech.network.packets.STeslaCoilEffect;
 import com.brachy84.mechtech.common.MTConfig;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IElectricItem;
@@ -15,7 +14,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -35,10 +33,10 @@ public class TeslaCoil implements IModule {
     public void onTick(World world, EntityPlayer player, ItemStack modularArmorPiece, NBTTagCompound armorData) {
         if (!world.isRemote && world.getTotalWorldTime() % 20 == 0) {
 
-            double range = MTConfig.modules.teslaCoilRange;
-            double damage = MTConfig.modules.teslaCoilDamage;
-            double maxEntities = MTConfig.modules.teslaCoilMaxEntitiesPerSecond;
-            double edRatio = MTConfig.modules.teslaCoilDamageEnergyRatio;
+            double range = MTConfig.modularArmor.modules.teslaCoilRange;
+            double damage = MTConfig.modularArmor.modules.teslaCoilDamage;
+            double maxEntities = MTConfig.modularArmor.modules.teslaCoilMaxEntitiesPerSecond;
+            double edRatio = MTConfig.modularArmor.modules.teslaCoilDamageEnergyRatio;
 
             IElectricItem electricItem = modularArmorPiece.getCapability(GregtechCapabilities.CAPABILITY_ELECTRIC_ITEM, null);
             if (electricItem == null || electricItem.getMaxCharge() < edRatio)
@@ -55,13 +53,10 @@ public class TeslaCoil implements IModule {
                     break;
                 electricItem.discharge(energy, Integer.MAX_VALUE, false, false, false);
                 if (living.attackEntityFrom(DamageSources.getElectricDamage(), (float) damage)) {
-                    spawnLightning(player, living);
+                    playEffects(player, living);
                     if (++count == maxEntities)
                         break;
                 }
-            }
-            if(count > 0) {
-                playSound(world, player);
             }
             player.inventoryContainer.detectAndSendChanges();
         }
@@ -72,14 +67,10 @@ public class TeslaCoil implements IModule {
         return "tesla_coil";
     }
 
-    private void spawnLightning(EntityPlayer source, Entity target) {
+    private void playEffects(EntityPlayer source, Entity target) {
         double targetY = target.posY + target.height / 2.0;
         double sourceY = source.posY + 2.2;
-        SModuleParticles packet = new SModuleParticles(new Vec3d(source.posX, sourceY, source.posZ), new Vec3d(target.posX, targetY, target.posZ));
+        STeslaCoilEffect packet = new STeslaCoilEffect(new Vec3d(source.posX, sourceY, source.posZ), new Vec3d(target.posX, targetY, target.posZ));
         NetworkHandler.channel.sendTo(packet.toFMLPacket(), (EntityPlayerMP) source);
-    }
-
-    private void playSound(World world, EntityPlayer player) {
-        world.playSound(player, player.posX, player.posY + 2.2, player.posZ, Sounds.TESLA_ZAP, SoundCategory.PLAYERS, 5f, 1f);
     }
 }

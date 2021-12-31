@@ -3,6 +3,7 @@ package com.brachy84.mechtech.api;
 import gregtech.api.pattern.PatternMatchContext;
 import gregtech.api.pattern.TraceabilityPredicate;
 import gregtech.api.unification.material.Material;
+import gregtech.api.util.BlockInfo;
 import gregtech.api.util.GTLog;
 import gregtech.common.blocks.BlockCompressed;
 import gregtech.common.blocks.MetaBlocks;
@@ -13,33 +14,36 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class TorusBlock {
 
-    private static final Map<IBlockState, TorusBlock> TORUS_BLOCK_MAP = new HashMap<>();
-    private static final Map<String, TorusBlock> TORUS_BLOCK_NAME_MAP = new HashMap<>();
+    private static final Map<String, TorusBlock> TORUS_BLOCK_MAP = new HashMap<>();
 
     @Nullable
     public static TorusBlock get(IBlockState state) {
-        return TORUS_BLOCK_MAP.get(state);
+        for(TorusBlock block : TORUS_BLOCK_MAP.values()) {
+            if(block.state.getBlock() == state.getBlock() && block.state.getBlock().getMetaFromState(block.state) == state.getBlock().getMetaFromState(state))
+                return block;
+        }
+        return null;
     }
 
     @Nullable
     public static TorusBlock get(String name) {
-        return TORUS_BLOCK_NAME_MAP.get(name);
+        return TORUS_BLOCK_MAP.get(name);
     }
 
     public static Map<String, TorusBlock> getRegistryMap() {
-        return Collections.unmodifiableMap(TORUS_BLOCK_NAME_MAP);
+        return Collections.unmodifiableMap(TORUS_BLOCK_MAP);
     }
 
     public static void register(String id, TorusBlock block) {
-        if(block.state.equals(Blocks.AIR.getDefaultState())) {
+        if (block.state.getBlock() == Blocks.AIR) {
             GTLog.logger.error("Can not register TorusBlock with AIR block state");
             return;
         }
-        TORUS_BLOCK_MAP.put(block.state, block);
-        TORUS_BLOCK_NAME_MAP.put(id, block);
+        TORUS_BLOCK_MAP.put(id, block);
         block.name = id;
     }
 
@@ -56,7 +60,7 @@ public class TorusBlock {
 
     public static TorusBlock ofMaterial(Material material) {
         BlockCompressed block = MetaBlocks.COMPRESSED.get(material);
-        if(block == null)
+        if (block == null)
             return new TorusBlock(Blocks.AIR.getDefaultState());
         return new TorusBlock(block.getBlock(material));
     }
@@ -98,13 +102,23 @@ public class TorusBlock {
     }
 
     public static TraceabilityPredicate traceabilityPredicate() {
+        Supplier<BlockInfo[]> candidates = () -> {
+            BlockInfo[] info = new BlockInfo[TORUS_BLOCK_MAP.size()];
+            int i = 0;
+            for (TorusBlock block : TORUS_BLOCK_MAP.values()) {
+                info[i] = new BlockInfo(block.state);
+                i++;
+            }
+            return info;
+        };
         return new TraceabilityPredicate(blockWorldState -> {
             TorusBlock torusBlock = get(blockWorldState.getBlockState());
-            if(torusBlock == null)
+            if (torusBlock == null) {
                 return false;
+            }
             PatternMatchContext matchContext = blockWorldState.getMatchContext();
             matchContext.increment(torusBlock.name, 1);
             return true;
-        });
+        }, candidates);
     }
 }
