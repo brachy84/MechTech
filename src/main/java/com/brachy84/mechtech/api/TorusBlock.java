@@ -50,7 +50,6 @@ public class TorusBlock {
     private final IBlockState state;
     private float dmgModifier;
     private float rangeModifier;
-    private float voltageModifier;
     private float ampsPerBlock;
     private String name = "unregistered";
 
@@ -75,13 +74,13 @@ public class TorusBlock {
         return this;
     }
 
-    public TorusBlock setVoltageModifier(float voltageModifier) {
-        this.voltageModifier = voltageModifier;
+    public TorusBlock setAmpsPerBlock(float ampsPerBlock) {
+        this.ampsPerBlock = ampsPerBlock;
         return this;
     }
 
-    public TorusBlock setAmpsPerBlock(float ampsPerBlock) {
-        this.ampsPerBlock = ampsPerBlock;
+    public TorusBlock register(String id) {
+        register(id, this);
         return this;
     }
 
@@ -91,10 +90,6 @@ public class TorusBlock {
 
     public float getRangeModifier() {
         return rangeModifier;
-    }
-
-    public float getVoltageModifier() {
-        return voltageModifier;
     }
 
     public float getAmpsPerBlock() {

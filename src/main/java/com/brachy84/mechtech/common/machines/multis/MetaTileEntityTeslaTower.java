@@ -50,12 +50,11 @@ import static gregtech.api.util.RelativeDirection.*;
 public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
 
     public static void initTorusBlocks() {
-        TorusBlock copper = TorusBlock.ofMaterial(Materials.Copper)
-                .setAmpsPerBlock(0.2f)
+        TorusBlock.ofMaterial(Materials.Copper)
+                .setAmpsPerBlock(0.11f)
                 .setDmgModifier(20)
                 .setRangeModifier(6)
-                .setVoltageModifier(1);
-        TorusBlock.register("copper", copper);
+                .register("copper");
     }
 
     public static final int TORUS_BLOCK_COUNT = 92;
@@ -168,7 +167,6 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
         for (Map.Entry<String, TorusBlock> entry : TorusBlock.getRegistryMap().entrySet()) {
             int count = context.getInt(entry.getKey());
             TorusBlock block = entry.getValue();
-
             dmg += block.getDmgModifier() * count;
             range += block.getRangeModifier() * count;
             amps += block.getAmpsPerBlock() * count;
@@ -176,16 +174,12 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
         dmg /= TORUS_BLOCK_COUNT;
         range /= TORUS_BLOCK_COUNT;
         maxAmps = (int) Math.floor(amps);
-        range *= coilHeight;
+        range *= Math.pow(coilHeight, 0.85);
         range = round(range);
         dmg = (float) round(dmg);
         energyContainerList = new GoodEnergyContainerList(getAbilities(MultiblockAbility.INPUT_ENERGY));
         voltage = energyContainerList.getInputVoltage();
         center = getPos().offset(getFrontFacing().getOpposite(), 3).offset(EnumFacing.UP, 5 + coilHeight);
-
-        int xMin = (int) (center.getX() - range), yMin = (int) (center.getY() - range), zMin = (int) (center.getZ() - range);
-        int d = (int) (range * 2 + 1);
-        GTLog.logger.info("MinPos {}, MaxPos {}", MechTech.blockPosToString(new BlockPos(xMin, yMin, zMin)), MechTech.blockPosToString(new BlockPos(xMin + d, yMin + d, zMin + d)));
     }
 
     private double round(double num) {
@@ -335,7 +329,6 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
             textList.add(new TextComponentString("Dmg: " + dmg));
             textList.add(new TextComponentString("Range: " + range));
             textList.add(new TextComponentString("Receivers: " + energyHandlers.size()));
-            textList.add(new TextComponentString("Center: " + MechTech.blockPosToString(center)));
         }
     }
 
