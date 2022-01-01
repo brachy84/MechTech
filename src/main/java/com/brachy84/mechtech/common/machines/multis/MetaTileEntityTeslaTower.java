@@ -95,14 +95,10 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
                 toRemove.clear();
             }
             int toTick = effectQueue.size() / 20;
-            int restI = effectQueue.size() % 20;
-            double rest = restI / 20.0;
-            if (restI > 0) {
-                for(int i = 0; i < restI; i++) {
-                    if(GTValues.RNG.nextFloat() <= rest)
-                        toTick++;
-                }
-            }
+            double rest = effectQueue.size() / 20.0 - toTick;
+            if (rest > 0 && GTValues.RNG.nextFloat() <= rest)
+                toTick++;
+
             Iterator<BlockPos> iterator = effectQueue.iterator();
             while (toTick > 0 && iterator.hasNext()) {
                 BlockPos pos = iterator.next();
