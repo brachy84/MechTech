@@ -4,7 +4,6 @@ import com.brachy84.mechtech.api.armor.MaterialArmorModuleBuilder;
 import com.brachy84.mechtech.api.armor.Modules;
 import com.brachy84.mechtech.common.items.MTMetaItems;
 import com.brachy84.mechtech.common.machines.MTTileEntities;
-import com.brachy84.mechtech.common.recipes.recipes.MetaTileEntityRecipes;
 import gregtech.api.recipes.ModHandler;
 import gregtech.api.recipes.RecipeMaps;
 import gregtech.api.unification.material.Material;
@@ -13,15 +12,21 @@ import gregtech.api.unification.material.info.MaterialFlags;
 import gregtech.api.unification.material.properties.PropertyKey;
 import gregtech.api.unification.ore.OrePrefix;
 import gregtech.api.unification.stack.UnificationEntry;
+import gregtech.common.blocks.BlockMetalCasing;
+import gregtech.common.blocks.MetaBlocks;
 import gregtech.common.items.MetaItems;
 import gregtech.common.metatileentities.MetaTileEntities;
 import net.minecraft.item.ItemStack;
 
+import static gregtech.api.unification.material.Materials.*;
+import static gregtech.api.unification.ore.OrePrefix.*;
+
 public class Recipes {
 
     public static void init() {
-        MetaTileEntityRecipes.init();
         modularArmor();
+        modules();
+        metaTileEntities();
         for (MaterialArmorModuleBuilder builder : Modules.getArmorModules().values()) {
             if (builder.isRegistered()) {
                 if (builder.doGenerateRecipe && builder.material != null && builder.material.hasFlag(MaterialFlags.GENERATE_PLATE)) {
@@ -32,8 +37,6 @@ public class Recipes {
     }
 
     private static void modularArmor() {
-        ModHandler.addShapedRecipe("armor_workbench", MTTileEntities.ARMOR_WORKBENCH.getStackForm(), " S ", "SWS", "hSw", 'S', new UnificationEntry(OrePrefix.stick, Materials.StainlessSteel), 'W', MetaTileEntities.WORKBENCH.getStackForm());
-
         RecipeMaps.ASSEMBLER_RECIPES.recipeBuilder()
                 .input(OrePrefix.stick, Materials.StainlessSteel, 5)
                 .input(MetaItems.CARBON_MESH, 3)
@@ -80,8 +83,8 @@ public class Recipes {
         if (material.hasProperty(PropertyKey.INGOT)) {
             ModHandler.addShapedRecipe("armor_plating_" + material.toString(), result, "PPh", "PP ", "h  ", 'P', new UnificationEntry(OrePrefix.plate, material));
             RecipeMaps.FORMING_PRESS_RECIPES.recipeBuilder()
-                    .input(OrePrefix.plate, material, 2)
-                    .input(OrePrefix.plate, material, 2)
+                    .input(plate, material, 2)
+                    .input(plate, material, 2)
                     .outputs(result)
                     .duration(160)
                     .EUt(44)
@@ -91,12 +94,93 @@ public class Recipes {
             // TODO gem plating recipe
             ModHandler.addShapedRecipe("armor_plating_" + material.toString(), result, "PPh", "PP ", "h  ", 'P', new UnificationEntry(OrePrefix.plate, material));
             RecipeMaps.FORMING_PRESS_RECIPES.recipeBuilder()
-                    .input(OrePrefix.plate, material, 2)
-                    .input(OrePrefix.plate, material, 2)
+                    .input(plate, material, 2)
+                    .input(plate, material, 2)
                     .outputs(result)
                     .duration(160)
                     .EUt(44)
                     .buildAndRegister();
         }
+    }
+
+    private static void modules() {
+        RecipeMaps.ASSEMBLER_RECIPES.recipeBuilder()
+                .input(MetaItems.SENSOR_LUV)
+                .input(plate, Osmium)
+                .input(cableGtSingle, NiobiumNitride)
+                .circuitMeta(3)
+                .output(MTMetaItems.WIRELESS_RECEIVER)
+                .duration(400)
+                .EUt(2048)
+                .buildAndRegister();
+
+        RecipeMaps.ASSEMBLER_RECIPES.recipeBuilder()
+                .input(MetaItems.FLUID_CELL_LARGE_ALUMINIUM, 2)
+                .input(plate, Tin, 3)
+                .input(stick, Steel)
+                .circuitMeta(3)
+                .output(MTMetaItems.AUTO_FEEDER)
+                .duration(200)
+                .EUt(96)
+                .buildAndRegister();
+
+        RecipeMaps.ASSEMBLER_RECIPES.recipeBuilder()
+                .input(MetaItems.VOLTAGE_COIL_LUV, 8)
+                .input(plateDouble, IndiumTinBariumTitaniumCuprate, 8)
+                .input(stickLong, PolyvinylChloride, 4)
+                .circuitMeta(3)
+                .output(MTMetaItems.TESLA_COIL)
+                .duration(600)
+                .EUt(2048)
+                .buildAndRegister();
+
+        RecipeMaps.ASSEMBLER_RECIPES.recipeBuilder()
+                .input(MetaItems.SENSOR_LV, 1)
+                .input(lens, Glass, 2)
+                .input(MetaItems.DUCT_TAPE, 2)
+                .circuitMeta(3)
+                .output(MTMetaItems.BINOCULARS)
+                .duration(300)
+                .EUt(32)
+                .buildAndRegister();
+
+        RecipeMaps.ASSEMBLER_RECIPES.recipeBuilder()
+                .input(plate, Steel, 2)
+                .input(springSmall, Tungsten, 3)
+                .circuitMeta(3)
+                .output(MTMetaItems.SHOCK_ABSORBER)
+                .duration(200)
+                .EUt(480)
+                .buildAndRegister();
+
+        RecipeMaps.ASSEMBLER_RECIPES.recipeBuilder()
+                .input(foil, Polycaprolactam, 64)
+                .input(MetaItems.DUCT_TAPE, 8)
+                .circuitMeta(3)
+                .output(MTMetaItems.SHOCK_ABSORBER)
+                .duration(150)
+                .EUt(48)
+                .buildAndRegister();
+    }
+
+    private static void metaTileEntities() {
+        ModHandler.addShapedRecipe("armor_workbench", MTTileEntities.ARMOR_WORKBENCH.getStackForm(), " S ", "SWS", "hSw", 'S', new UnificationEntry(OrePrefix.stick, Materials.StainlessSteel), 'W', MetaTileEntities.WORKBENCH.getStackForm());
+
+        RecipeMaps.ASSEMBLY_LINE_RECIPES.recipeBuilder()
+                .input(plateDouble, IndiumTinBariumTitaniumCuprate, 16)
+                .input(MetaItems.VOLTAGE_COIL_ZPM, 16)
+                .input(stickLong, PolyvinylChloride, 20)
+                .inputs(MetaBlocks.METAL_CASING.getItemVariant(BlockMetalCasing.MetalCasingType.TITANIUM_STABLE, 4))
+                .input(MTMetaItems.TESLA_COIL, 4)
+                .input("circuitMaster", 4)
+                .input("circuitUltimate", 1)
+                .input(MetaItems.EMITTER_ZPM, 8)
+                .input(MetaItems.FIELD_GENERATOR_ZPM, 2)
+                .input(MetaItems.WIRELESS, 6)
+                .input(MetaItems.ENERGY_LAPOTRONIC_ORB_CLUSTER)
+                .output(MTTileEntities.TESLA_TOWER)
+                .duration(12000)
+                .EUt(120000)
+                .buildAndRegister();
     }
 }
