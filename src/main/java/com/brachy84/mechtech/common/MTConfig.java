@@ -63,8 +63,13 @@ public class MTConfig {
     public static class TeslaTower {
 
         @Config.Name("Lightning chance")
-        @Config.Comment("Chance on each insertion to spawn a lightning")
+        @Config.Comment("Chance on each insertion to spawn a lightning. 0 disables effects")
         @Config.RangeDouble(min = 0, max = 1)
         public double lightningChance = 0.5;
+
+        @Config.Name("Attack chance")
+        @Config.Comment("Chance to attack any mob in range every 5 ticks. 0 disables it")
+        @Config.RangeDouble(min = 0, max = 1)
+        public double attackChance = 0.01;
     }
 }

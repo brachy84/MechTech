@@ -4,7 +4,7 @@ import codechicken.lib.render.CCRenderState;
 import codechicken.lib.render.pipeline.IVertexOperation;
 import codechicken.lib.vec.Matrix4;
 import com.brachy84.mechtech.MechTech;
-import com.brachy84.mechtech.api.TorusBlock;
+import com.brachy84.mechtech.api.ToroidBlock;
 import com.brachy84.mechtech.api.capability.GoodEnergyContainerList;
 import com.brachy84.mechtech.common.MTConfig;
 import com.brachy84.mechtech.common.cover.CoverWirelessReceiver;
@@ -16,6 +16,7 @@ import gregtech.api.capability.IEnergyContainer;
 import gregtech.api.capability.impl.EnergyContainerBatteryBuffer;
 import gregtech.api.cover.CoverBehavior;
 import gregtech.api.cover.ICoverable;
+import gregtech.api.damagesources.DamageSources;
 import gregtech.api.metatileentity.MetaTileEntity;
 import gregtech.api.metatileentity.MetaTileEntityHolder;
 import gregtech.api.metatileentity.multiblock.IMultiblockPart;
@@ -34,11 +35,15 @@ import gregtech.common.blocks.BlockMetalCasing;
 import gregtech.common.blocks.BlockWireCoil;
 import gregtech.common.blocks.MetaBlocks;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
@@ -50,16 +55,17 @@ import static gregtech.api.util.RelativeDirection.*;
 public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
 
     public static void initTorusBlocks() {
-        TorusBlock.ofMaterial(Materials.Copper)
+        ToroidBlock.create(Materials.Copper)
                 .setAmpsPerBlock(0.11f)
-                .setDmgModifier(20)
+                .setDmgModifier(7)
                 .setRangeModifier(6)
-                .register("copper");
+                .register();
     }
 
     public static final int TORUS_BLOCK_COUNT = 92;
     public static final int SCAN_TICKS = 100;
 
+    // TODO: coil tier & coil height effects?
     private int coilHeight;
     private float dmg;
     private double range;
@@ -67,6 +73,7 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
     private long voltage;
 
     private int scanX, scanY, scanZ;
+    private Vec3d minPos, maxPos;
     private BlockPos center;
 
     private long ampsUsed;
@@ -76,6 +83,7 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
     private final Map<BlockPos, EnumFacing> energyHandlers = new HashMap<>();
     private final List<BlockPos> toRemove = new ArrayList<>();
     private final Set<BlockPos> effectQueue = new HashSet<>();
+    private final List<EntityLivingBase> livings = new ArrayList<>();
 
     public MetaTileEntityTeslaTower(ResourceLocation metaTileEntityId) {
         super(metaTileEntityId);
@@ -84,8 +92,12 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
     @Override
     protected void updateFormedValid() {
         if (!getWorld().isRemote) {
+            // scan range for receivers every tick
             scanRange();
-            if (energyContainerList.getEnergyStored() > 0 && getOffsetTimer() % 20 == 0) {
+
+            // transmit energy to receivers every second
+            long stored = energyContainerList.getEnergyStored();
+            if (stored > 0 && getOffsetTimer() % 20 == 0) {
                 ampsUsed = 0;
                 for (Map.Entry<BlockPos, EnumFacing> entry : energyHandlers.entrySet()) {
                     if (!transferEnergy(entry.getKey(), entry.getValue()) || ampsUsed >= maxAmps)
@@ -94,6 +106,8 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
                 toRemove.forEach(energyHandlers::remove);
                 toRemove.clear();
             }
+
+            // spawn bolts and make sounds to transmitted receivers every tick
             int toTick = effectQueue.size() / 20;
             double rest = effectQueue.size() / 20.0 - toTick;
             if (rest > 0 && GTValues.RNG.nextFloat() <= rest)
@@ -106,17 +120,44 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
                 toTick--;
                 iterator.remove();
             }
+
+            // gather living entities every 4 seconds
+            if (MTConfig.teslaTower.attackChance > 0 && getOffsetTimer() % 80 == 0) {
+                double entityRange = (range * 2 + 1) / 6;
+                livings.clear();
+                for (Entity entity : getWorld().getEntitiesInAABBexcluding(null, new AxisAlignedBB(minPos, maxPos).shrink(entityRange), entity -> entity.isEntityAlive() && entity instanceof EntityLivingBase)) {
+                    livings.add((EntityLivingBase) entity);
+                }
+            }
+
+            // randomly damage a entity every 5 ticks
+            if (getOffsetTimer() % 5 == 0 && livings.size() > 0 && MTConfig.teslaTower.attackChance > 0 && stored > 0 && GTValues.RNG.nextFloat() < MTConfig.teslaTower.attackChance) {
+                Collections.shuffle(livings);
+                Iterator<EntityLivingBase> iterator1 = livings.iterator();
+                while (iterator1.hasNext()) {
+                    EntityLivingBase living = iterator1.next();
+                    if (living == null || !living.isEntityAlive() || !isEntityInRange(living)) {
+                        iterator1.remove();
+                        continue;
+                    }
+                    living.attackEntityFrom(DamageSources.getElectricDamage(), dmg);
+                    break;
+                }
+            }
         }
     }
 
+    private boolean isEntityInRange(Entity entity) {
+        return Math.sqrt(center.distanceSq(entity.posX, entity.posY, entity.posZ)) < range;
+    }
+
     private void scanRange() {
-        int d = (int) (range * 2 + 1);
+        int d = (int) (maxPos.x - minPos.x);
         int totalBlocks = d * d * d;
         int blocksPerTick = totalBlocks / SCAN_TICKS;
         int scannedBlocks = 0;
 
         BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain();
-        int xMin = (int) (center.getX() - range), yMin = (int) (center.getY() - range), zMin = (int) (center.getZ() - range);
         while (scannedBlocks <= blocksPerTick) {
             for (; scanX < d; scanX++) {
                 for (; scanZ < d; scanZ++) {
@@ -125,7 +166,7 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
                             pos.release();
                             return;
                         }
-                        pos.setPos(xMin + scanX, yMin + scanY, zMin + scanZ);
+                        pos.setPos(minPos.x + scanX, minPos.y + scanY, minPos.z + scanZ);
                         if (center.getDistance(pos.getX(), pos.getY(), pos.getZ()) > range) {
                             continue;
                         }
@@ -160,9 +201,9 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
         coilHeight = context.getInt("Count") / 12 - 1;
 
         float amps = 0;
-        for (Map.Entry<String, TorusBlock> entry : TorusBlock.getRegistryMap().entrySet()) {
+        for (Map.Entry<String, ToroidBlock> entry : ToroidBlock.getRegistryMap().entrySet()) {
             int count = context.getInt(entry.getKey());
-            TorusBlock block = entry.getValue();
+            ToroidBlock block = entry.getValue();
             dmg += block.getDmgModifier() * count;
             range += block.getRangeModifier() * count;
             amps += block.getAmpsPerBlock() * count;
@@ -176,6 +217,10 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
         energyContainerList = new GoodEnergyContainerList(getAbilities(MultiblockAbility.INPUT_ENERGY));
         voltage = energyContainerList.getInputVoltage();
         center = getPos().offset(getFrontFacing().getOpposite(), 3).offset(EnumFacing.UP, 5 + coilHeight);
+        Vec3d centerD = new Vec3d(center.getX() + 0.5, center.getY() + 0.5, center.getZ() + 0.5);
+        double d = range * 2 + 1;
+        minPos = new Vec3d(centerD.x - range, centerD.y - range, centerD.z - range);
+        maxPos = minPos.add(d, d, d);
     }
 
     private double round(double num) {
@@ -277,7 +322,7 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
                 .where('C', states(getCasingState())
                         .or(abilities(MultiblockAbility.INPUT_ENERGY).setMaxGlobalLimited(8).setMinGlobalLimited(1, 2))
                         .or(abilities(MultiblockAbility.MAINTENANCE_HATCH).setExactLimit(1)))
-                .where('T', TorusBlock.traceabilityPredicate())
+                .where('T', ToroidBlock.traceabilityPredicate())
                 .where('L', coilPredicate())
                 .where('P', states(materialBlockState(Materials.Polyethylene)))
                 .where('#', any())

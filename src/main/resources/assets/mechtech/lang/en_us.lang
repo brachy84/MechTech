@@ -26,9 +26,9 @@ mechtech.multiblock.tesla_tower.description=The Tesla Tower can transmit power w
 
 mechtech.jei_category.torus_block=Tesla Tower Torus Blocks
 
-mechtech.recipe.torus_block.loss=Energy loss modifier: %d
+mechtech.recipe.torus_block.dmg=Damage modifier: %d
 mechtech.recipe.torus_block.range=Range modifier: %d
-mechtech.recipe.torus_block.voltage=Max Voltage: (%s) %d
+mechtech.recipe.torus_block.amps=Amperage per Block: %d
 
 mechtech.modules.armor_plating.name=%s Armor Plating
 mechtech.modules.night_vision.name=Night Vision
