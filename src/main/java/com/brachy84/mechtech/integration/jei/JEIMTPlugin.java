@@ -1,10 +1,14 @@
-package com.brachy84.mechtech.common.jei;
+package com.brachy84.mechtech.integration.jei;
 
 import com.brachy84.mechtech.MechTech;
+import com.brachy84.mechtech.api.ToroidBlock;
+import com.brachy84.mechtech.common.machines.MTTileEntities;
 import gregtech.api.GTValues;
 import gregtech.api.recipes.RecipeMap;
 import mezz.jei.api.*;
 import mezz.jei.api.recipe.IRecipeCategoryRegistration;
+
+import java.util.stream.Collectors;
 
 @JEIPlugin
 public class JEIMTPlugin implements IModPlugin {
@@ -16,18 +20,15 @@ public class JEIMTPlugin implements IModPlugin {
 
     @Override
     public void registerCategories(IRecipeCategoryRegistration registry) {
-        /*registry.addRecipeCategories(
+        registry.addRecipeCategories(
                 new TorusBlockRecipeCategory(registry.getJeiHelpers().getGuiHelper())
-        );*/
+        );
     }
 
     @Override
     public void register(IModRegistry registry) {
-
-        /*registry.addRecipes(TorusBlock.getTorusBlocks()
-                .stream().map((TorusBlockRecipeWrapper::new)).collect(Collectors.toList()), TORUS_RECIPES);
-
-        registry.addRecipeCatalyst(MTTileEntities.TESLA_TOWER.getStackForm(), TORUS_RECIPES);*/
+        registry.addRecipes(ToroidBlock.getAll().stream().map((TorusBlockRecipeWrapper::new)).collect(Collectors.toList()), TORUS_RECIPES);
+        registry.addRecipeCatalyst(MTTileEntities.TESLA_TOWER.getStackForm(), TORUS_RECIPES);
     }
 
     @Override

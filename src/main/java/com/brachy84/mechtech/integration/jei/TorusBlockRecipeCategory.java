@@ -1,6 +1,17 @@
-package com.brachy84.mechtech.common.jei;
+package com.brachy84.mechtech.integration.jei;
 
-/*
+
+import com.brachy84.mechtech.MechTech;
+import com.brachy84.mechtech.common.machines.MTTileEntities;
+import mezz.jei.api.IGuiHelper;
+import mezz.jei.api.gui.IDrawable;
+import mezz.jei.api.gui.IRecipeLayout;
+import mezz.jei.api.ingredients.IIngredients;
+import mezz.jei.api.recipe.IRecipeCategory;
+import net.minecraft.client.resources.I18n;
+
+import javax.annotation.Nullable;
+
 public class TorusBlockRecipeCategory implements IRecipeCategory<TorusBlockRecipeWrapper> {
 
     private final IDrawable background;
@@ -8,12 +19,12 @@ public class TorusBlockRecipeCategory implements IRecipeCategory<TorusBlockRecip
 
     public TorusBlockRecipeCategory(IGuiHelper helper) {
         this.background = helper.createBlankDrawable(176, 50);
-        //icon = helper.createDrawableIngredient(MTTileEntities.TESLA_TOWER.getStackForm());
+        icon = helper.createDrawableIngredient(MTTileEntities.TESLA_TOWER.getStackForm());
     }
 
     @Override
     public String getUid() {
-        return MechTech.MODID + ":torus_block";
+        return JEIMTPlugin.TORUS_RECIPES;
     }
 
     @Override
@@ -43,4 +54,4 @@ public class TorusBlockRecipeCategory implements IRecipeCategory<TorusBlockRecip
         recipeLayout.getItemStacks().set(ingredients);
 
     }
-}*/
+}
