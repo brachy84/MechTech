@@ -57,7 +57,7 @@ public class MTConfig {
         @Config.Name("Tesla Coil damage energy ratio")
         @Config.Comment("Determine how much energy should be drawn per damage dealt. 0 will disable energy use")
         @Config.RangeDouble
-        public double teslaCoilDamageEnergyRatio = 40;
+        public double teslaCoilDamageEnergyRatio = 400;
     }
 
     public static class TeslaTower {
@@ -74,6 +74,6 @@ public class MTConfig {
         @Config.Name("Attack chance")
         @Config.Comment("Chance to attack any mob in range every 5 ticks. 0 disables it")
         @Config.RangeDouble(min = 0, max = 1)
-        public double attackChance = 0.01;
+        public double attackChance = 0.03;
     }
 }

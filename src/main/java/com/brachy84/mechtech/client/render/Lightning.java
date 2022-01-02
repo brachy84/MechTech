@@ -164,7 +164,7 @@ public class Lightning extends Particle {
 
         for (int layer = 0; layer < 2; layer++) {
             if (layer == 0) {
-                scale = 0.02;
+                scale = 0.04;
                 offX *= 0.001;
                 offY *= 0.001;
                 offZ *= 0.001;
@@ -176,7 +176,7 @@ public class Lightning extends Particle {
                 offX = 0;
                 offY = 0;
                 offZ = 0;
-                scale = 0.015;
+                scale = 0.02;
                 red = ((color2 >> 16) & 0xFF) / 255f;
                 green = ((color2 >> 8) & 0xFF) / 255f;
                 blue = ((color2) & 0xFF) / 255f;

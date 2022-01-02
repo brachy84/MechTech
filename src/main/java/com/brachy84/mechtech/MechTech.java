@@ -6,8 +6,10 @@ import com.brachy84.mechtech.common.cover.MTCoverBehaviors;
 import com.brachy84.mechtech.common.machines.MTTileEntities;
 import com.brachy84.mechtech.common.machines.multis.MetaTileEntityTeslaTower;
 import com.brachy84.mechtech.network.NetworkHandler;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -46,5 +48,13 @@ public class MechTech {
 
     public static String blockPosToString(BlockPos pos) {
         return "X: " + pos.getX() + ", Y: " + pos.getY() + ", Z: " + pos.getZ();
+    }
+
+    public static Vec3d getMiddleOf(BlockPos pos) {
+        return new Vec3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
+    }
+
+    public static Vec3d getMiddleOf(Entity entity) {
+        return new Vec3d(entity.posX, entity.posY + entity.height / 2, entity.posZ);
     }
 }

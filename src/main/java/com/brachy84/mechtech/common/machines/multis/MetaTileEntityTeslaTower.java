@@ -17,6 +17,8 @@ import gregtech.api.capability.impl.EnergyContainerBatteryBuffer;
 import gregtech.api.cover.CoverBehavior;
 import gregtech.api.cover.ICoverable;
 import gregtech.api.damagesources.DamageSources;
+import gregtech.api.gui.ModularUI;
+import gregtech.api.gui.widgets.CycleButtonWidget;
 import gregtech.api.metatileentity.MetaTileEntity;
 import gregtech.api.metatileentity.MetaTileEntityHolder;
 import gregtech.api.metatileentity.multiblock.IMultiblockPart;
@@ -37,7 +39,9 @@ import gregtech.common.blocks.MetaBlocks;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
@@ -78,6 +82,8 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
 
     private long ampsUsed;
 
+    private boolean defenseMode;
+
     private GoodEnergyContainerList energyContainerList = null;
 
     private final Map<BlockPos, EnumFacing> energyHandlers = new HashMap<>();
@@ -92,58 +98,10 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
     @Override
     protected void updateFormedValid() {
         if (!getWorld().isRemote) {
-            // scan range for receivers every tick
-            scanRange();
-
-            // transmit energy to receivers every second
-            long stored = energyContainerList.getEnergyStored();
-            if (stored > 0 && getOffsetTimer() % 20 == 0) {
-                ampsUsed = 0;
-                for (Map.Entry<BlockPos, EnumFacing> entry : energyHandlers.entrySet()) {
-                    if (!transferEnergy(entry.getKey(), entry.getValue()) || ampsUsed >= maxAmps)
-                        break;
-                }
-                toRemove.forEach(energyHandlers::remove);
-                toRemove.clear();
-            }
-
-            // spawn bolts and make sounds to transmitted receivers every tick
-            int toTick = effectQueue.size() / 20;
-            double rest = effectQueue.size() / 20.0 - toTick;
-            if (rest > 0 && GTValues.RNG.nextFloat() <= rest)
-                toTick++;
-
-            Iterator<BlockPos> iterator = effectQueue.iterator();
-            while (toTick > 0 && iterator.hasNext()) {
-                BlockPos pos = iterator.next();
-                playEffects(pos);
-                toTick--;
-                iterator.remove();
-            }
-
-            // gather living entities every 4 seconds
-            if (MTConfig.teslaTower.attackChance > 0 && getOffsetTimer() % 80 == 0) {
-                double entityRange = (range * 2 + 1) / 6;
-                livings.clear();
-                for (Entity entity : getWorld().getEntitiesInAABBexcluding(null, new AxisAlignedBB(minPos, maxPos).shrink(entityRange), entity -> entity.isEntityAlive() && entity instanceof EntityLivingBase)) {
-                    livings.add((EntityLivingBase) entity);
-                }
-            }
-
-            // randomly damage a entity every 5 ticks
-            if (getOffsetTimer() % 5 == 0 && livings.size() > 0 && MTConfig.teslaTower.attackChance > 0 && stored > 0 && GTValues.RNG.nextFloat() < MTConfig.teslaTower.attackChance) {
-                Collections.shuffle(livings);
-                Iterator<EntityLivingBase> iterator1 = livings.iterator();
-                while (iterator1.hasNext()) {
-                    EntityLivingBase living = iterator1.next();
-                    if (living == null || !living.isEntityAlive() || !isEntityInRange(living)) {
-                        iterator1.remove();
-                        continue;
-                    }
-                    living.attackEntityFrom(DamageSources.getElectricDamage(), dmg);
-                    break;
-                }
-            }
+            if(defenseMode)
+                updateDefenseMode();
+            else
+                updateWirelessEnergyMode();
         }
     }
 
@@ -195,6 +153,95 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
         pos.release();
     }
 
+    private void updateDefenseMode() {
+        // gather living entities every 4 seconds
+        if (getOffsetTimer() % 60 == 0) {
+            livings.clear();
+            for (Entity entity : getWorld().getEntitiesInAABBexcluding(null, new AxisAlignedBB(minPos, maxPos), entity -> entity.isEntityAlive() && entity instanceof EntityLivingBase)) {
+                livings.add((EntityLivingBase) entity);
+            }
+        }
+
+        // randomly damage a entity every 5 ticks
+        if (getOffsetTimer() % 4 == 0 && livings.size() > 0 && energyContainerList.getEnergyStored() > 0) {
+            int maxEntities = 10;
+            int entitiesHit = 0;
+            float dmg = this.dmg / 4f;
+            Collections.shuffle(livings);
+            Iterator<EntityLivingBase> iterator1 = livings.iterator();
+            while (entitiesHit < maxEntities && iterator1.hasNext()) {
+                EntityLivingBase living = iterator1.next();
+                if (living == null || !living.isEntityAlive() || !isEntityInRange(living) || living instanceof EntityPlayer) {
+                    iterator1.remove();
+                    continue;
+                }
+                dmg = Math.min(dmg, living.getHealth());
+                long energy = (long) (dmg * MTConfig.modularArmor.modules.teslaCoilDamageEnergyRatio);
+                if(energyContainerList.getEnergyStored() < energy)
+                    break;
+                energyContainerList.removeEnergy(energy);
+                living.attackEntityFrom(DamageSources.getElectricDamage(), dmg);
+                playEffects(living);
+                entitiesHit++;
+            }
+        }
+    }
+
+    private void updateWirelessEnergyMode() {
+        // scan range for receivers every tick
+        scanRange();
+
+        // transmit energy to receivers every second
+        long stored = energyContainerList.getEnergyStored();
+        if (stored > 0 && getOffsetTimer() % 20 == 0) {
+            ampsUsed = 0;
+            for (Map.Entry<BlockPos, EnumFacing> entry : energyHandlers.entrySet()) {
+                if (!transferEnergy(entry.getKey(), entry.getValue()) || ampsUsed >= maxAmps)
+                    break;
+            }
+            toRemove.forEach(energyHandlers::remove);
+            toRemove.clear();
+        }
+
+        // spawn bolts and make sounds to transmitted receivers every tick
+        int toTick = effectQueue.size() / 20;
+        double rest = effectQueue.size() / 20.0 - toTick;
+        if (rest > 0 && GTValues.RNG.nextFloat() <= rest)
+            toTick++;
+
+        Iterator<BlockPos> iterator = effectQueue.iterator();
+        while (toTick > 0 && iterator.hasNext()) {
+            BlockPos pos = iterator.next();
+            playEffects(pos);
+            toTick--;
+            iterator.remove();
+        }
+
+        // gather living entities every 4 seconds
+        if (MTConfig.teslaTower.attackChance > 0 && getOffsetTimer() % 80 == 0) {
+            double entityRange = (range * 2 + 1) / 3;
+            livings.clear();
+            for (Entity entity : getWorld().getEntitiesInAABBexcluding(null, new AxisAlignedBB(minPos, maxPos).shrink(entityRange), entity -> entity.isEntityAlive() && entity instanceof EntityLivingBase)) {
+                livings.add((EntityLivingBase) entity);
+            }
+        }
+
+        // randomly damage a entity every 5 ticks
+        if (getOffsetTimer() % 5 == 0 && livings.size() > 0 && MTConfig.teslaTower.attackChance > 0 && stored > 0 && GTValues.RNG.nextFloat() < MTConfig.teslaTower.attackChance) {
+            Collections.shuffle(livings);
+            Iterator<EntityLivingBase> iterator1 = livings.iterator();
+            while (iterator1.hasNext()) {
+                EntityLivingBase living = iterator1.next();
+                if (living == null || !living.isEntityAlive() || !isEntityInRange(living)) {
+                    iterator1.remove();
+                    continue;
+                }
+                living.attackEntityFrom(DamageSources.getElectricDamage(), dmg);
+                break;
+            }
+        }
+    }
+
     @Override
     protected void formStructure(PatternMatchContext context) {
         super.formStructure(context);
@@ -217,7 +264,7 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
         energyContainerList = new GoodEnergyContainerList(getAbilities(MultiblockAbility.INPUT_ENERGY));
         voltage = energyContainerList.getInputVoltage();
         center = getPos().offset(getFrontFacing().getOpposite(), 3).offset(EnumFacing.UP, 5 + coilHeight);
-        Vec3d centerD = new Vec3d(center.getX() + 0.5, center.getY() + 0.5, center.getZ() + 0.5);
+        Vec3d centerD = MechTech.getMiddleOf(center);
         double d = range * 2 + 1;
         minPos = new Vec3d(centerD.x - range, centerD.y - range, centerD.z - range);
         maxPos = minPos.add(d, d, d);
@@ -362,6 +409,14 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
     }
 
     @Override
+    protected ModularUI.Builder createUITemplate(EntityPlayer entityPlayer) {
+        ModularUI.Builder builder = super.createUITemplate(entityPlayer);
+        builder.widget(new CycleButtonWidget(61, 97, 100, 20, () -> defenseMode, val -> defenseMode = val, "Wireless Energy Mode", "Defense Mode")
+            .setTooltipHoverString("mechtech.tesla_tower.ui.mode.tooltip"));
+        return builder;
+    }
+
+    @Override
     protected void addDisplayText(List<ITextComponent> textList) {
         super.addDisplayText(textList);
         if (isStructureFormed()) {
@@ -458,8 +513,27 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
     }
 
     private void playEffects(BlockPos target) {
-        STeslaTowerEffect packet = new STeslaTowerEffect(center, target);
+        STeslaTowerEffect packet = new STeslaTowerEffect(center, MechTech.getMiddleOf(target));
         NetworkRegistry.TargetPoint targetPoint = new NetworkRegistry.TargetPoint(getWorld().provider.getDimension(), center.getX(), center.getY(), center.getZ(), 64);
         NetworkHandler.channel.sendToAllAround(packet.toFMLPacket(), targetPoint);
+    }
+
+    private void playEffects(Entity target) {
+        STeslaTowerEffect packet = new STeslaTowerEffect(center, MechTech.getMiddleOf(target)).setScale(5f);
+        NetworkRegistry.TargetPoint targetPoint = new NetworkRegistry.TargetPoint(getWorld().provider.getDimension(), center.getX(), center.getY(), center.getZ(), 64);
+        NetworkHandler.channel.sendToAllAround(packet.toFMLPacket(), targetPoint);
+    }
+
+    @Override
+    public NBTTagCompound writeToNBT(NBTTagCompound data) {
+        super.writeToNBT(data);
+        data.setBoolean("DefenseMode", defenseMode);
+        return data;
+    }
+
+    @Override
+    public void readFromNBT(NBTTagCompound data) {
+        super.readFromNBT(data);
+        defenseMode = data.getBoolean("DefenseMode");
     }
 }
