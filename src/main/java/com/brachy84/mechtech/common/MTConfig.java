@@ -62,6 +62,10 @@ public class MTConfig {
 
     public static class TeslaTower {
 
+        @Config.Name("Enable Tesla Tower")
+        @Config.RequiresMcRestart
+        public boolean enable = true;
+
         @Config.Name("Lightning chance")
         @Config.Comment("Chance on each insertion to spawn a lightning. 0 disables effects")
         @Config.RangeDouble(min = 0, max = 1)

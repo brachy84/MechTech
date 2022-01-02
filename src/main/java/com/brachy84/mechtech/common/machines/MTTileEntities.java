@@ -1,6 +1,7 @@
 package com.brachy84.mechtech.common.machines;
 
 import com.brachy84.mechtech.MechTech;
+import com.brachy84.mechtech.common.MTConfig;
 import com.brachy84.mechtech.common.machines.multis.MetaTileEntityTeslaTower;
 import gregtech.api.GTValues;
 import gregtech.api.GregTechAPI;
@@ -20,7 +21,8 @@ public class MTTileEntities {
 
     public static void init() {
         ARMOR_WORKBENCH = register(10100, new MetaTileEntityArmorWorkbench(loc("armor_workbench")));
-        TESLA_TOWER = register(10101, new MetaTileEntityTeslaTower(loc("tesla_tower")));
+        if (MTConfig.teslaTower.enable)
+            TESLA_TOWER = register(10101, new MetaTileEntityTeslaTower(loc("tesla_tower")));
         ENERGY_SINK = register(10490, new EnergySink(loc("energy_sink")));
     }
 

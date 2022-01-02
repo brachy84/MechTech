@@ -2,6 +2,7 @@ package com.brachy84.mechtech.common.recipes;
 
 import com.brachy84.mechtech.api.armor.MaterialArmorModuleBuilder;
 import com.brachy84.mechtech.api.armor.Modules;
+import com.brachy84.mechtech.common.MTConfig;
 import com.brachy84.mechtech.common.items.MTMetaItems;
 import com.brachy84.mechtech.common.machines.MTTileEntities;
 import gregtech.api.recipes.ModHandler;
@@ -166,21 +167,22 @@ public class Recipes {
     private static void metaTileEntities() {
         ModHandler.addShapedRecipe("armor_workbench", MTTileEntities.ARMOR_WORKBENCH.getStackForm(), " S ", "SWS", "hSw", 'S', new UnificationEntry(OrePrefix.stick, Materials.StainlessSteel), 'W', MetaTileEntities.WORKBENCH.getStackForm());
 
-        RecipeMaps.ASSEMBLY_LINE_RECIPES.recipeBuilder()
-                .input(plateDouble, IndiumTinBariumTitaniumCuprate, 16)
-                .input(MetaItems.VOLTAGE_COIL_ZPM, 16)
-                .input(stickLong, PolyvinylChloride, 20)
-                .inputs(MetaBlocks.METAL_CASING.getItemVariant(BlockMetalCasing.MetalCasingType.TITANIUM_STABLE, 4))
-                .input(MTMetaItems.TESLA_COIL, 4)
-                .input("circuitMaster", 4)
-                .input("circuitUltimate", 1)
-                .input(MetaItems.EMITTER_ZPM, 8)
-                .input(MetaItems.FIELD_GENERATOR_ZPM, 2)
-                .input(MetaItems.WIRELESS, 6)
-                .input(MetaItems.ENERGY_LAPOTRONIC_ORB_CLUSTER)
-                .output(MTTileEntities.TESLA_TOWER)
-                .duration(12000)
-                .EUt(120000)
-                .buildAndRegister();
+        if (MTConfig.teslaTower.enable)
+            RecipeMaps.ASSEMBLY_LINE_RECIPES.recipeBuilder()
+                    .input(plateDouble, IndiumTinBariumTitaniumCuprate, 16)
+                    .input(MetaItems.VOLTAGE_COIL_ZPM, 16)
+                    .input(stickLong, PolyvinylChloride, 20)
+                    .inputs(MetaBlocks.METAL_CASING.getItemVariant(BlockMetalCasing.MetalCasingType.TITANIUM_STABLE, 4))
+                    .input(MTMetaItems.TESLA_COIL, 4)
+                    .input("circuitMaster", 4)
+                    .input("circuitUltimate", 1)
+                    .input(MetaItems.EMITTER_ZPM, 8)
+                    .input(MetaItems.FIELD_GENERATOR_ZPM, 2)
+                    .input(MetaItems.WIRELESS, 6)
+                    .input(MetaItems.ENERGY_LAPOTRONIC_ORB_CLUSTER)
+                    .output(MTTileEntities.TESLA_TOWER)
+                    .duration(12000)
+                    .EUt(120000)
+                    .buildAndRegister();
     }
 }
