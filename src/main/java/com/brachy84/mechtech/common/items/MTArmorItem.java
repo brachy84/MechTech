@@ -2,6 +2,7 @@ package com.brachy84.mechtech.common.items;
 
 import com.brachy84.mechtech.api.armor.IModule;
 import com.brachy84.mechtech.api.armor.ModularArmor;
+import com.brachy84.mechtech.api.armor.ModularArmorStats;
 import com.brachy84.mechtech.common.MTConfig;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IElectricItem;
@@ -12,8 +13,11 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
+import net.minecraftforge.fluids.capability.IFluidTankProperties;
 import org.lwjgl.input.Keyboard;
 
 import javax.annotation.Nonnull;
@@ -62,12 +66,26 @@ public class MTArmorItem extends ArmorMetaItem<ArmorMetaItem<?>.ArmorMetaValueIt
                 lines.add(I18n.format("metaitem.modular_armor.no_modules"));
             }
 
-            IElectricItem electricItem = itemStack.getCapability(GregtechCapabilities.CAPABILITY_ELECTRIC_ITEM, (EnumFacing) null);
+            IElectricItem electricItem = itemStack.getCapability(GregtechCapabilities.CAPABILITY_ELECTRIC_ITEM, null);
             if (electricItem != null) {
                 if (electricItem.getMaxCharge() == 0) {
                     lines.add(I18n.format("metaitem.modular_armor.no_battery"));
                 } else {
                     lines.add(I18n.format("metaitem.generic.electric_item.tooltip", electricItem.getCharge(), electricItem.getMaxCharge(), "Unspecified"));
+                }
+            }
+
+            IFluidHandlerItem fluidHandler = itemStack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
+            if (fluidHandler != null) {
+                IFluidTankProperties[] properties = fluidHandler.getTankProperties();
+                if (properties[0] != ModularArmorStats.DEFAULT_TANK) {
+                    for (IFluidTankProperties property : properties) {
+                        FluidStack fluid = property.getContents();
+                        lines.add(I18n.format("metaitem.generic.fluid_container.tooltip",
+                                fluid == null ? 0 : fluid.amount,
+                                property.getCapacity(),
+                                fluid == null ? "" : fluid.getLocalizedName()));
+                    }
                 }
             }
 

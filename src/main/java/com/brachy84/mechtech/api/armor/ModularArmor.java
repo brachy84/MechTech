@@ -22,12 +22,18 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ISpecialArmor;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 public class ModularArmor implements ISpecialArmorLogic {
 
@@ -393,6 +399,55 @@ public class ModularArmor implements ISpecialArmorLogic {
             }
         }
         return cap;
+    }
+
+    public static int drainFluid(ItemStack stack, FluidStack fluid, boolean simulate) {
+        if (stack.isEmpty() || fluid == null || fluid.amount <= 0) {
+            return 0;
+        }
+        NBTTagCompound nbt = stack.getTagCompound();
+        if (nbt == null) {
+            return 0;
+        }
+        FluidStack toDrain = fluid.copy();
+        if (nbt.hasKey(BATTERIES)) {
+            NBTTagList list = nbt.getTagList(BATTERIES, Constants.NBT.TAG_COMPOUND);
+            for (int i = 0; i < list.tagCount(); i++) {
+                NBTTagCompound batteryNbt = list.getCompoundTagAt(i);
+                ItemStack batteryStack = new ItemStack(batteryNbt);
+                IFluidHandlerItem fluidHandler = batteryStack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
+                if (fluidHandler != null) {
+                    FluidStack drained = fluidHandler.drain(toDrain, !simulate);
+                    if (drained != null && drained.amount > 0) {
+                        toDrain.amount -= drained.amount;
+                        if (toDrain.amount <= 0) {
+                            break;
+                        }
+                    }
+                }
+            }
+            nbt.setTag(BATTERIES, list);
+        }
+        return fluid.amount - toDrain.amount;
+    }
+
+    public static List<IFluidHandlerItem> getFluidHandlers(ItemStack stack) {
+        if (!stack.isEmpty() && stack.hasTagCompound()) {
+            NBTTagCompound nbt = stack.getTagCompound();
+            if (!nbt.hasKey(BATTERIES))
+                return Collections.emptyList();
+            NBTTagList list = nbt.getTagList(BATTERIES, Constants.NBT.TAG_COMPOUND);
+            List<IFluidHandlerItem> fluidHandlers = new ArrayList<>();
+            for (int i = 0; i < list.tagCount(); i++) {
+                ItemStack item = new ItemStack(list.getCompoundTagAt(i));
+                IFluidHandlerItem fluidHandler = item.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
+                if (fluidHandler != null) {
+                    fluidHandlers.add(fluidHandler);
+                }
+            }
+            return fluidHandlers;
+        }
+        return Collections.emptyList();
     }
 
     public static void setBatteries(ItemStack stack, List<ItemStack> batteries) {
