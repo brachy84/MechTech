@@ -6,6 +6,7 @@ import com.brachy84.mechtech.common.cover.MTCoverBehaviors;
 import com.brachy84.mechtech.common.machines.MTTileEntities;
 import com.brachy84.mechtech.common.machines.multis.MetaTileEntityTeslaTower;
 import com.brachy84.mechtech.network.NetworkHandler;
+import gregtech.api.GTValues;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -18,7 +19,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod(modid = MechTech.MODID, name = MechTech.NAME, version = MechTech.VERSION, dependencies = "required-after:gregtech;")
+@Mod(modid = MechTech.MODID, name = MechTech.NAME, version = MechTech.VERSION, dependencies = "required:forge@[14.23.5.2847,);" + GTValues.MOD_VERSION_DEP + "after:crafttweaker")
 public class MechTech {
     public static final String MODID = "mechtech";
     public static final String NAME = "MechTech";
@@ -38,12 +39,12 @@ public class MechTech {
         proxy.preLoad();
         Sounds.registerSounds();
         MTTileEntities.init();
+        MetaTileEntityTeslaTower.initTorusBlocks();
     }
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
         MTCoverBehaviors.init();
-        MetaTileEntityTeslaTower.initTorusBlocks();
     }
 
     public static String blockPosToString(BlockPos pos) {
