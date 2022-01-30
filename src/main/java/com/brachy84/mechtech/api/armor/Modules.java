@@ -3,22 +3,17 @@ package com.brachy84.mechtech.api.armor;
 import com.brachy84.mechtech.api.armor.modules.*;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import crafttweaker.annotations.ZenRegister;
 import gregtech.api.GTValues;
 import gregtech.api.unification.material.Material;
 import gregtech.api.unification.material.Materials;
 import gregtech.api.util.GTLog;
 import org.apache.logging.log4j.Level;
-import stanhebben.zenscript.annotations.ZenClass;
-import stanhebben.zenscript.annotations.ZenMethod;
 
 import java.rmi.AlreadyBoundException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-@ZenClass("mods.mechtech.armor.Modules")
-@ZenRegister
 public class Modules {
 
     private static final BiMap<Integer, IModule> REGISTRY = HashBiMap.create(2000);
@@ -121,7 +116,6 @@ public class Modules {
         REGISTRY.put(id, module);
     }
 
-    @ZenMethod
     public static MaterialArmorModuleBuilder materialArmorBuilder(int id, Material material) {
         MaterialArmorModuleBuilder builder = new MaterialArmorModuleBuilder(id, material);
         ARMOR_MODULES.put(id, builder);

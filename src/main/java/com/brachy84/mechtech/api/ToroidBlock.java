@@ -1,7 +1,7 @@
 package com.brachy84.mechtech.api;
 
+import com.brachy84.mechtech.integration.crafttweaker.IToroidBlock;
 import crafttweaker.CraftTweakerAPI;
-import crafttweaker.annotations.ZenRegister;
 import crafttweaker.api.block.IBlock;
 import crafttweaker.api.minecraft.CraftTweakerMC;
 import gregtech.api.pattern.PatternMatchContext;
@@ -16,10 +16,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import stanhebben.zenscript.annotations.ZenClass;
-import stanhebben.zenscript.annotations.ZenGetter;
-import stanhebben.zenscript.annotations.ZenMethod;
-import stanhebben.zenscript.annotations.ZenProperty;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -28,9 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-@ZenClass("mods.mechtech.ToroidBlock")
-@ZenRegister
-public class ToroidBlock {
+public class ToroidBlock implements IToroidBlock {
 
     private static final ToroidBlock NULL = new ToroidBlock("NULL", Blocks.AIR.getDefaultState());
 
@@ -46,9 +40,16 @@ public class ToroidBlock {
     }
 
     @Nullable
-    @ZenMethod
     public static ToroidBlock get(String name) {
         return TORUS_BLOCK_MAP.get(name);
+    }
+
+    public static void remove(String name) {
+        if (!TORUS_BLOCK_MAP.containsKey(name)) {
+            CraftTweakerAPI.logError("Could not find ToroidBlock with name " + name);
+            return;
+        }
+        TORUS_BLOCK_MAP.remove(name);
     }
 
     public static Collection<ToroidBlock> getAll() {
@@ -60,11 +61,8 @@ public class ToroidBlock {
     }
 
     private final IBlockState state;
-    @ZenProperty
     public float dmgModifier = 0;
-    @ZenProperty
     public float rangeModifier = 0;
-    @ZenProperty
     public float ampsPerBlock = 0;
     private final String name;
 
@@ -73,7 +71,6 @@ public class ToroidBlock {
         this.name = name;
     }
 
-    @ZenMethod
     public static ToroidBlock create(String name, crafttweaker.api.block.IBlockState state) {
         if (state == null) {
             CraftTweakerAPI.logError("Can't create ToroidBlock of null BlockState");
@@ -86,7 +83,6 @@ public class ToroidBlock {
         return new ToroidBlock(name, state);
     }
 
-    @ZenMethod
     public static ToroidBlock create(String name, IBlock block) {
         if (block == null) {
             CraftTweakerAPI.logError("Can't create ToroidBlock of null block");
@@ -99,7 +95,6 @@ public class ToroidBlock {
         return new ToroidBlock(name, block.getDefaultState());
     }
 
-    @ZenMethod
     public static ToroidBlock create(Material material) {
         if (material == null) {
             CraftTweakerAPI.logError("Can't create ToroidBlock of null material");
@@ -108,7 +103,6 @@ public class ToroidBlock {
         return create(material.toString(), material);
     }
 
-    @ZenMethod
     public static ToroidBlock create(String name, Material material) {
         if (material == null) {
             CraftTweakerAPI.logError("Can't create ToroidBlock of null material");
@@ -122,25 +116,22 @@ public class ToroidBlock {
         return new ToroidBlock(name, block.getBlock(material));
     }
 
-    @ZenMethod
-    public ToroidBlock setDmgModifier(float dmgModifier) {
+    @Override
+    public void setDmgModifierCT(float dmgModifier) {
         this.dmgModifier = dmgModifier;
-        return this;
     }
 
-    @ZenMethod
-    public ToroidBlock setRangeModifier(float rangeModifier) {
+    @Override
+    public void setRangeModifierCT(float rangeModifier) {
         this.rangeModifier = rangeModifier;
-        return this;
     }
 
-    @ZenMethod
-    public ToroidBlock setAmpsPerBlock(float ampsPerBlock) {
+    @Override
+    public void setAmpsPerBlockCT(float ampsPerBlock) {
         this.ampsPerBlock = ampsPerBlock;
-        return this;
     }
 
-    @ZenMethod
+    @Override
     public ToroidBlock register() {
         if (state.getBlock() == Blocks.AIR) {
             GTLog.logger.error("Can not register TorusBlock with AIR block state");
@@ -154,19 +145,22 @@ public class ToroidBlock {
         return this;
     }
 
+    @Override
     public float getDmgModifier() {
         return dmgModifier;
     }
 
+    @Override
     public float getRangeModifier() {
         return rangeModifier;
     }
 
+    @Override
     public float getAmpsPerBlock() {
         return ampsPerBlock;
     }
 
-    @ZenGetter
+    @Override
     public String getName() {
         return name;
     }
@@ -193,6 +187,6 @@ public class ToroidBlock {
             PatternMatchContext matchContext = blockWorldState.getMatchContext();
             matchContext.increment(toroidBlock.name, 1);
             return true;
-        }, candidates);
+        }, candidates).addTooltips();
     }
 }

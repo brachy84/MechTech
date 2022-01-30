@@ -1,19 +1,16 @@
 package com.brachy84.mechtech.api.armor;
 
 import com.brachy84.mechtech.api.armor.modules.MaterialArmorModule;
-import crafttweaker.annotations.ZenRegister;
+import com.brachy84.mechtech.integration.crafttweaker.IArmorModule;
 import gregtech.api.items.metaitem.MetaItem;
 import gregtech.api.unification.material.Material;
 import gregtech.api.unification.material.properties.PropertyKey;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import stanhebben.zenscript.annotations.Optional;
-import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenMethod;
 
-@ZenClass("mods.mechtech.armor.MaterialArmorModuleBuilder")
-@ZenRegister
-public class MaterialArmorModuleBuilder {
+public class MaterialArmorModuleBuilder implements IArmorModule {
 
     public final int id;
     public final Material material;
@@ -60,11 +57,17 @@ public class MaterialArmorModuleBuilder {
         return this;
     }
 
-    @ZenMethod
+    @Override
     public MaterialArmorModuleBuilder armor(double armor, @Optional double toughness, @Optional int durability) {
-        this.armor = armor;
-        this.toughness = toughness;
-        this.durability = durability;
+        if (armor >= 0) {
+            this.armor = armor;
+        }
+        if (toughness >= 0) {
+            this.toughness = toughness;
+        }
+        if (durability >= 0 || this.durability <= 0) {
+            this.durability = durability;
+        }
         return this;
     }
 
@@ -82,10 +85,40 @@ public class MaterialArmorModuleBuilder {
         return this;
     }
 
-    @ZenMethod
+    @Override
     public MaterialArmorModuleBuilder dontGenerateRecipe() {
         this.doGenerateRecipe = false;
         return this;
+    }
+
+    @Override
+    public double getArmor() {
+        return armor;
+    }
+
+    @Override
+    public double getToughness() {
+        return toughness;
+    }
+
+    @Override
+    public int getDurability() {
+        return durability;
+    }
+
+    @Override
+    public void setArmor(double armor) {
+        this.armor = armor;
+    }
+
+    @Override
+    public void setToughness(double toughness) {
+        this.toughness = toughness;
+    }
+
+    @Override
+    public void setDurability(int durability) {
+        this.durability = durability;
     }
 
     @ZenMethod
