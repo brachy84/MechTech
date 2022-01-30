@@ -6,7 +6,7 @@ import codechicken.lib.render.pipeline.IVertexOperation;
 import codechicken.lib.vec.Matrix4;
 import com.brachy84.mechtech.api.armor.IModule;
 import com.brachy84.mechtech.api.armor.ModularArmor;
-import com.brachy84.mechtech.client.*;
+import com.brachy84.mechtech.client.ClientHandler;
 import com.brachy84.mechtech.client.gui.BatterySlot;
 import com.brachy84.mechtech.client.gui.ErrorTextWidget;
 import com.brachy84.mechtech.client.gui.ModuleSlot;
@@ -31,6 +31,8 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemStackHandler;
 import org.apache.commons.lang3.ArrayUtils;
@@ -126,7 +128,21 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
             SlotWidget slot = new BatterySlot(batterySlotHandler, i, pos[0], pos[1])
                     .setFilter(stack -> {
                         IElectricItem electricItem = stack.getCapability(GregtechCapabilities.CAPABILITY_ELECTRIC_ITEM, null);
-                        return electricItem != null && electricItem.getMaxCharge() <= Long.MAX_VALUE / batterySlots.length;
+                        if (electricItem != null) {
+                            long totalCap = 0;
+                            for (int j = 0; j < batterySlotHandler.getSlots(); j++) {
+                                ItemStack stack1 = batterySlotHandler.getStackInSlot(j);
+                                if (stack1.isEmpty()) continue;
+                                IElectricItem electricItem1 = stack1.getCapability(GregtechCapabilities.CAPABILITY_ELECTRIC_ITEM, null);
+                                if (electricItem1 == null) continue;
+                                long max = electricItem1.getMaxCharge();
+                                if (Long.MAX_VALUE - totalCap > max || (totalCap += max) >= Long.MAX_VALUE)
+                                    return false;
+                            }
+                            return true;
+                        }
+                        IFluidHandlerItem fluidHandler = stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
+                        return fluidHandler != null;
                     });
             slot.setBackgroundTexture(GuiTextures.SLOT, GuiTextures.BATTERY_OVERLAY);
             slot.setActive(false);

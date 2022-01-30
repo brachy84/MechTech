@@ -31,7 +31,7 @@ public class TeslaCoil implements IModule {
 
     @Override
     public void onTick(World world, EntityPlayer player, ItemStack modularArmorPiece, NBTTagCompound armorData) {
-        if (!world.isRemote && world.getTotalWorldTime() % 20 == 0) {
+        if (!world.isRemote && world.getTotalWorldTime() % 4 == 0) {
 
             double range = MTConfig.modularArmor.modules.teslaCoilRange;
             double damage = MTConfig.modularArmor.modules.teslaCoilDamage;

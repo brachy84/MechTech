@@ -50,9 +50,9 @@ public class MTConfig {
         @Config.RangeDouble
         public double teslaCoilRange = 5;
 
-        @Config.Name("Tesla Coil max entities damaged per second")
+        @Config.Name("Tesla Coil max entities damaged per second/5")
         @Config.RangeInt(min = 0)
-        public int teslaCoilMaxEntitiesPerSecond = 5;
+        public int teslaCoilMaxEntitiesPerSecond = 1;
 
         @Config.Name("Tesla Coil damage energy ratio")
         @Config.Comment("Determine how much energy should be drawn per damage dealt. 0 will disable energy use")

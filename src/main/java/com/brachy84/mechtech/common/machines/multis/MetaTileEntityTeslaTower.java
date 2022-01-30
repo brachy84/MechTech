@@ -98,7 +98,7 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
     @Override
     protected void updateFormedValid() {
         if (!getWorld().isRemote) {
-            if(defenseMode)
+            if (defenseMode)
                 updateDefenseMode();
             else
                 updateWirelessEnergyMode();
@@ -177,7 +177,7 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
                 }
                 dmg = Math.min(dmg, living.getHealth());
                 long energy = (long) (dmg * MTConfig.modularArmor.modules.teslaCoilDamageEnergyRatio);
-                if(energyContainerList.getEnergyStored() < energy)
+                if (energyContainerList.getEnergyStored() < energy)
                     break;
                 energyContainerList.removeEnergy(energy);
                 living.attackEntityFrom(DamageSources.getElectricDamage(), dmg);
@@ -388,14 +388,14 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
             IBlockState blockState = blockWorldState.getBlockState();
             if (blockState.getBlock() instanceof BlockWireCoil) {
                 BlockWireCoil blockWireCoil = (BlockWireCoil) blockState.getBlock();
-                BlockWireCoil.CoilType coilType = (BlockWireCoil.CoilType) blockWireCoil.getState(blockState);
+                BlockWireCoil.CoilType coilType = blockWireCoil.getState(blockState);
                 Object currentCoilType = blockWorldState.getMatchContext().getOrPut("CoilType", coilType);
                 if (!currentCoilType.toString().equals(coilType.getName())) {
                     blockWorldState.setError(new PatternStringError("gregtech.multiblock.pattern.error.coils"));
                     return false;
                 } else {
                     blockWorldState.getMatchContext().increment("Count", 1);
-                    ((LinkedList) blockWorldState.getMatchContext().getOrPut("VABlock", new LinkedList())).add(blockWorldState.getPos());
+                    blockWorldState.getMatchContext().getOrPut("VABlock", new LinkedList()).add(blockWorldState.getPos());
                     return true;
                 }
             } else {
@@ -412,7 +412,7 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
     protected ModularUI.Builder createUITemplate(EntityPlayer entityPlayer) {
         ModularUI.Builder builder = super.createUITemplate(entityPlayer);
         builder.widget(new CycleButtonWidget(61, 97, 100, 20, () -> defenseMode, val -> defenseMode = val, "Wireless Energy Mode", "Defense Mode")
-            .setTooltipHoverString("mechtech.tesla_tower.ui.mode.tooltip"));
+                .setTooltipHoverString("mechtech.tesla_tower.ui.mode.tooltip"));
         return builder;
     }
 

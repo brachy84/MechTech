@@ -14,7 +14,7 @@ public class MTMetaItems {
 
     // Modules
     public static MetaItem<?>.MetaValueItem SHOCK_ABSORBER;
-    public static MetaItem<?>.MetaValueItem THICK_ISOLATOR;
+    public static MetaItem<?>.MetaValueItem THICK_INSULATOR;
     public static MetaItem<?>.MetaValueItem BINOCULARS;
     public static MetaItem<?>.MetaValueItem AUTO_FEEDER;
     public static MetaItem<?>.MetaValueItem TESLA_COIL;

@@ -158,7 +158,7 @@ public class Recipes {
                 .input(foil, Polycaprolactam, 64)
                 .input(MetaItems.DUCT_TAPE, 8)
                 .circuitMeta(3)
-                .output(MTMetaItems.SHOCK_ABSORBER)
+                .output(MTMetaItems.THICK_INSULATOR)
                 .duration(150)
                 .EUt(48)
                 .buildAndRegister();
@@ -171,7 +171,7 @@ public class Recipes {
             RecipeMaps.ASSEMBLY_LINE_RECIPES.recipeBuilder()
                     .input(plateDouble, IndiumTinBariumTitaniumCuprate, 16)
                     .input(MetaItems.VOLTAGE_COIL_ZPM, 16)
-                    .input(stickLong, PolyvinylChloride, 20)
+                    .input(stick, PolyvinylChloride, 20)
                     .inputs(MetaBlocks.METAL_CASING.getItemVariant(BlockMetalCasing.MetalCasingType.TITANIUM_STABLE, 4))
                     .input(MTMetaItems.TESLA_COIL, 4)
                     .input("circuitMaster", 4)

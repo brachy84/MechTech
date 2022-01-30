@@ -25,7 +25,7 @@ public interface IModule extends IItemBehaviour {
      * Stored the MetaValueItems for the modules
      * !SHOULD NOT BE EDITED!
      */
-    static Map<IModule, MetaItem<?>.MetaValueItem> NO_TOUCHY = new HashMap<>();
+    Map<IModule, MetaItem<?>.MetaValueItem> NO_TOUCHY = new HashMap<>();
 
     @Nullable
     static IModule getOf(ItemStack stack) {

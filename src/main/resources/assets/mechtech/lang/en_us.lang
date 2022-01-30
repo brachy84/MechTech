@@ -23,7 +23,7 @@ mechtech.multiblock.tesla_tower.scan=Scan
 mechtech.multiblock.tesla_tower.amps=Amps: %d/%d
 mechtech.multiblock.tesla_tower.loss=Loss: %d
 mechtech.multiblock.tesla_tower.description=The Tesla Tower can transmit power wireless.
-mechtech.tesla_tower.ui.mode.tooltip=§bWireless Energy Mode\n§rThe tower transmits wireless power to machines within range. The further the machine is away, the more energy is lost. It can hurt entities if they are too close.\n§bDefense Mode\n§rThe tower will aggressively attack any mob in range. It wont transmit power wireless.
+mechtech.tesla_tower.ui.mode.tooltip=§bWireless Energy Mode/n§rThe tower transmits wireless power to machines within range. The further the machine is away, the more energy is lost. It can hurt entities if they are too close./n§bDefense Mode/n§rThe tower will aggressively attack any mob in range. It wont transmit power wireless.
 
 mechtech.jei_category.torus_block=Tesla Tower Torus Blocks
 
