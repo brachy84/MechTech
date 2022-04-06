@@ -6,8 +6,7 @@ import com.brachy84.mechtech.api.armor.Modules;
 import com.google.common.collect.Lists;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IElectricItem;
-import gregtech.api.items.armor.ArmorUtils;
-import gregtech.api.util.input.EnumKey;
+import gregtech.api.util.input.KeyBind;
 import gregtech.common.items.armor.IJetpack;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
@@ -45,15 +44,15 @@ public class JetpackModule implements IJetpack, IModule {
             hover = armorData.getBoolean("hover");
         }
 
-        if (toggleTimer == 0 && ArmorUtils.isKeyDown(player, EnumKey.HOVER_KEY)) {
+        if (toggleTimer == 0 && KeyBind.ARMOR_HOVER.isKeyDown(player)) {
             hover = !hover;
             toggleTimer = 5;
             armorData.setBoolean("hover", hover);
             if (!world.isRemote) {
                 if (hover) {
-                    player.sendStatusMessage(new TextComponentTranslation("metaarmor.jetpack.hover.enable", new Object[0]), true);
+                    player.sendStatusMessage(new TextComponentTranslation("metaarmor.jetpack.hover.enable"), true);
                 } else {
-                    player.sendStatusMessage(new TextComponentTranslation("metaarmor.jetpack.hover.disable", new Object[0]), true);
+                    player.sendStatusMessage(new TextComponentTranslation("metaarmor.jetpack.hover.disable"), true);
                 }
             }
         }

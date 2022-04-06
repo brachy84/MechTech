@@ -1,8 +1,7 @@
 package com.brachy84.mechtech.api.armor.modules;
 
 import com.brachy84.mechtech.api.armor.IModule;
-import gregtech.api.items.armor.ArmorUtils;
-import gregtech.api.util.input.EnumKey;
+import gregtech.api.util.input.KeyBind;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
@@ -30,7 +29,7 @@ public class Binoculars implements IModule {
             zoom = armorData.getBoolean("zoom");
         }
 
-        if (toggleTimer == 0 && ArmorUtils.isKeyDown(player, EnumKey.MODE_SWITCH)) {
+        if (toggleTimer == 0 && KeyBind.ARMOR_MODE_SWITCH.isKeyDown(player)) {
             zoom = !zoom;
             toggleTimer = 5;
             armorData.setBoolean("zoom", zoom);

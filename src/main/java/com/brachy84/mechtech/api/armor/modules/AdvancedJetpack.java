@@ -6,8 +6,7 @@ import com.brachy84.mechtech.api.armor.Modules;
 import com.google.common.collect.Lists;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IElectricItem;
-import gregtech.api.items.armor.ArmorUtils;
-import gregtech.api.util.input.EnumKey;
+import gregtech.api.util.input.KeyBind;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
@@ -39,13 +38,13 @@ public class AdvancedJetpack extends JetpackModule {
     @Override
     public void onTick(World world, EntityPlayer player, ItemStack modularArmorPiece, NBTTagCompound armorData) {
         IElectricItem cont = modularArmorPiece.getCapability(GregtechCapabilities.CAPABILITY_ELECTRIC_ITEM, null);
-        if(cont == null) {
+        if (cont == null) {
             return;
         }
         boolean hoverMode = armorData.getBoolean("hover");
         byte toggleTimer = armorData.getByte("toggleTimer");
 
-        if (toggleTimer == 0 && ArmorUtils.isKeyDown(player, EnumKey.HOVER_KEY)) {
+        if (toggleTimer == 0 && KeyBind.ARMOR_HOVER.isKeyDown(player)) {
             hoverMode = !hoverMode;
             toggleTimer = 5;
             armorData.setBoolean("hover", hoverMode);
