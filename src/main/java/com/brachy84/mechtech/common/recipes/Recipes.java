@@ -44,7 +44,7 @@ public class Recipes {
                 .input(OrePrefix.plate, Materials.BlackBronze)
                 .output(MTMetaItems.MODULAR_HELMET)
                 .EUt(400)
-                .duration(3600)
+                .duration(1200)
                 .buildAndRegister();
 
         RecipeMaps.ASSEMBLER_RECIPES.recipeBuilder()
@@ -53,7 +53,7 @@ public class Recipes {
                 .input(OrePrefix.plate, Materials.Tungsten)
                 .output(MTMetaItems.MODULAR_CHESTPLATE)
                 .EUt(400)
-                .duration(3600)
+                .duration(1600)
                 .buildAndRegister();
 
         RecipeMaps.ASSEMBLER_RECIPES.recipeBuilder()
@@ -62,7 +62,7 @@ public class Recipes {
                 .input(OrePrefix.plate, Materials.NiobiumNitride)
                 .output(MTMetaItems.MODULAR_LEGGINGS)
                 .EUt(400)
-                .duration(3600)
+                .duration(1400)
                 .buildAndRegister();
 
         RecipeMaps.ASSEMBLER_RECIPES.recipeBuilder()
@@ -71,7 +71,7 @@ public class Recipes {
                 .input(OrePrefix.plate, Materials.Nichrome)
                 .output(MTMetaItems.MODULAR_BOOTS)
                 .EUt(400)
-                .duration(180)
+                .duration(1000)
                 .buildAndRegister();
     }
 
@@ -82,7 +82,7 @@ public class Recipes {
         }
         Material material = builder.material;
         if (material.hasProperty(PropertyKey.INGOT)) {
-            ModHandler.addShapedRecipe("armor_plating_" + material.toString(), result, "PPh", "PP ", "h  ", 'P', new UnificationEntry(OrePrefix.plate, material));
+            ModHandler.addShapedRecipe("armor_plating_" + material, result, "PPh", "PP ", "h  ", 'P', new UnificationEntry(OrePrefix.plate, material));
             RecipeMaps.FORMING_PRESS_RECIPES.recipeBuilder()
                     .input(plate, material, 2)
                     .input(plate, material, 2)
@@ -93,7 +93,7 @@ public class Recipes {
         } else if (material.hasProperty(PropertyKey.GEM)) {
 
             // TODO gem plating recipe
-            ModHandler.addShapedRecipe("armor_plating_" + material.toString(), result, "PPh", "PP ", "h  ", 'P', new UnificationEntry(OrePrefix.plate, material));
+            ModHandler.addShapedRecipe("armor_plating_" + material, result, "PPh", "PP ", "h  ", 'P', new UnificationEntry(OrePrefix.plate, material));
             RecipeMaps.FORMING_PRESS_RECIPES.recipeBuilder()
                     .input(plate, material, 2)
                     .input(plate, material, 2)
@@ -128,7 +128,7 @@ public class Recipes {
         RecipeMaps.ASSEMBLER_RECIPES.recipeBuilder()
                 .input(MetaItems.VOLTAGE_COIL_LuV, 8)
                 .input(plateDouble, IndiumTinBariumTitaniumCuprate, 8)
-                .input(stickLong, PolyvinylChloride, 4)
+                .input(stick, PolyvinylChloride, 4)
                 .circuitMeta(3)
                 .output(MTMetaItems.TESLA_COIL)
                 .duration(600)
@@ -174,14 +174,14 @@ public class Recipes {
                     .input(stick, PolyvinylChloride, 20)
                     .inputs(MetaBlocks.METAL_CASING.getItemVariant(BlockMetalCasing.MetalCasingType.TITANIUM_STABLE, 4))
                     .input(MTMetaItems.TESLA_COIL, 4)
-                    .input("circuitMaster", 4)
-                    .input("circuitUltimate", 1)
+                    .input("circuitZpm", 4)
+                    .input("circuitUv", 1)
                     .input(MetaItems.EMITTER_ZPM, 8)
                     .input(MetaItems.FIELD_GENERATOR_ZPM, 2)
                     .input(MetaItems.WIRELESS, 6)
                     .input(MetaItems.ENERGY_LAPOTRONIC_ORB_CLUSTER)
                     .output(MTTileEntities.TESLA_TOWER)
-                    .duration(12000)
+                    .duration(2000)
                     .EUt(120000)
                     .buildAndRegister();
     }
