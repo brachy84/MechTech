@@ -14,7 +14,7 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle.forge'
 
 version = "1.1.0-beta"
-group = "com.brachy84.mechtech" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+group = "com.brachy84" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "mechtech"
 
 sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
@@ -54,7 +54,7 @@ dependencies {
 
     compile files(
             "libs/CraftTweaker2-1.12-4.1.20.670.jar",
-            "libs/gregtech-1.12.2-2.2.0-beta.jar"
+            "libs/gregtech-1.12.2-2.5.2-beta.jar"
     )
 }
 
@@ -75,23 +75,4 @@ processResources {
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }
-}
-
-def run(command) {
-    def process = command.execute()
-    def outputStream = new StringBuffer();
-    def errorStream = new StringBuffer();
-    process.waitForProcessOutput(outputStream, errorStream)
-
-    errorStream.toString().with {
-        if (it) {
-            throw new GradleException("Error executing ${command}:\n> ${it}")
-        }
-    }
-
-    return outputStream.toString().trim()
-}
-
-runClient {
-    //jvmArgs "Xxm4G"
 }
