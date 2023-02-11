@@ -1,5 +1,6 @@
 package com.brachy84.mechtech.api.armor;
 
+import com.brachy84.mechtech.client.model.ModularArmorModelLegs;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import gregtech.api.capability.GregtechCapabilities;
@@ -9,6 +10,7 @@ import gregtech.api.items.armor.IArmorLogic;
 import gregtech.api.items.armor.ISpecialArmorLogic;
 import gregtech.api.items.metaitem.stats.IItemBehaviour;
 import gregtech.api.util.GTLog;
+import net.minecraft.client.model.ModelBiped;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -30,6 +32,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -280,12 +283,21 @@ public class ModularArmor implements ISpecialArmorLogic {
         });
     }
 
+    @Nullable
+    @Override
+    public ModelBiped getArmorModel(EntityLivingBase entityLiving, ItemStack itemStack, EntityEquipmentSlot armorSlot, ModelBiped defaultModel) {
+        if (armorSlot == EntityEquipmentSlot.LEGS) {
+            return ModularArmorModelLegs.INSTANCE;
+        }
+        return null;
+    }
+
     @Override
     public String getArmorTexture(ItemStack stack, Entity entity, EntityEquipmentSlot slot, String type) {
-        String armorTexture = "nano_muscule_suite";
-        return slot != EntityEquipmentSlot.LEGS ?
-                String.format("gregtech:textures/armor/%s_1.png", armorTexture) :
-                String.format("gregtech:textures/armor/%s_2.png", armorTexture);
+        if (slot == EntityEquipmentSlot.LEGS) {
+            return "gregtech:textures/models/armor/test.png";
+        }
+        return String.format("gregtech:textures/armor/%s_1.png", "nano_muscule_suite");
     }
 
     public static NBTTagCompound getArmorData(ItemStack itemStack) {
