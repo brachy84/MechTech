@@ -5,6 +5,8 @@ import com.brachy84.mechtech.api.armor.Modules;
 import com.google.common.collect.Lists;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IElectricItem;
+import gregtech.api.items.metaitem.MetaItem;
+import gregtech.common.items.MetaItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
@@ -63,5 +65,20 @@ public class SolarGen implements IModule {
     @Override
     public String getModuleId() {
         return "solar_gen." + tier;
+    }
+
+    @Override
+    public MetaItem<?>.MetaValueItem getMetaValueItem() {
+        switch (tier) {
+            case 1: return MetaItems.COVER_SOLAR_PANEL_LV;
+            case 2: return MetaItems.COVER_SOLAR_PANEL_MV;
+            case 3: return MetaItems.COVER_SOLAR_PANEL_HV;
+            case 4: return MetaItems.COVER_SOLAR_PANEL_EV;
+            case 5: return MetaItems.COVER_SOLAR_PANEL_IV;
+            case 6: return MetaItems.COVER_SOLAR_PANEL_LUV;
+            case 7: return MetaItems.COVER_SOLAR_PANEL_ZPM;
+            case 8: return MetaItems.COVER_SOLAR_PANEL_UV;
+        }
+        throw new IllegalArgumentException("Invalid tier: " + tier);
     }
 }

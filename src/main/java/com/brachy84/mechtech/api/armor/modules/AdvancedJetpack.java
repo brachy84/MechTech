@@ -6,7 +6,9 @@ import com.brachy84.mechtech.api.armor.Modules;
 import com.google.common.collect.Lists;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IElectricItem;
+import gregtech.api.items.metaitem.MetaItem;
 import gregtech.api.util.input.KeyBind;
+import gregtech.common.items.MetaItems;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
@@ -127,5 +129,10 @@ public class AdvancedJetpack extends JetpackModule {
     @Override
     public String getModuleId() {
         return "advanced_jetpack";
+    }
+
+    @Override
+    public MetaItem<?>.MetaValueItem getMetaValueItem() {
+        return MetaItems.ELECTRIC_JETPACK_ADVANCED;
     }
 }

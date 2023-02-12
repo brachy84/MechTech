@@ -6,7 +6,9 @@ import com.brachy84.mechtech.api.armor.Modules;
 import com.google.common.collect.Lists;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IElectricItem;
+import gregtech.api.items.metaitem.MetaItem;
 import gregtech.api.util.input.KeyBind;
+import gregtech.common.items.MetaItems;
 import gregtech.common.items.armor.IJetpack;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
@@ -21,6 +23,8 @@ import javax.annotation.Nonnull;
 import java.util.Collection;
 
 public class JetpackModule implements IJetpack, IModule {
+
+
 
     @Override
     public Collection<IModule> getIncompatibleModules() {
@@ -149,4 +153,8 @@ public class JetpackModule implements IJetpack, IModule {
         return "jetpack";
     }
 
+    @Override
+    public MetaItem<?>.MetaValueItem getMetaValueItem() {
+        return MetaItems.ELECTRIC_JETPACK;
+    }
 }

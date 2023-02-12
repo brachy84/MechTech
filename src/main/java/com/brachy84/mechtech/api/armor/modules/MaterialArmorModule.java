@@ -10,16 +10,18 @@ import gregtech.api.items.metaitem.stats.IItemDurabilityManager;
 import gregtech.api.items.metaitem.stats.IItemMaxStackSizeProvider;
 import gregtech.api.items.metaitem.stats.IItemNameProvider;
 import gregtech.api.unification.material.Material;
+import gregtech.api.util.GradientUtil;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.items.IItemHandler;
+import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.input.Keyboard;
 
+import java.awt.*;
 import java.util.List;
 
 public class MaterialArmorModule implements IArmorModule, IDurabilityModule, ISpecialArmorModule {
@@ -28,6 +30,7 @@ public class MaterialArmorModule implements IArmorModule, IDurabilityModule, ISp
     public final double armor, toughness;
     public final int durability;
     private final ISpecialArmorModule specialArmorModule;
+    private MetaItem<?>.MetaValueItem metaValueItem;
 
     public MaterialArmorModule(Material material, double armor, double toughness, int durability, ISpecialArmorModule specialArmorModule) {
         this.material = material;
@@ -116,20 +119,31 @@ public class MaterialArmorModule implements IArmorModule, IDurabilityModule, ISp
         lines.add(I18n.format("mechtech.modular_armor.usable"));
     }
 
-    @Override
-    public void onAddedToItem(MetaItem.MetaValueItem metaValueItem) {
-        IArmorModule.super.onAddedToItem(metaValueItem);
-        metaValueItem.addComponents(((IItemColorProvider) (stack, layer) -> material.getMaterialRGB()))
+    public void init(MetaItem<?>.MetaValueItem metaValueItem) {
+        if (this.metaValueItem != null) throw new IllegalStateException();
+        this.metaValueItem = metaValueItem;
+        this.metaValueItem.addComponents(this)
+                .addComponents(((IItemColorProvider) (stack, layer) -> material.getMaterialRGB()))
                 // name provider
                 .addComponents(((IItemNameProvider) (stack, name) -> I18n.format("mechtech.modules.armor_plating.name", material.getLocalizedName())))
                 // stack size provider
                 .addComponents((IItemMaxStackSizeProvider) (itemStack, i) -> 64)
                 // durability handler
                 .addComponents(new IItemDurabilityManager() {
+
                     @Override
-                    public boolean showsDurabilityBar(ItemStack itemStack) {
-                        NBTTagCompound nbt = itemStack.getTagCompound();
-                        return nbt != null && getDamage(nbt) > 0;
+                    public boolean showEmptyBar(ItemStack itemStack) {
+                        return true;
+                    }
+
+                    @Override
+                    public boolean showFullBar(ItemStack itemStack) {
+                        return false;
+                    }
+
+                    @Override
+                    public Pair<Color, Color> getDurabilityColorsForDisplay(ItemStack itemStack) {
+                        return GradientUtil.getGradient(12037896, 10);
                     }
 
                     @Override
@@ -137,11 +151,11 @@ public class MaterialArmorModule implements IArmorModule, IDurabilityModule, ISp
                         NBTTagCompound nbt = itemStack.getTagCompound();
                         return nbt == null ? 0 : getDamage(nbt) / ((double) durability);
                     }
-
-                    @Override
-                    public int getRGBDurabilityForDisplay(ItemStack itemStack) {
-                        return MathHelper.hsvToRGB((1.0f - (float) getDurabilityForDisplay(itemStack)) / 3.0f, 1.0f, 1.0f);
-                    }
                 });
+    }
+
+    @Override
+    public MetaItem<?>.MetaValueItem getMetaValueItem() {
+        return metaValueItem;
     }
 }

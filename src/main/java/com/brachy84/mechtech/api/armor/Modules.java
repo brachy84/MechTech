@@ -1,30 +1,30 @@
 package com.brachy84.mechtech.api.armor;
 
 import com.brachy84.mechtech.api.armor.modules.*;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import gregtech.api.GTValues;
 import gregtech.api.unification.material.Material;
 import gregtech.api.unification.material.Materials;
 import gregtech.api.util.GTLog;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import org.apache.logging.log4j.Level;
 
 import java.rmi.AlreadyBoundException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Modules {
 
-    private static final BiMap<Integer, IModule> REGISTRY = HashBiMap.create(2000);
-    private static final Map<Integer, MaterialArmorModuleBuilder> ARMOR_MODULES = new HashMap<>();
+    private static final Int2ObjectOpenHashMap<IModule> REGISTRY = new Int2ObjectOpenHashMap<>();
+    private static final Object2IntOpenHashMap<IModule> BACK_REGISTRY = new Object2IntOpenHashMap<>();
+    private static final Int2ObjectOpenHashMap<MaterialArmorModuleBuilder> ARMOR_MODULES = new Int2ObjectOpenHashMap<>();
 
     public static Iterable<IModule> getRegisteredModules() {
         return REGISTRY.values();
     }
 
-    public static Map<Integer, MaterialArmorModuleBuilder> getArmorModules() {
-        return Collections.unmodifiableMap(ARMOR_MODULES);
+    public static Int2ObjectMap<MaterialArmorModuleBuilder> getArmorModules() {
+        return Int2ObjectMaps.unmodifiable(ARMOR_MODULES);
     }
 
     public static final IModule NIGHT_VISION = new NightVision();
@@ -114,6 +114,7 @@ public class Modules {
             return;
         }
         REGISTRY.put(id, module);
+        BACK_REGISTRY.put(module, id);
     }
 
     public static MaterialArmorModuleBuilder materialArmorBuilder(int id, Material material) {
@@ -127,10 +128,15 @@ public class Modules {
     }
 
     public static int getModuleId(IModule module) {
-        Integer id = REGISTRY.inverse().get(module);
-        if (id == null) {
+        if (!BACK_REGISTRY.containsKey(module)) {
             throw new IllegalStateException("Module " + module.getModuleId() + " is not registered");
         }
-        return id;
+        return BACK_REGISTRY.getInt(module);
+    }
+
+    public static void init() {
+        for (IModule module : REGISTRY.values()) {
+            module.getMetaValueItem().addComponents(module);
+        }
     }
 }

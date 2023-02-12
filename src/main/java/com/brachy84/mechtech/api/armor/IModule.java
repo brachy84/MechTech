@@ -21,12 +21,6 @@ import java.util.*;
 
 public interface IModule extends IItemBehaviour {
 
-    /**
-     * Stored the MetaValueItems for the modules
-     * !SHOULD NOT BE EDITED!
-     */
-    Map<IModule, MetaItem<?>.MetaValueItem> NO_TOUCHY = new HashMap<>();
-
     @Nullable
     static IModule getOf(ItemStack stack) {
         if (stack.getItem() instanceof MetaItem) {
@@ -42,14 +36,6 @@ public interface IModule extends IItemBehaviour {
                 return (IModule) component;
         }
         return null;
-    }
-
-    /**
-     * !SHOULD NOT BE EDITED!
-     */
-    @Override
-    default void onAddedToItem(MetaItem.MetaValueItem metaValueItem) {
-        NO_TOUCHY.put(this, metaValueItem);
     }
 
     /**
@@ -163,11 +149,8 @@ public interface IModule extends IItemBehaviour {
 
     /**
      * @return the meta item this module was added to
-     * !SHOULD NOT BE EDITED!
      */
-    default MetaItem<?>.MetaValueItem getMetaValueItem() {
-        return NO_TOUCHY.get(this);
-    }
+    MetaItem<?>.MetaValueItem getMetaValueItem();
 
     @Deprecated
     default ItemStack getDestroyedStack() {

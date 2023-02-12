@@ -8,6 +8,7 @@ import com.brachy84.mechtech.api.ToroidBlock;
 import com.brachy84.mechtech.api.capability.GoodEnergyContainerList;
 import com.brachy84.mechtech.common.MTConfig;
 import com.brachy84.mechtech.common.cover.CoverWirelessReceiver;
+import com.brachy84.mechtech.network.NetworkHandler;
 import com.brachy84.mechtech.network.packets.STeslaTowerEffect;
 import gregtech.api.GTValues;
 import gregtech.api.capability.GregtechCapabilities;
@@ -24,7 +25,6 @@ import gregtech.api.metatileentity.interfaces.IGregTechTileEntity;
 import gregtech.api.metatileentity.multiblock.IMultiblockPart;
 import gregtech.api.metatileentity.multiblock.MultiblockAbility;
 import gregtech.api.metatileentity.multiblock.MultiblockWithDisplayBase;
-import gregtech.api.net.NetworkHandler;
 import gregtech.api.pattern.*;
 import gregtech.api.unification.material.Material;
 import gregtech.api.unification.material.Materials;
@@ -515,13 +515,13 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
     private void playEffects(BlockPos target) {
         STeslaTowerEffect packet = new STeslaTowerEffect(center, MechTech.getMiddleOf(target));
         NetworkRegistry.TargetPoint targetPoint = new NetworkRegistry.TargetPoint(getWorld().provider.getDimension(), center.getX(), center.getY(), center.getZ(), 64);
-        NetworkHandler.channel.sendToAllAround(packet.toFMLPacket(), targetPoint);
+        NetworkHandler.sendToAllAround(packet, targetPoint);
     }
 
     private void playEffects(Entity target) {
         STeslaTowerEffect packet = new STeslaTowerEffect(center, MechTech.getMiddleOf(target)).setScale(5f);
         NetworkRegistry.TargetPoint targetPoint = new NetworkRegistry.TargetPoint(getWorld().provider.getDimension(), center.getX(), center.getY(), center.getZ(), 64);
-        NetworkHandler.channel.sendToAllAround(packet.toFMLPacket(), targetPoint);
+        NetworkHandler.sendToAllAround(packet, targetPoint);
     }
 
     @Override

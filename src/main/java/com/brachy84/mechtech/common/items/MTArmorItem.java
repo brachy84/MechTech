@@ -7,7 +7,6 @@ import com.brachy84.mechtech.common.MTConfig;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IElectricItem;
 import gregtech.api.items.armor.ArmorMetaItem;
-import gregtech.api.items.metaitem.MetaItem;
 import gregtech.api.items.metaitem.stats.IItemBehaviour;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
@@ -93,15 +92,5 @@ public class MTArmorItem extends ArmorMetaItem<ArmorMetaItem<?>.ArmorMetaValueIt
                 behaviour.addInformation(itemStack, lines);
             }
         }
-    }
-
-    @Override
-    public boolean showDurabilityBar(@Nonnull ItemStack stack) {
-        MetaItem<?>.MetaValueItem metaValueItem = getItem(stack);
-        if (metaValueItem != null && metaValueItem.getDurabilityManager() != null) {
-            return metaValueItem.getDurabilityManager().showsDurabilityBar(stack);
-        }
-        IElectricItem electricItem = stack.getCapability(GregtechCapabilities.CAPABILITY_ELECTRIC_ITEM, null);
-        return ModularArmor.getBatteries(stack).size() > 0 && electricItem != null && (stack.getMaxStackSize() == 1 || electricItem.getCharge() > 0L);
     }
 }

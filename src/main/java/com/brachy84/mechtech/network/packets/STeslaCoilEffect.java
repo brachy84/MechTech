@@ -2,8 +2,7 @@ package com.brachy84.mechtech.network.packets;
 
 import com.brachy84.mechtech.client.Sounds;
 import com.brachy84.mechtech.client.render.Lightning;
-import gregtech.api.net.IPacket;
-import gregtech.api.util.GTLog;
+import com.brachy84.mechtech.network.IPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.network.PacketBuffer;
@@ -34,7 +33,7 @@ public class STeslaCoilEffect implements IPacket {
     }
 
     @Override
-    public void encode(PacketBuffer buf) {
+    public void write(PacketBuffer buf) {
         buf.writeDouble(source.x);
         buf.writeDouble(source.y);
         buf.writeDouble(source.z);
@@ -44,17 +43,18 @@ public class STeslaCoilEffect implements IPacket {
     }
 
     @Override
-    public void decode(PacketBuffer buf) {
+    public void read(PacketBuffer buf) {
         source = new Vec3d(buf.readDouble(), buf.readDouble(), buf.readDouble());
         target = new Vec3d(buf.readDouble(), buf.readDouble(), buf.readDouble());
     }
 
     @Override
-    public void executeClient(NetHandlerPlayClient handler) {
+    public IPacket executeClient(NetHandlerPlayClient handler) {
         Lightning lightning = new Lightning(Minecraft.getMinecraft().world, source, target)
                 .setColor(new Color(83, 166, 189, 153).getRGB(), new Color(167, 192, 199, 204).getRGB())
                 .setup();
         Minecraft.getMinecraft().effectRenderer.addEffect(lightning);
         Minecraft.getMinecraft().world.playSound(source.x, source.y, source.z, Sounds.TESLA_ZAP, SoundCategory.BLOCKS, 1, 1.3f, false);
+        return null;
     }
 }

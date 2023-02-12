@@ -1,5 +1,6 @@
 package com.brachy84.mechtech;
 
+import com.brachy84.mechtech.api.armor.Modules;
 import com.brachy84.mechtech.client.Sounds;
 import com.brachy84.mechtech.common.CommonProxy;
 import com.brachy84.mechtech.common.cover.MTCoverBehaviors;
@@ -45,6 +46,7 @@ public class MechTech {
     @EventHandler
     public void init(FMLInitializationEvent event) {
         MTCoverBehaviors.init();
+        Modules.init();
     }
 
     public static String blockPosToString(BlockPos pos) {

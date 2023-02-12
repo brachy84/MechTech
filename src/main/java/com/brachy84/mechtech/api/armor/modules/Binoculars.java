@@ -1,6 +1,8 @@
 package com.brachy84.mechtech.api.armor.modules;
 
 import com.brachy84.mechtech.api.armor.IModule;
+import com.brachy84.mechtech.common.items.MTMetaItems;
+import gregtech.api.items.metaitem.MetaItem;
 import gregtech.api.util.input.KeyBind;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
@@ -54,5 +56,10 @@ public class Binoculars implements IModule {
     @Override
     public String getModuleId() {
         return "binoculars";
+    }
+
+    @Override
+    public MetaItem<?>.MetaValueItem getMetaValueItem() {
+        return MTMetaItems.BINOCULARS;
     }
 }

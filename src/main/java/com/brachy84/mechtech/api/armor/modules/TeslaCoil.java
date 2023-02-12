@@ -1,22 +1,24 @@
 package com.brachy84.mechtech.api.armor.modules;
 
 import com.brachy84.mechtech.api.armor.IModule;
-import com.brachy84.mechtech.network.packets.STeslaCoilEffect;
 import com.brachy84.mechtech.common.MTConfig;
+import com.brachy84.mechtech.common.items.MTMetaItems;
+import com.brachy84.mechtech.network.NetworkHandler;
+import com.brachy84.mechtech.network.packets.STeslaCoilEffect;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IElectricItem;
 import gregtech.api.damagesources.DamageSources;
-import gregtech.api.net.NetworkHandler;
+import gregtech.api.items.metaitem.MetaItem;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.items.IItemHandler;
 
 import java.util.Collections;
@@ -67,10 +69,16 @@ public class TeslaCoil implements IModule {
         return "tesla_coil";
     }
 
+    @Override
+    public MetaItem<?>.MetaValueItem getMetaValueItem() {
+        return MTMetaItems.TESLA_COIL;
+    }
+
     private void playEffects(EntityPlayer source, Entity target) {
         double targetY = target.posY + target.height / 2.0;
         double sourceY = source.posY + 2.2;
         STeslaCoilEffect packet = new STeslaCoilEffect(new Vec3d(source.posX, sourceY, source.posZ), new Vec3d(target.posX, targetY, target.posZ));
-        NetworkHandler.channel.sendTo(packet.toFMLPacket(), (EntityPlayerMP) source);
+        NetworkRegistry.TargetPoint targetPoint = new NetworkRegistry.TargetPoint(source.dimension, source.posX, source.posY, source.posZ, 20);
+        NetworkHandler.sendToAllTracking(packet, targetPoint);
     }
 }

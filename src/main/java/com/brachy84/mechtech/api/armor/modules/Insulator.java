@@ -3,7 +3,9 @@ package com.brachy84.mechtech.api.armor.modules;
 import com.brachy84.mechtech.api.armor.AbsorbResult;
 import com.brachy84.mechtech.api.armor.IModule;
 import com.brachy84.mechtech.api.armor.ISpecialArmorModule;
+import com.brachy84.mechtech.common.items.MTMetaItems;
 import gregtech.api.damagesources.DamageSources;
+import gregtech.api.items.metaitem.MetaItem;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
@@ -36,5 +38,10 @@ public class Insulator implements IModule, ISpecialArmorModule {
             return new AbsorbResult(ratio, 60);
         }
         return AbsorbResult.ZERO;
+    }
+
+    @Override
+    public MetaItem<?>.MetaValueItem getMetaValueItem() {
+        return MTMetaItems.THICK_INSULATOR;
     }
 }

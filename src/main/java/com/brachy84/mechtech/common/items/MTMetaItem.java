@@ -2,11 +2,10 @@ package com.brachy84.mechtech.common.items;
 
 import com.brachy84.mechtech.api.armor.MaterialArmorModuleBuilder;
 import com.brachy84.mechtech.api.armor.Modules;
+import com.brachy84.mechtech.api.armor.modules.MaterialArmorModule;
 import gregtech.api.items.metaitem.MetaItem;
 import gregtech.api.items.metaitem.StandardMetaItem;
-import gregtech.common.items.MetaItems;
-
-import java.util.Map;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 
 import static com.brachy84.mechtech.common.items.MTMetaItems.*;
 
@@ -20,27 +19,20 @@ public class MTMetaItem extends StandardMetaItem {
     public void registerSubItems() {
         WIRELESS_RECEIVER = addItem(0, "wireless_receiver");
         // Modules
-        SHOCK_ABSORBER = addItem(1, "shock_absorber").addComponents(Modules.SHOCK_ABSORBER);
-        THICK_INSULATOR = addItem(2, "thick_insulator").addComponents(Modules.INSULATOR);
-        BINOCULARS = addItem(3, "binoculars").addComponents(Modules.BINOCULARS);
-        AUTO_FEEDER = addItem(4, "auto_feeder").addComponents(Modules.AUTO_FEEDER);
-        TESLA_COIL = addItem(5, "tesla_coil").addComponents(Modules.TESLA_COIL);
-
-        // Add modules to existing items
-        MetaItems.NIGHTVISION_GOGGLES.addComponents(Modules.NIGHT_VISION);
-        MetaItems.COVER_SOLAR_PANEL_LV.addComponents(Modules.SOLAR_GEN_I);
-        MetaItems.COVER_SOLAR_PANEL_MV.addComponents(Modules.SOLAR_GEN_II);
-        MetaItems.COVER_SOLAR_PANEL_HV.addComponents(Modules.SOLAR_GEN_III);
-        MetaItems.ELECTRIC_JETPACK.addComponents(Modules.JETPACK);
-        MetaItems.ELECTRIC_JETPACK_ADVANCED.addComponents(Modules.ADVANCED_JETPACK);
+        SHOCK_ABSORBER = addItem(1, "shock_absorber");
+        THICK_INSULATOR = addItem(2, "thick_insulator");
+        BINOCULARS = addItem(3, "binoculars");
+        AUTO_FEEDER = addItem(4, "auto_feeder");
+        TESLA_COIL = addItem(5, "tesla_coil");
 
         // Armor Platings
-        for (Map.Entry<Integer, MaterialArmorModuleBuilder> entry : Modules.getArmorModules().entrySet()) {
+        for (Int2ObjectMap.Entry<MaterialArmorModuleBuilder> entry : Modules.getArmorModules().int2ObjectEntrySet()) {
             MaterialArmorModuleBuilder builder = entry.getValue();
             if (!builder.isRegistered())
                 continue;
-            MetaItem<?>.MetaValueItem metaValueItem = addItem(entry.getKey(), "armor_plating_" + builder.material.toString())
-                    .addComponents(Modules.getModule(entry.getKey()));
+            MetaItem<?>.MetaValueItem metaValueItem = addItem(entry.getIntKey(), "armor_plating_" + builder.material.toString())
+                    .addComponents();
+            ((MaterialArmorModule) Modules.getModule(entry.getIntKey())).init(metaValueItem);
             MATERIAL_ARMOR_PLATINGS.put(builder.material, metaValueItem);
         }
         //MetaItems.TOOL_DATA_STICK.addComponents(new DataStickBehavior());

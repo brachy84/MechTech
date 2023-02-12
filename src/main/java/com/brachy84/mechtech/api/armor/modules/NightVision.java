@@ -1,8 +1,11 @@
 package com.brachy84.mechtech.api.armor.modules;
 
 import com.brachy84.mechtech.api.armor.IModule;
+import com.brachy84.mechtech.common.items.MTMetaItems;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IElectricItem;
+import gregtech.api.items.metaitem.MetaItem;
+import gregtech.common.items.MetaItems;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
@@ -45,5 +48,10 @@ public class NightVision implements IModule {
     @Override
     public String getModuleId() {
         return "night_vision";
+    }
+
+    @Override
+    public MetaItem<?>.MetaValueItem getMetaValueItem() {
+        return MetaItems.NIGHTVISION_GOGGLES;
     }
 }
