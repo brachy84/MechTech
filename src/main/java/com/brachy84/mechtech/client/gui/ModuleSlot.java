@@ -21,7 +21,7 @@ public class ModuleSlot extends SlotWidget {
 
     @Override
     public boolean canPutStack(ItemStack stack) {
-        if(!isEnabled())
+        if (!isEnabled())
             return false;
         return armorModulePredicate.test(stack);
     }

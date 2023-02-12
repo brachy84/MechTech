@@ -31,10 +31,10 @@ public class MTArmorItem extends ArmorMetaItem<ArmorMetaItem<?>.ArmorMetaValueIt
 
     @Override
     public void registerSubItems() {
-        MODULAR_HELMET = addItem(0, "modular_helmet").setArmorLogic(new ModularArmor(EntityEquipmentSlot.HEAD, MTConfig.modularArmor.helmetSlots));
-        MODULAR_CHESTPLATE = addItem(1, "modular_chestplate").setArmorLogic(new ModularArmor(EntityEquipmentSlot.CHEST, MTConfig.modularArmor.chestPlateSlots));
-        MODULAR_LEGGINGS = addItem(2, "modular_leggings").setArmorLogic(new ModularArmor(EntityEquipmentSlot.LEGS, MTConfig.modularArmor.leggingsSlots));
-        MODULAR_BOOTS = addItem(3, "modular_boots").setArmorLogic(new ModularArmor(EntityEquipmentSlot.FEET, MTConfig.modularArmor.bootsSlot));
+        MODULAR_HELMET = addItem(0, "modular_helmet").setArmorLogic(new ModularArmor(EntityEquipmentSlot.HEAD, MTConfig.modularArmor.helmetSlots, 4000));
+        MODULAR_CHESTPLATE = addItem(1, "modular_chestplate").setArmorLogic(new ModularArmor(EntityEquipmentSlot.CHEST, MTConfig.modularArmor.chestPlateSlots, 64000));
+        MODULAR_LEGGINGS = addItem(2, "modular_leggings").setArmorLogic(new ModularArmor(EntityEquipmentSlot.LEGS, MTConfig.modularArmor.leggingsSlots, 16000));
+        MODULAR_BOOTS = addItem(3, "modular_boots").setArmorLogic(new ModularArmor(EntityEquipmentSlot.FEET, MTConfig.modularArmor.bootsSlot, 0));
     }
 
     @Override
@@ -74,16 +74,20 @@ public class MTArmorItem extends ArmorMetaItem<ArmorMetaItem<?>.ArmorMetaValueIt
                 }
             }
 
-            IFluidHandlerItem fluidHandler = itemStack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
-            if (fluidHandler != null) {
-                IFluidTankProperties[] properties = fluidHandler.getTankProperties();
-                if (properties[0] != ModularArmorStats.DEFAULT_TANK) {
-                    for (IFluidTankProperties property : properties) {
-                        FluidStack fluid = property.getContents();
-                        lines.add(I18n.format("metaitem.generic.fluid_container.tooltip",
-                                fluid == null ? 0 : fluid.amount,
-                                property.getCapacity(),
-                                fluid == null ? "" : fluid.getLocalizedName()));
+            if (modularArmor.getMaxFluidSize() > 0) {
+                lines.add(I18n.format("metaitem.modular_armor.max_fluid", modularArmor.getMaxFluidSize() + "mb"));
+                IFluidHandlerItem fluidHandler = itemStack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
+                if (fluidHandler != null) {
+                    IFluidTankProperties[] properties = fluidHandler.getTankProperties();
+                    if (properties[0] != ModularArmorStats.DEFAULT_TANK) {
+                        for (IFluidTankProperties property : properties) {
+                            if (property.getContents() == null || property.getContents().amount <= 0) continue;
+                            FluidStack fluid = property.getContents();
+                            lines.add(I18n.format("metaitem.generic.fluid_container.tooltip",
+                                    fluid == null ? 0 : fluid.amount,
+                                    property.getCapacity(),
+                                    fluid == null ? "" : fluid.getLocalizedName()));
+                        }
                     }
                 }
             }

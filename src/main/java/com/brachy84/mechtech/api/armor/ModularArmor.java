@@ -52,14 +52,20 @@ public class ModularArmor implements ISpecialArmorLogic {
     public static final String MODULES = "Modules";
     private final int moduleSlots;
     private final EntityEquipmentSlot slot;
+    private final int maxFluidSize;
 
-    public ModularArmor(EntityEquipmentSlot slot, int moduleSlots) {
+    public ModularArmor(EntityEquipmentSlot slot, int moduleSlots, int maxFluidSize) {
         this.slot = slot;
         this.moduleSlots = moduleSlots;
+        this.maxFluidSize = maxFluidSize;
     }
 
     public int getModuleSlots() {
         return moduleSlots;
+    }
+
+    public int getMaxFluidSize() {
+        return maxFluidSize;
     }
 
     @Override

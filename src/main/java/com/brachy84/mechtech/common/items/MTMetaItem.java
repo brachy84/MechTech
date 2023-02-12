@@ -24,6 +24,7 @@ public class MTMetaItem extends StandardMetaItem {
         BINOCULARS = addItem(3, "binoculars");
         AUTO_FEEDER = addItem(4, "auto_feeder");
         TESLA_COIL = addItem(5, "tesla_coil");
+        OXYGEN_MASK = addItem(6, "oxygen_mask");
 
         // Armor Platings
         for (Int2ObjectMap.Entry<MaterialArmorModuleBuilder> entry : Modules.getArmorModules().int2ObjectEntrySet()) {
