@@ -33,6 +33,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
+import net.minecraftforge.fluids.capability.IFluidTankProperties;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemStackHandler;
 import org.apache.commons.lang3.ArrayUtils;
@@ -125,25 +126,7 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
         }
         for (int i = 0; i < batterySlots.length; i++) {
             int[] pos = batterySlots[i];
-            SlotWidget slot = new BatterySlot(batterySlotHandler, i, pos[0], pos[1])
-                    .setFilter(stack -> {
-                        IElectricItem electricItem = stack.getCapability(GregtechCapabilities.CAPABILITY_ELECTRIC_ITEM, null);
-                        if (electricItem != null) {
-                            long totalCap = 0;
-                            for (int j = 0; j < batterySlotHandler.getSlots(); j++) {
-                                ItemStack stack1 = batterySlotHandler.getStackInSlot(j);
-                                if (stack1.isEmpty()) continue;
-                                IElectricItem electricItem1 = stack1.getCapability(GregtechCapabilities.CAPABILITY_ELECTRIC_ITEM, null);
-                                if (electricItem1 == null) continue;
-                                long max = electricItem1.getMaxCharge();
-                                if (Long.MAX_VALUE - totalCap > max || (totalCap += max) >= Long.MAX_VALUE)
-                                    return false;
-                            }
-                            return true;
-                        }
-                        IFluidHandlerItem fluidHandler = stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
-                        return fluidHandler != null;
-                    });
+            SlotWidget slot = new BatterySlot(batterySlotHandler, i, pos[0], pos[1]).setFilter(stack -> isValidBatteryItem(stack) || isValidTankItem(stack));
             slot.setBackgroundTexture(GuiTextures.SLOT, GuiTextures.BATTERY_OVERLAY);
             slot.setActive(false);
             slot.setVisible(false);
@@ -156,91 +139,28 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
         builder.slot(armorInventory, 2, -18, 26, GuiTextures.SLOT);
         builder.slot(armorInventory, 3, -18, 8, GuiTextures.SLOT);
 
-        SlotWidget mainSlot = new SlotThatActuallyNotfiesListeners(this.mainSlot, 0, 79, 26).setBackgroundTexture(GuiTextures.SLOT).setChangeListener(() -> {
-            ItemStack stack = this.mainSlot.getStackInSlot(0);
-            for (Widget widget : moduleSlots.widgets) {
-                widget.setActive(false);
-                widget.setVisible(false);
-            }
-            if (!stack.isEmpty()) {
-                ModularArmor modularArmor = ModularArmor.get(stack);
-                if (modularArmor != null) {
-                    List<ItemStack> stacks = ModularArmor.getModuleStacksOf(stack);
-                    if (stacks.size() > modularArmor.getModuleSlots())
-                        throw new IllegalStateException("There were more modules than allowed");
-                    for (int i = 0; i < stacks.size(); i++) {
-                        moduleSlotHandler.setStackInSlot(i, stacks.get(i));
-                    }
-                    stacks = ModularArmor.getBatteries(stack);
-                    for (int i = 0; i < stacks.size(); i++) {
-                        batterySlotHandler.setStackInSlot(i, stacks.get(i));
-                    }
-                    int count = 0;
-                    for (Widget widget : moduleSlots.widgets) {
-                        if (widget instanceof ModuleSlot) {
-                            if (count == modularArmor.getModuleSlots())
-                                continue;
-                            count++;
-                            ((ModuleSlot) widget).setPredicate(stack1 -> {
-                                IModule module = IModule.getOf(stack1);
-                                if (module == null) {
-                                    errorTextWidget.updateText(NOT_MODULE);
-                                    return false;
-                                }
-                                if (!module.canPlaceIn(modularArmor.getSlot(), stack, moduleSlotHandler)) {
-                                    errorTextWidget.updateText(INVALID_SLOT);
-                                    return false;
-                                }
-                                if (!(module.maxModules() <= 0 || module.maxModules() > IModule.moduleCount(module, moduleSlotHandler))) {
-                                    errorTextWidget.updateText(MAX_MODULES);
-                                    return false;
-                                }
-                                List<IModule> modules = getModules();
-                                for (IModule module1 : modules) {
-                                    if (module1.getIncompatibleModules().contains(module) || module.getIncompatibleModules().contains(module1)) {
-                                        errorTextWidget.updateText(INCOMPATIBLE, module1.getLocalizedName());
-                                        return false;
-                                    }
-                                }
-                                for (IModule module1 : module.getRequiredModules()) {
-                                    if (!modules.contains(module1)) {
-                                        errorTextWidget.updateText(REQUIRED, module1.getLocalizedName());
-                                        return false;
-                                    }
-                                }
-                                return true;
-                            });
-                        }
-                        widget.setActive(true);
-                        widget.setVisible(true);
-                    }
-                    lastArmor = stack;
-                }
-            } else if (!lastArmor.isEmpty()) {
-                List<ItemStack> stacks = new ArrayList<>();
-                for (int i = 0; i < moduleSlotHandler.getSlots(); i++) {
-                    ItemStack stack1 = moduleSlotHandler.getStackInSlot(i);
-                    if (!stack1.isEmpty()) {
-                        stacks.add(stack1);
-                    }
-                }
-                ModularArmor.writeModulesTo(stacks, lastArmor);
-                stacks.clear();
-                for (int i = 0; i < batterySlotHandler.getSlots(); i++) {
-                    ItemStack stack1 = batterySlotHandler.getStackInSlot(i);
-                    if (!stack1.isEmpty()) {
-                        stacks.add(stack1);
-                    }
-                }
-                ModularArmor.setBatteries(lastArmor, stacks);
-                lastArmor = ItemStack.EMPTY;
-                for (int i = 0; i < getImportItems().getSlots(); i++) {
-                    getImportItems().setStackInSlot(i, ItemStack.EMPTY);
-                }
-            }
-        });
+        SlotWidget mainSlot = new SlotThatActuallyNotfiesListeners(this.mainSlot, 0, 79, 26)
+                .setBackgroundTexture(GuiTextures.SLOT)
+                .setChangeListener(() -> onMainSlotChanged(player, moduleSlots, errorTextWidget));
         builder.widget(mainSlot);
         builder.widget(moduleSlots);
+        builder.bindCloseListener(() -> {
+            //ItemStack armor = this.lastArmor;//this.mainSlot.getStackInSlot(0);
+            ItemStack armor = this.mainSlot.getStackInSlot(0);
+            if (!armor.isEmpty()) {
+                packModules(armor);
+                this.lastArmor = armor.copy();
+                this.mainSlot.setStackInSlot(0, lastArmor);
+            }
+        });
+        builder.bindOpenListener(() -> {
+            //ItemStack armor = this.lastArmor;//this.mainSlot.getStackInSlot(0);
+            ItemStack armor = this.mainSlot.getStackInSlot(0);
+            if (!armor.isEmpty()) {
+                unpackModules(armor, moduleSlots, errorTextWidget);
+                this.lastArmor = armor;
+            }
+        });
         return builder.build(getHolder(), player);
     }
 
@@ -272,6 +192,158 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
     public void readFromNBT(NBTTagCompound data) {
         super.readFromNBT(data);
         lastArmor = new ItemStack(data.getCompoundTag("LastArmor"));
+    }
+
+    private void onMainSlotChanged(EntityPlayer player, WidgetGroup moduleSlots, ErrorTextWidget errorTextWidget) {
+        ItemStack stack = this.mainSlot.getStackInSlot(0);
+        for (Widget widget : moduleSlots.widgets) {
+            widget.setActive(false);
+            widget.setVisible(false);
+        }
+        if (!stack.isEmpty()) {
+            // armor piece is inserted to slot
+            unpackModules(stack, moduleSlots, errorTextWidget);
+            lastArmor = stack.copy();
+            this.mainSlot.setStackInSlot(0, lastArmor);
+        } else if (!lastArmor.isEmpty()) {
+            // armor piece is taken out
+            packModules(lastArmor);
+            this.mainSlot.setStackInSlot(0, ItemStack.EMPTY);
+            player.inventory.setItemStack(lastArmor.copy());
+            lastArmor = ItemStack.EMPTY;
+        }
+    }
+
+    private void unpackModules(ItemStack stack, WidgetGroup moduleSlots, ErrorTextWidget errorTextWidget) {
+        ModularArmor modularArmor = ModularArmor.get(stack);
+        if (modularArmor != null) {
+            List<ItemStack> stacks = ModularArmor.getModuleStacksOf(stack);
+            if (stacks.size() > modularArmor.getModuleSlots())
+                throw new IllegalStateException("There were more modules than allowed");
+            // unpack modules
+            for (int i = 0; i < stacks.size(); i++) {
+                moduleSlotHandler.setStackInSlot(i, stacks.get(i));
+            }
+            // unpack batteries
+            stacks = ModularArmor.getBatteries(stack);
+            for (int i = 0; i < stacks.size(); i++) {
+                batterySlotHandler.setStackInSlot(i, stacks.get(i));
+            }
+            // update filter for module slots
+            int count = 0;
+            for (Widget widget : moduleSlots.widgets) {
+                if (widget instanceof ModuleSlot) {
+                    if (count == modularArmor.getModuleSlots())
+                        continue;
+                    count++;
+                    ((ModuleSlot) widget).setPredicate(stack1 -> isValidModule(stack1, stack, modularArmor, errorTextWidget));
+                }
+                widget.setActive(true);
+                widget.setVisible(true);
+            }
+        }
+    }
+
+    private void packModules(ItemStack armor) {
+        // pack modules
+        List<ItemStack> stacks = new ArrayList<>();
+        for (int i = 0; i < moduleSlotHandler.getSlots(); i++) {
+            ItemStack stack1 = moduleSlotHandler.getStackInSlot(i);
+            if (!stack1.isEmpty()) {
+                stacks.add(stack1);
+            }
+        }
+        ModularArmor.writeModulesTo(stacks, armor);
+        stacks.clear();
+        // pack batteries
+        for (int i = 0; i < batterySlotHandler.getSlots(); i++) {
+            ItemStack stack1 = batterySlotHandler.getStackInSlot(i);
+            if (!stack1.isEmpty()) {
+                stacks.add(stack1);
+            }
+        }
+        ModularArmor.setBatteries(armor, stacks);
+        // remove items from all module and battery slots
+        for (int i = 0; i < getImportItems().getSlots(); i++) {
+            getImportItems().setStackInSlot(i, ItemStack.EMPTY);
+        }
+    }
+
+    private boolean isValidModule(ItemStack moduleStack, ItemStack armorStack, ModularArmor modularArmor, ErrorTextWidget errorTextWidget) {
+        IModule module = IModule.getOf(moduleStack);
+        if (module == null) {
+            errorTextWidget.updateText(NOT_MODULE);
+            return false;
+        }
+        if (!module.canPlaceIn(modularArmor.getSlot(), armorStack, moduleSlotHandler)) {
+            errorTextWidget.updateText(INVALID_SLOT);
+            return false;
+        }
+        if (!(module.maxModules() <= 0 || module.maxModules() > IModule.moduleCount(module, moduleSlotHandler))) {
+            errorTextWidget.updateText(MAX_MODULES);
+            return false;
+        }
+        List<IModule> modules = getModules();
+        for (IModule module1 : modules) {
+            if (module1.getIncompatibleModules().contains(module) || module.getIncompatibleModules().contains(module1)) {
+                errorTextWidget.updateText(INCOMPATIBLE, module1.getLocalizedName());
+                return false;
+            }
+        }
+        for (IModule module1 : module.getRequiredModules()) {
+            if (!modules.contains(module1)) {
+                errorTextWidget.updateText(REQUIRED, module1.getLocalizedName());
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean isValidBatteryItem(ItemStack stack) {
+        IElectricItem electricItem = stack.getCapability(GregtechCapabilities.CAPABILITY_ELECTRIC_ITEM, null);
+        if (electricItem != null) {
+            long totalCap = 0;
+            for (int j = 0; j < batterySlotHandler.getSlots(); j++) {
+                ItemStack stack1 = batterySlotHandler.getStackInSlot(j);
+                if (stack1.isEmpty()) continue;
+                IElectricItem electricItem1 = stack1.getCapability(GregtechCapabilities.CAPABILITY_ELECTRIC_ITEM, null);
+                if (electricItem1 == null) continue;
+                long max = electricItem1.getMaxCharge();
+                if (Long.MAX_VALUE - totalCap > max || (totalCap += max) >= Long.MAX_VALUE)
+                    return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isValidTankItem(ItemStack stack) {
+        ModularArmor armor = ModularArmor.get(this.lastArmor);
+        if (armor != null && armor.getMaxFluidSize() > 0) {
+            IFluidHandlerItem fluidHandler = stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
+            if (fluidHandler != null) {
+                long totalCap = 0;
+                for (int j = 0; j < batterySlotHandler.getSlots(); j++) {
+                    ItemStack stack1 = batterySlotHandler.getStackInSlot(j);
+                    if (stack1.isEmpty()) continue;
+                    IFluidHandlerItem fluidHandler1 = stack1.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
+                    if (fluidHandler1 == null) continue;
+                    totalCap += getCapacity(fluidHandler1);
+                    if (armor.getMaxFluidSize() < totalCap)
+                        return false;
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static int getCapacity(IFluidHandlerItem fluidHandlerItem) {
+        int total = 0;
+        for (IFluidTankProperties property : fluidHandlerItem.getTankProperties()) {
+            total += property.getCapacity();
+        }
+        return total;
     }
 
     private static class ArmorInventoryWrapper implements IItemHandlerModifiable {

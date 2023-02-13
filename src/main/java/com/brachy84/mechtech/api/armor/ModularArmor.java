@@ -565,9 +565,9 @@ public class ModularArmor implements ISpecialArmorLogic {
             NBTTagCompound nbt = stack.getTagCompound();
             if (nbt == null) {
                 nbt = new NBTTagCompound();
-                stack.setTagCompound(nbt);
             }
             nbt.setTag(MODULES, modulesNbt);
+            stack.setTagCompound(nbt);
         }
     }
 

@@ -30,7 +30,7 @@ public class SlotThatActuallyNotfiesListeners extends SlotWidget {
     }
 
     public boolean mouseClicked(int mouseX, int mouseY, int button) {
-        if(isShiftDown()) {
+        if (isShiftDown()) {
             return this.isMouseOverElement(mouseX, mouseY) && this.gui != null && insert();
         }
         return super.mouseClicked(mouseX, mouseY, button);
@@ -39,11 +39,11 @@ public class SlotThatActuallyNotfiesListeners extends SlotWidget {
     // the change listener is so jank that i have to implement my one shift click function
     private boolean insert() {
         ItemStack current = getHandle().getStack();
-        if(!current.isEmpty() && gui != null) {
-            for(int i = 0; i < 4; i++) {
+        if (!current.isEmpty() && gui != null) {
+            for (int i = 0; i < 4; i++) {
                 ItemStack slotStack = gui.entityPlayer.inventory.armorInventory.get(i);
                 EntityEquipmentSlot slot = current.getItem().getEquipmentSlot(current);
-                if(slotStack.isEmpty() && slot != null && slot.getIndex() == i) {
+                if (slotStack.isEmpty() && slot != null && slot.getIndex() == i) {
                     gui.entityPlayer.inventory.armorInventory.set(i, current);
                     int finalI = i;
                     getHandle().putStack(ItemStack.EMPTY);
@@ -55,9 +55,9 @@ public class SlotThatActuallyNotfiesListeners extends SlotWidget {
                     return true;
                 }
             }
-            for(int i = 0; i < gui.entityPlayer.inventory.mainInventory.size(); i++) {
+            for (int i = 0; i < gui.entityPlayer.inventory.mainInventory.size(); i++) {
                 ItemStack slotStack = gui.entityPlayer.inventory.mainInventory.get(i);
-                if(slotStack.isEmpty()) {
+                if (slotStack.isEmpty()) {
                     gui.entityPlayer.inventory.mainInventory.set(i, current);
                     getHandle().putStack(ItemStack.EMPTY);
                     int finalI = i;
@@ -75,7 +75,7 @@ public class SlotThatActuallyNotfiesListeners extends SlotWidget {
 
     @Override
     public void handleClientAction(int id, PacketBuffer buffer) {
-        if(id == -99999 && gui != null) {
+        if (id == -99999 && gui != null) {
             boolean b = buffer.readBoolean();
             int index = buffer.readVarInt();
             ItemStack stack = null;
@@ -84,9 +84,9 @@ public class SlotThatActuallyNotfiesListeners extends SlotWidget {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            if(stack != null) {
+            if (stack != null) {
                 InventoryPlayer inventoryPlayer = gui.entityPlayer.inventory;
-                if(b) {
+                if (b) {
                     inventoryPlayer.armorInventory.set(index, stack);
                 } else {
                     inventoryPlayer.mainInventory.set(index, stack);
