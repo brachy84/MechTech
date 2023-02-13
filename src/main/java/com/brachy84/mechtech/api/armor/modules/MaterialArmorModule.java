@@ -122,36 +122,14 @@ public class MaterialArmorModule implements IArmorModule, IDurabilityModule, ISp
     public void init(MetaItem<?>.MetaValueItem metaValueItem) {
         if (this.metaValueItem != null) throw new IllegalStateException();
         this.metaValueItem = metaValueItem;
-        this.metaValueItem.addComponents(this)
+        this.metaValueItem
                 .addComponents(((IItemColorProvider) (stack, layer) -> material.getMaterialRGB()))
                 // name provider
                 .addComponents(((IItemNameProvider) (stack, name) -> I18n.format("mechtech.modules.armor_plating.name", material.getLocalizedName())))
                 // stack size provider
                 .addComponents((IItemMaxStackSizeProvider) (itemStack, i) -> 64)
                 // durability handler
-                .addComponents(new IItemDurabilityManager() {
-
-                    @Override
-                    public boolean showEmptyBar(ItemStack itemStack) {
-                        return true;
-                    }
-
-                    @Override
-                    public boolean showFullBar(ItemStack itemStack) {
-                        return false;
-                    }
-
-                    @Override
-                    public Pair<Color, Color> getDurabilityColorsForDisplay(ItemStack itemStack) {
-                        return GradientUtil.getGradient(12037896, 10);
-                    }
-
-                    @Override
-                    public double getDurabilityForDisplay(ItemStack itemStack) {
-                        NBTTagCompound nbt = itemStack.getTagCompound();
-                        return nbt == null ? 0 : getDamage(nbt) / ((double) durability);
-                    }
-                });
+                .addComponents(getDurabilityManager(this.durability));
     }
 
     @Override
