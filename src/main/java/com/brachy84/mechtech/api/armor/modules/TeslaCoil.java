@@ -60,7 +60,6 @@ public class TeslaCoil implements IModule {
                         break;
                 }
             }
-            player.inventoryContainer.detectAndSendChanges();
         }
     }
 
@@ -79,6 +78,6 @@ public class TeslaCoil implements IModule {
         double sourceY = source.posY + 2.2;
         STeslaCoilEffect packet = new STeslaCoilEffect(new Vec3d(source.posX, sourceY, source.posZ), new Vec3d(target.posX, targetY, target.posZ));
         NetworkRegistry.TargetPoint targetPoint = new NetworkRegistry.TargetPoint(source.dimension, source.posX, source.posY, source.posZ, 20);
-        NetworkHandler.sendToAllTracking(packet, targetPoint);
+        NetworkHandler.sendToAllAround(packet, targetPoint);
     }
 }

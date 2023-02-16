@@ -7,17 +7,13 @@ import codechicken.lib.vec.Matrix4;
 import com.brachy84.mechtech.api.armor.IModule;
 import com.brachy84.mechtech.api.armor.ModularArmor;
 import com.brachy84.mechtech.client.ClientHandler;
-import com.brachy84.mechtech.client.gui.BatterySlot;
 import com.brachy84.mechtech.client.gui.ErrorTextWidget;
-import com.brachy84.mechtech.client.gui.ModuleSlot;
-import com.brachy84.mechtech.client.gui.SlotThatActuallyNotfiesListeners;
-import com.google.common.collect.Lists;
+import com.brachy84.mechtech.client.gui.SlotArmorWorkbench;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IElectricItem;
-import gregtech.api.capability.impl.ItemHandlerList;
 import gregtech.api.gui.GuiTextures;
 import gregtech.api.gui.ModularUI;
-import gregtech.api.gui.Widget;
+import gregtech.api.gui.resources.IGuiTexture;
 import gregtech.api.gui.widgets.SlotWidget;
 import gregtech.api.gui.widgets.WidgetGroup;
 import gregtech.api.metatileentity.MetaTileEntity;
@@ -35,7 +31,6 @@ import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
 import net.minecraftforge.items.IItemHandlerModifiable;
-import net.minecraftforge.items.ItemStackHandler;
 import org.apache.commons.lang3.ArrayUtils;
 
 import javax.annotation.Nonnull;
@@ -72,9 +67,13 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
     private static final String INVALID_SLOT = "mechtech.modular_workbench.error5";
 
     private ItemStack lastArmor = ItemStack.EMPTY;
-    private ItemStackHandler mainSlot;
-    private ItemStackHandler moduleSlotHandler;
-    private ItemStackHandler batterySlotHandler;
+    private CustomItemHandler mainSlot;
+    private CustomItemHandler moduleSlotHandler;
+    private CustomItemHandler batterySlotHandler;
+    private Runnable mainSlotChanger = () -> {
+    };
+    private Runnable moduleSlotChanger = () -> {
+    };
 
     public MetaTileEntityArmorWorkbench(ResourceLocation metaTileEntityId) {
         super(metaTileEntityId);
@@ -85,52 +84,73 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
         return new MetaTileEntityArmorWorkbench(metaTileEntityId);
     }
 
+    private void clearModuleSlots() {
+        moduleSlotHandler.clear();
+        batterySlotHandler.clear();
+    }
+
     @Override
     protected IItemHandlerModifiable createImportItemHandler() {
-        mainSlot = new ItemStackHandler(1) {
+        mainSlot = new CustomItemHandler(1) {
+
             @Override
-            public int getSlotLimit(int slot) {
-                return 1;
+            protected void onContentsChanged(int slot) {
+                mainSlotChanger.run();
             }
         };
-        moduleSlotHandler = new ItemStackHandler(slotPositions.length) {
+        moduleSlotHandler = new CustomItemHandler(slotPositions.length) {
             @Override
-            public int getSlotLimit(int slot) {
-                return 1;
+            protected void onContentsChanged(int slot) {
+                moduleSlotChanger.run();
             }
         };
-        batterySlotHandler = new ItemStackHandler(batterySlots.length) {
+        batterySlotHandler = new CustomItemHandler(batterySlots.length) {
             @Override
-            public int getSlotLimit(int slot) {
-                return 1;
+            protected void onContentsChanged(int slot) {
+                moduleSlotChanger.run();
             }
         };
-        return new ItemHandlerList(Lists.newArrayList(mainSlot, moduleSlotHandler, batterySlotHandler));
+        return super.createImportItemHandler();
+    }
+
+    private IGuiTexture getBackground(EntityPlayer player) {
+        return player.getEntityWorld().isRemote ? ClientHandler.ARMOR_WORKBENCH_BACKGROUND : IGuiTexture.EMPTY;
     }
 
     @Override
     protected ModularUI createUI(EntityPlayer player) {
-        ModularUI.Builder builder = ModularUI.builder(ClientHandler.ARMOR_WORKBENCH_BACKGROUND, 176, 166);
+        ModularUI.Builder builder = ModularUI.builder(getBackground(player), 176, 166);
         builder.bindPlayerInventory(player.inventory);
         ErrorTextWidget errorTextWidget = new ErrorTextWidget(136, 8).setCentered(true).setWidth(71);
         builder.widget(errorTextWidget);
 
-        WidgetGroup moduleSlots = new WidgetGroup(Position.ORIGIN, new Size(176, 84));
+        final List<SlotArmorWorkbench> slots = new ArrayList<>();
+        final WidgetGroup slotsGroup = new WidgetGroup(Position.ORIGIN, new Size(176, 84));
         for (int i = 0; i < slotPositions.length; i++) {
             int[] pos = slotPositions[i];
-            ModuleSlot slot = new ModuleSlot(moduleSlotHandler, i, pos[0], pos[1]);
+            SlotArmorWorkbench slot = new SlotArmorWorkbench(moduleSlotHandler, i, pos[0], pos[1])
+                    .setType(SlotArmorWorkbench.Type.MODULE)
+                    .setFilter(stack -> {
+                        ItemStack armor = this.mainSlot.getStackInSlot(0);
+                        ModularArmor modularArmor = ModularArmor.get(armor);
+                        return modularArmor != null && isValidModule(stack, armor, modularArmor, errorTextWidget);
+                    });
             slot.setBackgroundTexture(GuiTextures.SLOT);
             slot.setActive(false);
             slot.setVisible(false);
-            moduleSlots.addWidget(slot);
+            slotsGroup.addWidget(slot);
+            slots.add(slot);
         }
         for (int i = 0; i < batterySlots.length; i++) {
             int[] pos = batterySlots[i];
-            SlotWidget slot = new BatterySlot(batterySlotHandler, i, pos[0], pos[1]).setFilter(stack -> isValidBatteryItem(stack) || isValidTankItem(stack));
+            SlotArmorWorkbench slot = new SlotArmorWorkbench(batterySlotHandler, i, pos[0], pos[1])
+                    .setType(SlotArmorWorkbench.Type.BATTERY)
+                    .setFilter(stack -> ModularArmor.get(stack) == null && (isValidBatteryItem(stack) || isValidTankItem(stack)));
             slot.setBackgroundTexture(GuiTextures.SLOT, GuiTextures.BATTERY_OVERLAY);
             slot.setActive(false);
             slot.setVisible(false);
-            moduleSlots.addWidget(slot);
+            slotsGroup.addWidget(slot);
+            slots.add(slot);
         }
         builder.image(-26, 0, 26, 88, ClientHandler.ARMOR_SLOTS_BACKGROUND);
         ArmorInventoryWrapper armorInventory = new ArmorInventoryWrapper(player);
@@ -139,27 +159,26 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
         builder.slot(armorInventory, 2, -18, 26, GuiTextures.SLOT);
         builder.slot(armorInventory, 3, -18, 8, GuiTextures.SLOT);
 
-        SlotWidget mainSlot = new SlotThatActuallyNotfiesListeners(this.mainSlot, 0, 79, 26)
-                .setBackgroundTexture(GuiTextures.SLOT)
-                .setChangeListener(() -> onMainSlotChanged(player, moduleSlots, errorTextWidget));
+        SlotWidget mainSlot = new SlotArmorWorkbench(this.mainSlot, 0, 79, 26)
+                .setType(SlotArmorWorkbench.Type.ARMOR)
+                .setFilter(stack -> ModularArmor.get(stack) != null)
+                .setBackgroundTexture(GuiTextures.SLOT);
         builder.widget(mainSlot);
-        builder.widget(moduleSlots);
-        builder.bindCloseListener(() -> {
-            //ItemStack armor = this.lastArmor;//this.mainSlot.getStackInSlot(0);
-            ItemStack armor = this.mainSlot.getStackInSlot(0);
-            if (!armor.isEmpty()) {
-                packModules(armor);
-                this.lastArmor = armor.copy();
-                this.mainSlot.setStackInSlot(0, lastArmor);
-            }
-        });
+        builder.widget(slotsGroup);
+        mainSlotChanger = () -> onMainSlotChanged(player, slots, errorTextWidget);
+        moduleSlotChanger = () -> packModules(player, this.mainSlot.getStackInSlot(0));
         builder.bindOpenListener(() -> {
-            //ItemStack armor = this.lastArmor;//this.mainSlot.getStackInSlot(0);
             ItemStack armor = this.mainSlot.getStackInSlot(0);
             if (!armor.isEmpty()) {
-                unpackModules(armor, moduleSlots, errorTextWidget);
+                unpackModules(armor, slots, errorTextWidget);
                 this.lastArmor = armor;
             }
+        });
+        builder.bindCloseListener(() -> {
+            mainSlotChanger = () -> {
+            };
+            moduleSlotChanger = () -> {
+            };
         });
         return builder.build(getHolder(), player);
     }
@@ -194,27 +213,32 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
         lastArmor = new ItemStack(data.getCompoundTag("LastArmor"));
     }
 
-    private void onMainSlotChanged(EntityPlayer player, WidgetGroup moduleSlots, ErrorTextWidget errorTextWidget) {
+    private void onMainSlotChanged(EntityPlayer player, List<SlotArmorWorkbench> slots, ErrorTextWidget errorTextWidget) {
         ItemStack stack = this.mainSlot.getStackInSlot(0);
-        for (Widget widget : moduleSlots.widgets) {
+        for (SlotArmorWorkbench widget : slots) {
             widget.setActive(false);
             widget.setVisible(false);
         }
         if (!stack.isEmpty()) {
             // armor piece is inserted to slot
-            unpackModules(stack, moduleSlots, errorTextWidget);
+            unpackModules(stack, slots, errorTextWidget);
             lastArmor = stack.copy();
-            this.mainSlot.setStackInSlot(0, lastArmor);
+            this.mainSlot.setSlotSilent(0, lastArmor);
         } else if (!lastArmor.isEmpty()) {
             // armor piece is taken out
-            packModules(lastArmor);
-            this.mainSlot.setStackInSlot(0, ItemStack.EMPTY);
+            // packModules(lastArmor);
+            clearModuleSlots();
+            this.mainSlot.setSlotSilent(0, ItemStack.EMPTY);
             player.inventory.setItemStack(lastArmor.copy());
             lastArmor = ItemStack.EMPTY;
         }
     }
 
-    private void unpackModules(ItemStack stack, WidgetGroup moduleSlots, ErrorTextWidget errorTextWidget) {
+    private void unpackModules(EntityPlayer player, ItemStack stack, List<SlotArmorWorkbench> slots, ErrorTextWidget errorTextWidget) {
+        unpackModules(stack, slots, errorTextWidget);
+    }
+
+    private void unpackModules(ItemStack stack, List<SlotArmorWorkbench> slots, ErrorTextWidget errorTextWidget) {
         ModularArmor modularArmor = ModularArmor.get(stack);
         if (modularArmor != null) {
             List<ItemStack> stacks = ModularArmor.getModuleStacksOf(stack);
@@ -222,26 +246,29 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
                 throw new IllegalStateException("There were more modules than allowed");
             // unpack modules
             for (int i = 0; i < stacks.size(); i++) {
-                moduleSlotHandler.setStackInSlot(i, stacks.get(i));
+                moduleSlotHandler.setSlotSilent(i, stacks.get(i));
             }
             // unpack batteries
             stacks = ModularArmor.getBatteries(stack);
             for (int i = 0; i < stacks.size(); i++) {
-                batterySlotHandler.setStackInSlot(i, stacks.get(i));
+                batterySlotHandler.setSlotSilent(i, stacks.get(i));
             }
             // update filter for module slots
             int count = 0;
-            for (Widget widget : moduleSlots.widgets) {
-                if (widget instanceof ModuleSlot) {
+            for (SlotArmorWorkbench widget : slots) {
+                if (widget.getType() == SlotArmorWorkbench.Type.MODULE) {
                     if (count == modularArmor.getModuleSlots())
                         continue;
                     count++;
-                    ((ModuleSlot) widget).setPredicate(stack1 -> isValidModule(stack1, stack, modularArmor, errorTextWidget));
                 }
                 widget.setActive(true);
                 widget.setVisible(true);
             }
         }
+    }
+
+    private void packModules(EntityPlayer player, ItemStack armor) {
+        packModules(armor);
     }
 
     private void packModules(ItemStack armor) {
@@ -264,9 +291,7 @@ public class MetaTileEntityArmorWorkbench extends MetaTileEntity {
         }
         ModularArmor.setBatteries(armor, stacks);
         // remove items from all module and battery slots
-        for (int i = 0; i < getImportItems().getSlots(); i++) {
-            getImportItems().setStackInSlot(i, ItemStack.EMPTY);
-        }
+        //clearModuleSlots();
     }
 
     private boolean isValidModule(ItemStack moduleStack, ItemStack armorStack, ModularArmor modularArmor, ErrorTextWidget errorTextWidget) {

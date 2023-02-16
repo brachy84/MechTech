@@ -53,7 +53,7 @@ public class ErrorTextWidget extends Widget {
     }
 
     public void updateText(String text, Object... data) {
-        if (gui != null && gui.entityPlayer instanceof EntityPlayerSP) {
+        if (gui != null && gui.entityPlayer.getEntityWorld().isRemote) {
             this.text = I18n.format(text, data);
             countdown = TEXT_TIME;
             this.updateSize();
@@ -61,7 +61,7 @@ public class ErrorTextWidget extends Widget {
     }
 
     public void updateTextUnlocalized(String text) {
-        if (gui != null && gui.entityPlayer instanceof EntityPlayerSP) {
+        if (gui != null && gui.entityPlayer.getEntityWorld().isRemote) {
             this.text = text;
             countdown = TEXT_TIME;
             this.updateSize();
