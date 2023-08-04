@@ -7,6 +7,7 @@ import com.brachy84.mechtech.common.items.MTMetaItems;
 import com.brachy84.mechtech.common.machines.MTTileEntities;
 import gregtech.api.recipes.ModHandler;
 import gregtech.api.recipes.RecipeMaps;
+import gregtech.api.unification.material.MarkerMaterials;
 import gregtech.api.unification.material.Material;
 import gregtech.api.unification.material.Materials;
 import gregtech.api.unification.material.info.MaterialFlags;
@@ -42,36 +43,40 @@ public class Recipes {
                 .input(OrePrefix.stick, Materials.StainlessSteel, 5)
                 .input(MetaItems.CARBON_MESH, 3)
                 .input(OrePrefix.plate, Materials.BlackBronze)
+                .input(circuit, MarkerMaterials.Tier.MV)
                 .output(MTMetaItems.MODULAR_HELMET)
                 .EUt(400)
-                .duration(1200)
+                .duration(300)
                 .buildAndRegister();
 
         RecipeMaps.ASSEMBLER_RECIPES.recipeBuilder()
                 .input(OrePrefix.stick, Materials.StainlessSteel, 8)
                 .input(MetaItems.CARBON_MESH, 6)
                 .input(OrePrefix.plate, Materials.Tungsten)
+                .input(circuit, MarkerMaterials.Tier.HV)
                 .output(MTMetaItems.MODULAR_CHESTPLATE)
                 .EUt(400)
-                .duration(1600)
+                .duration(400)
                 .buildAndRegister();
 
         RecipeMaps.ASSEMBLER_RECIPES.recipeBuilder()
                 .input(OrePrefix.stick, Materials.StainlessSteel, 7)
                 .input(MetaItems.CARBON_MESH, 5)
                 .input(OrePrefix.plate, Materials.NiobiumNitride)
+                .input(circuit, MarkerMaterials.Tier.MV)
                 .output(MTMetaItems.MODULAR_LEGGINGS)
                 .EUt(400)
-                .duration(1400)
+                .duration(350)
                 .buildAndRegister();
 
         RecipeMaps.ASSEMBLER_RECIPES.recipeBuilder()
                 .input(OrePrefix.stick, Materials.StainlessSteel, 4)
                 .input(MetaItems.CARBON_MESH, 2)
                 .input(OrePrefix.plate, Materials.Nichrome)
+                .input(circuit, MarkerMaterials.Tier.MV)
                 .output(MTMetaItems.MODULAR_BOOTS)
                 .EUt(400)
-                .duration(1000)
+                .duration(250)
                 .buildAndRegister();
     }
 
@@ -87,7 +92,7 @@ public class Recipes {
                     .input(plate, material, 2)
                     .input(plate, material, 2)
                     .outputs(result)
-                    .duration(160)
+                    .duration(120)
                     .EUt(44)
                     .buildAndRegister();
         } else if (material.hasProperty(PropertyKey.GEM)) {
@@ -98,7 +103,7 @@ public class Recipes {
                     .input(plate, material, 2)
                     .input(plate, material, 2)
                     .outputs(result)
-                    .duration(160)
+                    .duration(120)
                     .EUt(44)
                     .buildAndRegister();
         }
@@ -111,7 +116,7 @@ public class Recipes {
                 .input(cableGtSingle, NiobiumNitride)
                 .circuitMeta(3)
                 .output(MTMetaItems.WIRELESS_RECEIVER)
-                .duration(400)
+                .duration(200)
                 .EUt(2048)
                 .buildAndRegister();
 
@@ -121,17 +126,18 @@ public class Recipes {
                 .input(stick, Steel)
                 .circuitMeta(3)
                 .output(MTMetaItems.AUTO_FEEDER)
-                .duration(200)
+                .duration(140)
                 .EUt(96)
                 .buildAndRegister();
 
         RecipeMaps.ASSEMBLER_RECIPES.recipeBuilder()
                 .input(MetaItems.VOLTAGE_COIL_LuV, 8)
-                .input(plateDouble, IndiumTinBariumTitaniumCuprate, 8)
+                .input(plate, IndiumTinBariumTitaniumCuprate, 16)
                 .input(stick, PolyvinylChloride, 4)
+                .input(OrePrefix.circuit, MarkerMaterials.Tier.IV, 4)
                 .circuitMeta(3)
                 .output(MTMetaItems.TESLA_COIL)
-                .duration(600)
+                .duration(300)
                 .EUt(2048)
                 .buildAndRegister();
 
@@ -141,7 +147,7 @@ public class Recipes {
                 .input(MetaItems.DUCT_TAPE, 2)
                 .circuitMeta(3)
                 .output(MTMetaItems.BINOCULARS)
-                .duration(300)
+                .duration(150)
                 .EUt(32)
                 .buildAndRegister();
 
@@ -150,7 +156,7 @@ public class Recipes {
                 .input(springSmall, Tungsten, 3)
                 .circuitMeta(3)
                 .output(MTMetaItems.SHOCK_ABSORBER)
-                .duration(200)
+                .duration(120)
                 .EUt(480)
                 .buildAndRegister();
 
@@ -159,8 +165,18 @@ public class Recipes {
                 .input(MetaItems.DUCT_TAPE, 8)
                 .circuitMeta(3)
                 .output(MTMetaItems.THICK_INSULATOR)
-                .duration(150)
+                .duration(100)
                 .EUt(48)
+                .buildAndRegister();
+
+        RecipeMaps.ASSEMBLER_RECIPES.recipeBuilder()
+                .input(foil, PolyvinylChloride, 8)
+                .input(MetaItems.DUCT_TAPE, 8)
+                .input(craftingLens, Glass, 4)
+                .circuitMeta(3)
+                .output(MTMetaItems.OXYGEN_MASK)
+                .duration(180)
+                .EUt(480)
                 .buildAndRegister();
     }
 
