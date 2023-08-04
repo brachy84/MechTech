@@ -72,16 +72,16 @@ jobs:
 
           files-primary: build/libs/!(*-@(dev|sources|javadoc)).jar
           files-secondary: build/libs/*-@(dev|sources|javadoc).jar
-          name: ModularUI-${{ github.event.inputs.version }}
+          name: MechTech-${{ github.event.inputs.version }}
           version: ${{ github.event.inputs.version }}
           version-type: ${{ github.event.inputs.release_type }}
-          changelog: "[Click here](https://github.com/CleanroomMC/ModularUI/releases/tag/v${{ github.event.inputs.version }})"
+          changelog: "[Click here](https://github.com/brachy84/MechTech/releases/tag/v${{ github.event.inputs.version }})"
           loaders: |
             forge
           game-versions: |
             1.12.2
           dependencies: |
-            gregtech | depends | 2.7.2
+            gregtech-ce-unofficial | depends | 2.7.2
             jei | recommends | *
           java: |
             8
