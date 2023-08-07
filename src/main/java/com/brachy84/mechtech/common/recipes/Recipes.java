@@ -5,6 +5,7 @@ import com.brachy84.mechtech.api.armor.Modules;
 import com.brachy84.mechtech.common.MTConfig;
 import com.brachy84.mechtech.common.items.MTMetaItems;
 import com.brachy84.mechtech.common.machines.MTTileEntities;
+import gregtech.api.GTValues;
 import gregtech.api.recipes.ModHandler;
 import gregtech.api.recipes.RecipeMaps;
 import gregtech.api.unification.material.MarkerMaterials;
@@ -185,7 +186,7 @@ public class Recipes {
 
         if (MTConfig.teslaTower.enable)
             RecipeMaps.ASSEMBLY_LINE_RECIPES.recipeBuilder()
-                    .input(plateDouble, IndiumTinBariumTitaniumCuprate, 16)
+                    .input(plate, IndiumTinBariumTitaniumCuprate, 32)
                     .input(MetaItems.VOLTAGE_COIL_ZPM, 16)
                     .input(stick, PolyvinylChloride, 20)
                     .inputs(MetaBlocks.METAL_CASING.getItemVariant(BlockMetalCasing.MetalCasingType.TITANIUM_STABLE, 4))
@@ -197,6 +198,9 @@ public class Recipes {
                     .input(MetaItems.WIRELESS, 6)
                     .input(MetaItems.ENERGY_LAPOTRONIC_ORB_CLUSTER)
                     .output(MTTileEntities.TESLA_TOWER)
+                    .research(t -> t.CWUt(32)
+                            .EUt(GTValues.VA[GTValues.ZPM])
+                            .researchStack(MTMetaItems.TESLA_COIL.getStackForm()))
                     .duration(2000)
                     .EUt(120000)
                     .buildAndRegister();
