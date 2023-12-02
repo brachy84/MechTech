@@ -15,8 +15,8 @@ import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.GregtechTileCapabilities;
 import gregtech.api.capability.IEnergyContainer;
 import gregtech.api.capability.impl.EnergyContainerBatteryBuffer;
-import gregtech.api.cover.CoverBehavior;
-import gregtech.api.cover.ICoverable;
+import gregtech.api.cover.Cover;
+import gregtech.api.cover.CoverableView;
 import gregtech.api.damagesources.DamageSources;
 import gregtech.api.gui.ModularUI;
 import gregtech.api.gui.widgets.CycleButtonWidget;
@@ -132,12 +132,12 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
                         if (te == null) {
                             continue;
                         }
-                        ICoverable coverable = te.getCapability(GregtechTileCapabilities.CAPABILITY_COVERABLE, null);
+                        CoverableView coverable = te.getCapability(GregtechTileCapabilities.CAPABILITY_COVER_HOLDER, null);
                         if (coverable == null) {
                             continue;
                         }
                         for (EnumFacing facing : EnumFacing.VALUES) {
-                            CoverBehavior cover = coverable.getCoverAtSide(facing);
+                            Cover cover = coverable.getCoverAtSide(facing);
                             if (cover instanceof CoverWirelessReceiver) {
                                 energyHandlers.put(pos.toImmutable(), facing);
                                 break;
@@ -445,13 +445,13 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
     }
 
     private boolean hasCover(EnumFacing facing, TileEntity te) {
-        ICoverable coverable = te.getCapability(GregtechTileCapabilities.CAPABILITY_COVERABLE, facing);
+        CoverableView coverable = te.getCapability(GregtechTileCapabilities.CAPABILITY_COVER_HOLDER, facing);
         if (coverable == null)
             return false;
         return hasCover(facing, coverable);
     }
 
-    private boolean hasCover(EnumFacing facing, ICoverable coverable) {
+    private boolean hasCover(EnumFacing facing, CoverableView coverable) {
         return coverable.getCoverAtSide(facing) instanceof CoverWirelessReceiver;
     }
 

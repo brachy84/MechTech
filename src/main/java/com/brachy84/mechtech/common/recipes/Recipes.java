@@ -198,7 +198,8 @@ public class Recipes {
                     .input(MetaItems.WIRELESS, 6)
                     .input(MetaItems.ENERGY_LAPOTRONIC_ORB_CLUSTER)
                     .output(MTTileEntities.TESLA_TOWER)
-                    .research(t -> t.CWUt(32)
+                    .stationResearch(b -> b
+                            .CWUt(32)
                             .EUt(GTValues.VA[GTValues.ZPM])
                             .researchStack(MTMetaItems.TESLA_COIL.getStackForm()))
                     .duration(2000)

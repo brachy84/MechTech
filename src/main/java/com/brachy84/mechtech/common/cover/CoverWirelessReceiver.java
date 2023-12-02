@@ -7,25 +7,27 @@ import codechicken.lib.vec.Matrix4;
 import com.brachy84.mechtech.client.ClientHandler;
 import gregtech.api.capability.GregtechCapabilities;
 import gregtech.api.capability.IEnergyContainer;
-import gregtech.api.cover.CoverBehavior;
-import gregtech.api.cover.ICoverable;
+import gregtech.api.cover.CoverBase;
+import gregtech.api.cover.CoverDefinition;
+import gregtech.api.cover.CoverableView;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
+import org.jetbrains.annotations.NotNull;
 
-public class CoverWirelessReceiver extends CoverBehavior {
+public class CoverWirelessReceiver extends CoverBase {
 
-    public CoverWirelessReceiver(ICoverable coverHolder, EnumFacing attachedSide) {
-        super(coverHolder, attachedSide);
+    public CoverWirelessReceiver(@NotNull CoverDefinition definition, @NotNull CoverableView coverableView, @NotNull EnumFacing attachedSide) {
+        super(definition, coverableView, attachedSide);
     }
 
     @Override
-    public boolean canAttach() {
-        IEnergyContainer container = this.coverHolder.getCapability(GregtechCapabilities.CAPABILITY_ENERGY_CONTAINER, attachedSide);
-        return container != null && container.inputsEnergy(attachedSide);
+    public boolean canAttach(@NotNull CoverableView coverable, @NotNull EnumFacing side) {
+        IEnergyContainer container = coverable.getCapability(GregtechCapabilities.CAPABILITY_ENERGY_CONTAINER, side);
+        return container != null && container.inputsEnergy(getAttachedSide());
     }
 
     @Override
-    public void renderCover(CCRenderState ccRenderState, Matrix4 matrix4, IVertexOperation[] iVertexOperations, Cuboid6 cuboid6, BlockRenderLayer blockRenderLayer) {
-        ClientHandler.COVER_WIRELESS_RECEIVER.renderSided(attachedSide, cuboid6, ccRenderState, iVertexOperations, matrix4);
+    public void renderCover(@NotNull CCRenderState ccRenderState, @NotNull Matrix4 matrix4, @NotNull IVertexOperation[] iVertexOperations, @NotNull Cuboid6 cuboid6, @NotNull BlockRenderLayer blockRenderLayer) {
+        ClientHandler.COVER_WIRELESS_RECEIVER.renderSided(getAttachedSide(), cuboid6, ccRenderState, iVertexOperations, matrix4);
     }
 }
