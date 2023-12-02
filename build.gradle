@@ -87,7 +87,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'org.jetbrains:annotations:24.0.1'
+    compileOnly 'org.jetbrains:annotations:24.1.0'
+    annotationProcessor 'org.jetbrains:annotations:24.1.0'
 
     annotationProcessor('org.ow2.asm:asm-debug-all:5.2')
     annotationProcessor('com.google.guava:guava:24.1.1-jre')
@@ -96,7 +97,7 @@ dependencies {
     implementation "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.20.684"
     implementation rfg.deobf("curse.maven:codechicken-lib-1-8-242818:2779848")
     implementation 'mezz.jei:jei_1.12.2:4.16.1.302'
-    implementation "curse.maven:gregtech_ce_unofficial-557242:4910614-sources-4910615"
+    implementation "curse.maven:gregtech_ce_unofficial-557242:4904270-sources-4904271"
 }
 
 processResources {
