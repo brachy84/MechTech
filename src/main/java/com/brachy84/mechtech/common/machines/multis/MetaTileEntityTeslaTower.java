@@ -216,30 +216,6 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
             toTick--;
             iterator.remove();
         }
-
-        // gather living entities every 4 seconds
-        if (MTConfig.teslaTower.attackChance > 0 && getOffsetTimer() % 80 == 0) {
-            double entityRange = (range * 2 + 1) / 3;
-            livings.clear();
-            for (Entity entity : getWorld().getEntitiesInAABBexcluding(null, new AxisAlignedBB(minPos, maxPos).shrink(entityRange), entity -> entity.isEntityAlive() && entity instanceof EntityLivingBase)) {
-                livings.add((EntityLivingBase) entity);
-            }
-        }
-
-        // randomly damage a entity every 5 ticks
-        if (getOffsetTimer() % 5 == 0 && livings.size() > 0 && MTConfig.teslaTower.attackChance > 0 && stored > 0 && GTValues.RNG.nextFloat() < MTConfig.teslaTower.attackChance) {
-            Collections.shuffle(livings);
-            Iterator<EntityLivingBase> iterator1 = livings.iterator();
-            while (iterator1.hasNext()) {
-                EntityLivingBase living = iterator1.next();
-                if (living == null || !living.isEntityAlive() || !isEntityInRange(living)) {
-                    iterator1.remove();
-                    continue;
-                }
-                living.attackEntityFrom(DamageSources.getElectricDamage(), dmg);
-                break;
-            }
-        }
     }
 
     @Override
