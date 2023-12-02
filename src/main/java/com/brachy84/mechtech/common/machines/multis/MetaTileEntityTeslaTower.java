@@ -51,6 +51,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -68,6 +69,7 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
 
     public static final int TORUS_BLOCK_COUNT = 92;
     public static final int SCAN_TICKS = 100;
+    private static final int DMG_FREQUENCY = 5;
 
     // TODO: coil tier & coil height effects?
     private int coilHeight;
@@ -105,8 +107,8 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
         }
     }
 
-    private boolean isEntityInRange(Entity entity) {
-        return Math.sqrt(center.distanceSq(entity.posX, entity.posY, entity.posZ)) < range;
+    private boolean isEntityOutOfRange(Entity entity) {
+        return Math.sqrt(center.distanceSq(entity.posX, entity.posY, entity.posZ)) > range;
     }
 
     private void scanRange() {
@@ -154,33 +156,35 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
     }
 
     private void updateDefenseMode() {
-        // gather living entities every 4 seconds
-        if (getOffsetTimer() % 60 == 0) {
+        // gather living entities every 2 seconds
+        if (getOffsetTimer() % 40 == 0) {
             livings.clear();
             for (Entity entity : getWorld().getEntitiesInAABBexcluding(null, new AxisAlignedBB(minPos, maxPos), entity -> entity.isEntityAlive() && entity instanceof EntityLivingBase)) {
                 livings.add((EntityLivingBase) entity);
             }
         }
 
-        // randomly damage a entity every 5 ticks
-        if (getOffsetTimer() % 4 == 0 && livings.size() > 0 && energyContainerList.getEnergyStored() > 0) {
+        // randomly damage an entity every 4 ticks
+        if (getOffsetTimer() % DMG_FREQUENCY == 0 && livings.size() > 0 && energyContainerList.getEnergyStored() > 0) {
             int maxEntities = 10;
             int entitiesHit = 0;
-            float dmg = this.dmg / 4f;
+            float dmg = DMG_FREQUENCY * this.dmg / 10f;
             Collections.shuffle(livings);
             Iterator<EntityLivingBase> iterator1 = livings.iterator();
             while (entitiesHit < maxEntities && iterator1.hasNext()) {
                 EntityLivingBase living = iterator1.next();
-                if (living == null || !living.isEntityAlive() || !isEntityInRange(living) || living instanceof EntityPlayer) {
+                if (living == null || !living.isEntityAlive() || isEntityOutOfRange(living) || living instanceof EntityPlayer) {
                     iterator1.remove();
                     continue;
                 }
-                dmg = Math.min(dmg, living.getHealth());
                 long energy = (long) (dmg * MTConfig.modularArmor.modules.teslaCoilDamageEnergyRatio);
                 if (energyContainerList.getEnergyStored() < energy)
                     break;
                 energyContainerList.removeEnergy(energy);
                 living.attackEntityFrom(DamageSources.getElectricDamage(), dmg);
+                living.maxHurtTime = DMG_FREQUENCY;
+                living.hurtTime = DMG_FREQUENCY;
+                living.hurtResistantTime = 10 + DMG_FREQUENCY;
                 playEffects(living);
                 entitiesHit++;
             }
@@ -251,7 +255,7 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
     }
 
     @Override
-    protected BlockPattern createStructurePattern() {
+    protected @NotNull BlockPattern createStructurePattern() {
         return FactoryBlockPattern.start(RIGHT, FRONT, UP)
                 .aisle("###########",
                         "###########",
@@ -371,7 +375,7 @@ public class MetaTileEntityTeslaTower extends MultiblockWithDisplayBase {
                     return false;
                 } else {
                     blockWorldState.getMatchContext().increment("Count", 1);
-                    blockWorldState.getMatchContext().getOrPut("VABlock", new LinkedList()).add(blockWorldState.getPos());
+                    blockWorldState.getMatchContext().getOrPut("VABlock", new LinkedList<>()).add(blockWorldState.getPos());
                     return true;
                 }
             } else {
