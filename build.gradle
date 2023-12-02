@@ -76,11 +76,12 @@ tasks.injectTags.configure {
 
 repositories {
     maven {
-        url = "https://maven.blamejared.com/"
+        name 'BlameJared Maven'
+        url 'https://maven.blamejared.com'
     }
     maven {
-        name = 'Curse Maven'
-        url = 'https://www.cursemaven.com'
+        name 'Curse Maven'
+        url 'https://www.cursemaven.com'
     }
     mavenLocal() // Must be last for caching to work
 }
@@ -92,13 +93,10 @@ dependencies {
     annotationProcessor('com.google.guava:guava:24.1.1-jre')
     annotationProcessor('com.google.code.gson:gson:2.8.6')
 
+    implementation "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.20.684"
     implementation rfg.deobf("curse.maven:codechicken-lib-1-8-242818:2779848")
     implementation 'mezz.jei:jei_1.12.2:4.16.1.302'
-
-    implementation files(
-            'libs/CraftTweaker2-1.12-4.1.20.670.jar',
-            'libs/gregtech-1.12.2-2.8.1-beta-dev.jar'
-    )
+    implementation "curse.maven:gregtech_ce_unofficial-557242:4910614-sources-4910615"
 }
 
 processResources {
