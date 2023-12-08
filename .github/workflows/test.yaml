@@ -25,4 +25,4 @@ jobs:
           fi
       - name: Print info
         run: echo "Is updated simple"
-        if: ${{ '$UPDATED' == 'true' }}
+        if: env.UPDATED == 'true'
