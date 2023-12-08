@@ -1,0 +1,12 @@
+name: Test
+
+on: workflow_dispatch
+
+jobs:
+  test-1:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print name
+        run: |
+          REPO_LINK="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}"
+          echo "Repositgory Link: $REPO_LINK"
