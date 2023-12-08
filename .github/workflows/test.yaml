@@ -1,6 +1,13 @@
 name: Test
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version'
+        type: string
+        default: '0.1.0'
+        required: false
 
 jobs:
   test-1:
@@ -8,8 +15,6 @@ jobs:
     steps:
       - name: Print name
         run: |
-          REPO_LINK="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}"
-          echo "Repositgory Link: $REPO_LINK"
-          echo "URL: ${GITHUB_SERVER_URL}"
-          echo "Name: ${GITHUB_REPOSITORY}"
-          echo "Name 2: ${GITHUB_REPOSITORY#*/}"
+          updated=$(grep "mod_version" gradle.properties | cut -d'=' -f2 | tr -d '[:space:]') == ${{inputs.version}}
+          echo "IS_ALREADY_UPDATED=updated" >> $GITHUB_ENV
+          echo "Is already updated: updated"
