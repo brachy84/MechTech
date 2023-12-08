@@ -21,10 +21,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
       - name: Print info
-        if: "${{ inputs.overwrite-w == true }}"
+        if: "${{ inputs.overwrite-w }}"
         run: echo "This works"
       - name: Print info 2
-        if: ${{ inputs.overwrite-w == true }}
+        if: ${{ inputs.overwrite-w }}
         run: echo "This works"
 
       - name: Print name
