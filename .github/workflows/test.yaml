@@ -24,11 +24,11 @@ jobs:
             echo "UPDATED=false" >> $GITHUB_ENV
           fi
       - name: Print info
-        if: "$UPDATED"
+        if: '$UPDATED'
         run: |
           echo "Is updated simple"
 
       - name: Print info 2
-        if: "$UPDATED" == "true"
+        if: '$UPDATED' == 'true'
         run: |
           echo "Is updated 2"
