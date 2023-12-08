@@ -27,6 +27,6 @@ jobs:
         run: echo "Is updated simple"
         if: '$UPDATED'
 
-      - name: Print info 2
+      - name: 'Print info 2'
         run: echo "Is updated 2"
         if: '$UPDATED' == 'true'
