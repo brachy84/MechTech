@@ -8,6 +8,11 @@ on:
         type: string
         default: '0.1.0'
         required: false
+      overwrite:
+        description: 'If existing version should be overriden'
+        default: false
+        required: false
+        type: boolean
 
 jobs:
   test-1:
@@ -24,5 +29,11 @@ jobs:
             echo "UPDATED=false" >> $GITHUB_ENV
           fi
       - name: Print info
-        run: echo "Is updated simple"
-        if: env.UPDATED == 'true'
+        run: |
+          if [ "$UPDATED" == "true" ] && [ "${{ inputs.overwrite }}" == "false" ]; then
+            echo "ERROR. Version already exists"
+          elif [ "$UPDATED" == "true" ]; then
+            echo "Overwriting version"
+          else
+            echo "Updating version"
+          fi
