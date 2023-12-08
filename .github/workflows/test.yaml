@@ -15,6 +15,7 @@ jobs:
     steps:
       - name: Print name
         run: |
-          updated=$(grep "mod_version" gradle.properties | cut -d'=' -f2 | tr -d '[:space:]') == ${{inputs.version}}
-          echo "IS_ALREADY_UPDATED=updated" >> $GITHUB_ENV
-          echo "Is already updated: updated"
+          mod_version=$(grep "mod_version" gradle.properties | cut -d'=' -f2 | tr -d '[:space:]')
+          updated = "$mod_version" == "${{inputs.version}}"
+          echo "IS_ALREADY_UPDATED=$updated" >> $GITHUB_ENV
+          echo "Is already updated: $updated"
