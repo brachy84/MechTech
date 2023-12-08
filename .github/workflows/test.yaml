@@ -42,7 +42,7 @@ jobs:
         run: |
           RELEASE_URL="https://api.github.com/repos/${{ github.repository }}/releases/tags/v${{ inputs.version }}"
           RELEASE_JSON=$(curl -sSL $RELEASE_URL)
-          echo "CHANGELOG=$(echo $RELEASE_JSON | jq -r '.body')" >> $GITHUB_ENV
+          echo "CHANGELOG=$(echo $RELEASE_JSON | jq -r '.body')"
       - name: Print changelog
         run: echo "$CHANGELOG"
 
