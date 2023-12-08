@@ -8,7 +8,7 @@ on:
         type: string
         default: '0.1.0'
         required: false
-      overwrite:
+      overwrite-w:
         description: 'If existing version should be overriden'
         default: false
         required: false
@@ -30,7 +30,8 @@ jobs:
           fi
       - name: Print info
         run: |
-          if [ "$UPDATED" == "true" ] && [ "${{ inputs.overwrite }}" == "false" ]; then
+          echo "Overwrite ${{ inputs.overwrite-w }}"
+          if [ "$UPDATED" == "true" ] && [ "${{ inputs.overwrite-w }}" == "false" ]; then
             echo "ERROR. Version already exists"
           elif [ "$UPDATED" == "true" ]; then
             echo "Overwriting version"
@@ -42,8 +43,9 @@ jobs:
         run: |
           RELEASE_URL="https://api.github.com/repos/${{ github.repository }}/releases/tags/v${{ inputs.version }}"
           RELEASE_JSON=$(curl -sSL $RELEASE_URL)
-          echo "CHANGELOG=$(echo $RELEASE_JSON | jq -r '.body')"
+          CHANGELOG=echo $RELEASE_JSON | jq -r '.body'
+          echo "$CHANGELOG" > "build/changelog.md
       - name: Print changelog
-        run: echo "$CHANGELOG"
+        run: cat "build/changelog.md"
 
 
