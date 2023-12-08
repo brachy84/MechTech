@@ -10,3 +10,6 @@ jobs:
         run: |
           REPO_LINK="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}"
           echo "Repositgory Link: $REPO_LINK"
+          echo "URL: ${GITHUB_SERVER_URL}"
+          echo "Name: ${GITHUB_REPOSITORY}"
+          echo "Name 2: ${GITHUB_REPOSITORY#*/}"
