@@ -20,6 +20,16 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+      - name: Print info
+        if: "${{ inputs.overwrite-w == 'true' }}"
+        run: echo "This works"
+      - name: Print info 2
+        if: ${{ inputs.overwrite-w == 'true' }}
+        run: echo "This works"
+      - name: Print info
+        if: "${{ inputs.overwrite-w }}" == 'true'
+        run: echo "This works"
+
       - name: Print name
         run: |
           mod_version=$(grep "mod_version" gradle.properties | cut -d'=' -f2 | tr -d '[:space:]')
@@ -28,7 +38,7 @@ jobs:
           else
             echo "UPDATED=false" >> $GITHUB_ENV
           fi
-      - name: Print info
+      - name: Print info 4
         run: |
           echo "Overwrite ${{ inputs.overwrite-w }}"
           if [ "$UPDATED" == "true" ] && [ "${{ inputs.overwrite-w }}" == "false" ]; then
