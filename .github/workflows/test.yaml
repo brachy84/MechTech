@@ -26,9 +26,6 @@ jobs:
       - name: Print info 2
         if: ${{ inputs.overwrite-w == 'true' }}
         run: echo "This works"
-      - name: Print info
-        if: "${{ inputs.overwrite-w }}" == 'true'
-        run: echo "This works"
 
       - name: Print name
         run: |
