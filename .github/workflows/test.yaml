@@ -27,7 +27,6 @@ jobs:
         run: |
           NAME="${GITHUB_REPOSITORY#*/}-${{ github.event.inputs.version }}"
           echo $NAME
-            - name: Get Changelog
       - name: Get Changelog
         run: |
           mkdir -p build
