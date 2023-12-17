@@ -14,6 +14,9 @@ on:
         required: false
         type: boolean
 
+env:
+  CHANGELOG_LOCATION: "build/gh_changelog.md"
+
 jobs:
   test-1:
     runs-on: ubuntu-latest
@@ -24,3 +27,17 @@ jobs:
         run: |
           NAME="${GITHUB_REPOSITORY#*/}-${{ github.event.inputs.version }}"
           echo $NAME
+            - name: Get Changelog
+      - name: Get Changelog
+        run: |
+          mkdir -p build
+          RELEASE_URL="https://api.github.com/repos/CleanroomMC/ModularUI/releases/tags/v2.4.1"
+          RELEASE_JSON=$(curl -sSL $RELEASE_URL)
+          CHANGELOG="$(echo $RELEASE_JSON | jq -r '.body')"
+          if [ "$CHANGELOG" == "null" ]; then
+            echo "No changelog found" > $CHANGELOG_LOCATION
+          else
+            echo "$CHANGELOG" > $CHANGELOG_LOCATION
+          fi
+      - name: Print Changelog
+        run: cat "$CHANGELOG_LOCATION"
