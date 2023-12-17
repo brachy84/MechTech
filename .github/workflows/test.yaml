@@ -23,6 +23,13 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '8'
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
       - name: Print name
         run: |
           NAME="${GITHUB_REPOSITORY#*/}-${{ github.event.inputs.version }}"
