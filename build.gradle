@@ -163,3 +163,11 @@ idea {
 tasks.named("processIdeaSettings").configure {
     dependsOn("injectTags")
 }
+
+tasks.register("testTask") {
+    doLast {
+        def file = new File(providers.environmentVariable('CHANGELOG_LOCATION').get())
+        println(file.toString())
+        println(file.getText())
+    }
+}

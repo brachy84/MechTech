@@ -40,3 +40,10 @@ jobs:
           fi
       - name: Print Changelog
         run: cat "$CHANGELOG_LOCATION"
+      - name: Print Changelog gradle
+        uses: gradle/gradle-build-action@v2
+        env:
+          CHANGELOG_LOCATION: $CHANGELOG_LOCATION
+        with:
+          arguments: 'testTask'
+          generate-job-summary: false
